@@ -7,11 +7,13 @@ const montserratAlternates = Montserrat_Alternates({
   variable: "--font-montserrat-alternates",
 });
 
+
 const montserrat = Montserrat({
   subsets: ["latin"],
-  weight: ["400", "700"], // Specify the weights you need
+  weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-montserrat",
 });
+
 
 export const metadata = {
   title: "SynkAfrica",

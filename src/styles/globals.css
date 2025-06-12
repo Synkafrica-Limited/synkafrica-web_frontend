@@ -15,7 +15,5 @@
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-montserrat), sans-serif;
+  @apply bg-[var(--background)] text-[var(--foreground)] font-sans;
 }
