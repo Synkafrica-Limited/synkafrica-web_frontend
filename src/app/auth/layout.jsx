@@ -1,7 +1,5 @@
 import { Montserrat, Montserrat_Alternates } from "next/font/google";
-import Navbar1 from "../components/navbar/Navbar1";
-import Footer from "../components/footer/Footer";
-import "../styles/globals.css"; 
+import "../../styles/globals.css";
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -9,27 +7,23 @@ const montserratAlternates = Montserrat_Alternates({
   variable: "--font-montserrat-alternates",
 });
 
-
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-montserrat",
 });
 
-
 export const metadata = {
   title: "SynkAfrica",
-  description: "Empowering mobility across Africa",
+  description: "Welcome back",
 };
 
-export default function RootLayout({ children }) {
+export default function AuthLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${montserrat.variable} ${montserratAlternates.variable}`}>
-        <Navbar1 />
-          {children}
-        <Footer />
-        </body>
+        {children}
+      </body>
     </html>
   );
 }
