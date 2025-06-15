@@ -1,11 +1,9 @@
 import { Montserrat, Montserrat_Alternates } from "next/font/google";
-import Navbar1 from "../components/navbar/Navbar1";
-import Footer from "../components/footer/Footer";
 import "../styles/globals.css"; 
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
-  weight: ["400", "700"], 
+  weight: ["400", "700"],
   variable: "--font-montserrat-alternates",
 });
 
@@ -26,9 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${montserrat.variable} ${montserratAlternates.variable}`}>
-        <Navbar1 />
-          {children}
-        <Footer />
+        {children}
         </body>
     </html>
   );
