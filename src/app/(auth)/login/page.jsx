@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ArrowLeft, Mail } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
@@ -67,19 +68,15 @@ export default function SignInScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 sm:p-6">
         <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <ArrowLeft className="w-6 h-6 text-gray-700" />
+          <Link href="/"><ArrowLeft className="w-5 h-5 text-gray-600" /></Link>
         </button>
         {/* logo */}
-        {/* <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-lg">
-          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-            <div className="w-4 h-4 bg-gradient-to-br from-orange-400 to-red-500 rounded-full"></div>
-          </div>
-        </div> */}
-        <div className="w-10"></div> {/* Spacer for centering */}
+        <h2 className="text-xl font-semibold text-gray-900">SynkAfrica</h2>
+        <div className="w-10"></div>
       </div>
 
       {/* Main Content */}
