@@ -1,9 +1,16 @@
-import Image from "next/image";
+import BookingFlow from '@/components/booking_flow';
+import ExperiencesSection from './customer_landingpage/ExperiencesSection';
+import BecomeVendorSection from './customer_landingpage/Become_a_vendorSection';
+import ExploreCarsSection from './customer_landingpage/Explore_cars';
 
-
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-    </div>
+    <main className="min-h-screen bg-gray-50">
+      <BookingFlow />
+      <ExperiencesSection />
+      <BecomeVendorSection />
+      <ExploreCarsSection />
+    </main>
+
   );
 }

@@ -1,5 +1,94 @@
 @import "tailwindcss";
 
-body {
-  background-color: white !important;
+/* SynkAfrica Design System Tokens - Tailwind v4+ @theme */
+@theme {
+  /* FONT FAMILY */
+  --font-sans: 'Montserrat', sans-serif;
+
+  /* TYPOGRAPHY */
+  --font-size-h1: 60px;
+  --line-height-h1: 72px;
+  --font-size-h2: 48px;
+  --line-height-h2: 58px;
+  --font-size-h3: 40px;
+  --line-height-h3: 48px;
+  --font-size-h4: 30px;
+  --line-height-h4: 38px;
+  --font-size-h5: 28px;
+  --line-height-h5: 40px;
+  --font-size-h6: 24px;
+  --line-height-h6: 30px;
+  --font-size-body: 16px;
+  --line-height-body: 28px;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-4xl: 36px;
+  --letter-spacing-caps: 0.1em;
+
+  /* COLOR PALETTE */
+  --color-primary-50:  #FFF2F1;
+  --color-primary-100: #FFE7E5;
+  --color-primary-200: #FCB6AF;
+  --color-primary-300: #F18A83;
+  --color-primary-400: #E47458;
+  --color-primary-500: #E05D3D;
+  --color-primary-600: #C15034;
+  --color-primary-700: #A1432C;
+  --color-primary-800: #823623;
+  --color-primary-900: #63291B;
+
+  --color-secondary-50:  #FFF5F5;
+  --color-secondary-100: #FFE3E3;
+  --color-secondary-200: #FFBDBD;
+  --color-secondary-300: #FF9999;
+  --color-secondary-400: #FF6F6F;
+  --color-secondary-500: #155DA9;
+  --color-secondary-600: #0F4A87;
+  --color-secondary-700: #0A3570;
+  --color-secondary-800: #061F58;
+  --color-secondary-900: #011111;
+
+  --color-gray-50:  #F9FAFB;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E7EB;
+  --color-gray-300: #D1D5DB;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-gray-900: #111827;
+
+  /* GRADIENTS */
+  --gradient-primary-1: linear-gradient(180deg, #FF6F6F 0%, #DB2C2C 100%);
+  --gradient-primary-2: linear-gradient(180deg, #FFE3E3 0%, #FF3F3F 100%);
+  --gradient-primary-3: linear-gradient(180deg, #1A1C1B 0%, #E05D3D 100%);
+  --gradient-secondary-1: linear-gradient(180deg, #FF6F6F 0%, #DB2C2C 100%);
+  --gradient-secondary-2: linear-gradient(180deg, #FFE3E3 0%, #FF3F3F 100%);
+  --gradient-secondary-3: linear-gradient(180deg, #701111 0%, #B82323 100%);
+
+  /* BOX SHADOWS */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-base: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0,0,0,0.25);
+
+  /* SPACING (Examples, adjust as needed) */
+  --spacing-0: 0px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
 }
