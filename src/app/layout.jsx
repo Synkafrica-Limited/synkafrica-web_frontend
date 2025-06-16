@@ -1,7 +1,7 @@
 import { Montserrat, Montserrat_Alternates } from "next/font/google";
 import Navbar1 from "../components/navbar/Navbar1";
 import Footer from "../components/footer/Footer";
-import "../styles/globals.css"; 
+import "../styles/globals.css";
 
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -25,7 +25,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${montserrat.variable} ${montserratAlternates.variable}`}>
+       <body className="font-sans bg-[var(--background)] text-[var(--foreground)]">
         <Navbar1 />
           {children}
         <Footer />
