@@ -9,7 +9,7 @@ const cars = [
 		desc: "Mercedes-Benz GLE Coupe 4MATIC",
 		img: "/images/car1.png", // Replace with your actual image path
 		features: [
-			{ icon: "🧑‍✈️", text: "Chauffeur" },
+			{ icon: "", text: "Chauffeur" },
 			{ icon: "❄️", text: "A/C" },
 			{ icon: "⛽", text: "Unlimited mileage" },
 		],
@@ -68,7 +68,7 @@ export default function ExploreCarsSection() {
 					<h2 className="text-2xl font-semibold">Explore cars</h2>
 					<p className="text-gray-500 text-sm">
 						Explore our car services, fast and tailored to get you where you need
-						to be. Hassle free.
+						to be Hassle free.
 					</p>
 				</div>
 				<Button
@@ -100,7 +100,7 @@ export default function ExploreCarsSection() {
 							</span>
 							<div className="font-semibold text-base mb-1">{car.title}</div>
 							<div className="text-gray-500 text-xs mb-2">{car.desc}</div>
-							<div className="flex items-center gap-2 text-xs text-gray-700 mb-2">
+							<div className="flex items-center gap-1 text-xs text-gray-700 mb-2">
 								{car.features.map((f, i) => (
 									<span key={i} className="flex items-center gap-1">
 										<span>{f.icon}</span>

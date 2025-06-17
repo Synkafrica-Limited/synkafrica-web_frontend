@@ -1,7 +1,8 @@
 import BookingFlow from '@/components/booking_flow';
-import ExperiencesSection from './customer_landingpage/ExperiencesSection';
-import BecomeVendorSection from './customer_landingpage/Become_a_vendorSection';
-import ExploreCarsSection from './customer_landingpage/Explore_cars';
+import ExperiencesSection from '../customer_landingpage/ExperiencesSection';
+import BecomeVendorSection from '../customer_landingpage/Become_a_vendorSection';
+import ExploreCarsSection from '../customer_landingpage/Explore_cars';
+import ExploreDiningSection from '../customer_landingpage/Explore_dining';
 
 export default function HomePage() {
   return (
@@ -10,6 +11,7 @@ export default function HomePage() {
       <ExperiencesSection />
       <BecomeVendorSection />
       <ExploreCarsSection />
+      <ExploreDiningSection/>
     </main>
 
   );

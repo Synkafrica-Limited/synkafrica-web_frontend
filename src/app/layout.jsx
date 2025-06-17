@@ -24,9 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
        <body className="font-sans bg-[var(--background)] text-[var(--foreground)]">
-        <Navbar1 />
           {children}
-        <Footer />
         </body>
     </html>
   );
