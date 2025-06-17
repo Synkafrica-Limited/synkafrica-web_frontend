@@ -1,5 +1,6 @@
 import React from "react";
-import Button from "../../components/ui/buttons"; // Adjust the import path if needed
+import Button from "../../components/ui/buttons"; 
+import { ArrowRight } from 'lucide-react';
 
 const cars = [
 	{
@@ -116,11 +117,10 @@ export default function ExploreCarsSection() {
 							</div>
 							<Button
 								variant="filled"
+								icon={<ArrowRight />}
 								size="md"
 								className="w-full mb-4"
-							>
-								Reserve <span className="ml-2 text-lg">→</span>
-							</Button>
+							>Reserve</Button>
 						</div>
 					</div>
 				))}

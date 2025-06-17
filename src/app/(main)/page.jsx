@@ -4,6 +4,7 @@ import BecomeVendorSection from '../customer_landingpage/Become_a_vendorSection'
 import ExploreCarsSection from '../customer_landingpage/Explore_cars';
 import ExploreDiningSection from '../customer_landingpage/Explore_dining';
 import ExploreBeachSection from '../customer_landingpage/Expore_beaches';
+import FaqSection from '../customer_landingpage/Faqs';
 
 export default function HomePage() {
   return (
@@ -15,6 +16,7 @@ export default function HomePage() {
         <ExploreCarsSection />
         <ExploreDiningSection />
         <ExploreBeachSection/>
+        <FaqSection/>
       </div>
     </main>
   );
