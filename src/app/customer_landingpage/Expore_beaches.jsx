@@ -7,28 +7,28 @@ const beaches = [
     price: "$60",
     rating: 4.4,
     review: "Very good",
-    image: "/images/beach1.jpg",
+    image: "/images/beach1.png",
   },
   {
     name: "Oniru private beach",
     price: "$60",
     rating: 4.3,
     review: "Very good",
-    image: "/images/beach2.jpg",
+    image: "/images/beach2.png",
   },
   {
     name: "The good beach",
     price: "$60",
     rating: 4.2,
     review: "Very good",
-    image: "/images/beach3.jpg",
+    image: "/images/beach3.png",
   },
   {
     name: "Elegushi royal beach",
     price: "$60",
     rating: 4.1,
     review: "Very good",
-    image: "/images/beach4.jpg",
+    image: "/images/beach4.png",
   },
 ];
 

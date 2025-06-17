@@ -3,6 +3,7 @@ import ExperiencesSection from '../customer_landingpage/ExperiencesSection';
 import BecomeVendorSection from '../customer_landingpage/Become_a_vendorSection';
 import ExploreCarsSection from '../customer_landingpage/Explore_cars';
 import ExploreDiningSection from '../customer_landingpage/Explore_dining';
+import ExploreBeachSection from '../customer_landingpage/Expore_beaches';
 
 export default function HomePage() {
   return (
@@ -13,6 +14,7 @@ export default function HomePage() {
         <BecomeVendorSection />
         <ExploreCarsSection />
         <ExploreDiningSection />
+        <ExploreBeachSection/>
       </div>
     </main>
   );
