@@ -1,13 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from 'react';
-import { ArrowLeft, Mail } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import { ArrowLeft, Mail } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function SignInScreen() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [emailError, setEmailError] = useState('');
+  const [emailError, setEmailError] = useState("");
   const [isEmailTouched, setIsEmailTouched] = useState(false);
 
   const validateEmail = (email) => {
@@ -18,14 +19,14 @@ export default function SignInScreen() {
   const handleEmailChange = (e) => {
     const value = e.target.value;
     setEmail(value);
-    
+
     if (isEmailTouched) {
       if (!value.trim()) {
-        setEmailError('Email is required');
+        setEmailError("Email is required");
       } else if (!validateEmail(value)) {
-        setEmailError('Please enter a valid email address');
+        setEmailError("Please enter a valid email address");
       } else {
-        setEmailError('');
+        setEmailError("");
       }
     }
   };
@@ -33,13 +34,13 @@ export default function SignInScreen() {
   const handleEmailBlur = () => {
     setIsEmailFocused(false);
     setIsEmailTouched(true);
-    
+
     if (!email.trim()) {
-      setEmailError('Email is required');
+      setEmailError("Email is required");
     } else if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address');
+      setEmailError("Please enter a valid email address");
     } else {
-      setEmailError('');
+      setEmailError("");
     }
   };
 
@@ -47,24 +48,24 @@ export default function SignInScreen() {
 
   const handleGoogleSignIn = () => {
     // Handle Google sign in
-    console.log('Google sign in clicked');
+    console.log("Google sign in clicked");
   };
 
   const handleEmailContinue = () => {
     if (isEmailValid) {
       // Handle email continue
-      console.log('Email continue clicked:', email);
+      console.log("Email continue clicked:", email);
     }
   };
 
   const handleAppleSignIn = () => {
     // Handle Apple sign in
-    console.log('Apple sign in clicked');
+    console.log("Apple sign in clicked");
   };
 
   const handleFacebookSignIn = () => {
     // Handle Facebook sign in
-    console.log('Facebook sign in clicked');
+    console.log("Facebook sign in clicked");
   };
 
   return (
@@ -72,10 +73,17 @@ export default function SignInScreen() {
       {/* Header */}
       <div className="flex items-center justify-between p-4 sm:p-6">
         <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <Link href="/"><ArrowLeft className="w-5 h-5 text-gray-600" /></Link>
+          <Link href="/">
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </Link>
         </button>
         {/* logo */}
-        <h2 className="text-xl font-semibold text-gray-900">SynkAfrica</h2>
+        <Image
+          src="/images/brand/synkafrica-logo-single.png"
+          alt="Synk Africa Logo"
+          width={80}
+          height={30}
+        />
         <div className="w-10"></div>
       </div>
 
@@ -88,7 +96,7 @@ export default function SignInScreen() {
               Sign in or create an account
             </h1>
             <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-              Unlock a world of rewards with one account across 
+              Unlock a world of rewards with one account across
               <br className="hidden sm:block" />
               synkafrica, Hotels.com, and Vrbo.
             </p>
@@ -143,9 +151,9 @@ export default function SignInScreen() {
                   onBlur={handleEmailBlur}
                   placeholder="Email"
                   className={`w-full px-4 py-3.5 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 ${
-                    emailError 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:ring-blue-500'
+                    emailError
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
                   }`}
                 />
                 {emailError && (
@@ -159,8 +167,8 @@ export default function SignInScreen() {
                 disabled={!isEmailValid}
                 className={`w-full py-3.5 px-4 rounded-lg font-medium transition-all duration-200 ${
                   isEmailValid
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm'
-                    : 'bg-orange-300 text-white cursor-not-allowed'
+                    ? "bg-orange-500 hover:bg-orange-600 text-white shadow-sm"
+                    : "bg-orange-300 text-white cursor-not-allowed"
                 }`}
               >
                 Continue
@@ -169,16 +177,22 @@ export default function SignInScreen() {
 
             {/* Other Sign In Options */}
             <div className="space-y-4">
-              <p className="text-center text-gray-600 text-sm">Other ways to sign in</p>
-              
+              <p className="text-center text-gray-600 text-sm">
+                Other ways to sign in
+              </p>
+
               <div className="flex justify-center space-x-4">
                 {/* Apple Sign In */}
                 <button
                   onClick={handleAppleSignIn}
                   className="w-12 h-12 bg-black hover:bg-gray-800 text-white rounded-full flex items-center justify-center transition-colors"
                 >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
+                  <svg
+                    className="w-6 h-6"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
                   </svg>
                 </button>
 
@@ -187,8 +201,12 @@ export default function SignInScreen() {
                   onClick={handleFacebookSignIn}
                   className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors"
                 >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  <svg
+                    className="w-6 h-6"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
                 </button>
               </div>
@@ -200,10 +218,14 @@ export default function SignInScreen() {
       {/* Footer */}
       <div className="px-6 pb-8 pt-4">
         <p className="text-center text-xs text-gray-500 leading-relaxed">
-          By continuing, you have read and agree to our{' '}
-          <button className="text-blue-600 hover:underline">Terms & Condition</button>{' '}
-          and{' '}
-          <button className="text-blue-600 hover:underline">Privacy Policy</button>
+          By continuing, you have read and agree to our{" "}
+          <button className="text-blue-600 hover:underline">
+            Terms & Condition
+          </button>{" "}
+          and{" "}
+          <button className="text-blue-600 hover:underline">
+            Privacy Policy
+          </button>
         </p>
       </div>
     </div>
