@@ -3,8 +3,8 @@ import React from "react";
 
 export default function BecomeVendorSection() {
   return (
-    <section className="max-w-7xl max-h-10xl mx-auto px-4 py-8">
-      <div className="relative rounded-2xl overflow-hidden h-48 md:h-56 flex items-center bg-gradient-to-tr from-blue-200 via-white to-orange-100">
+    <section className="max-w-7xl mx-auto px-4 py-8">
+      <div className="relative rounded-2xl overflow-hidden md:h-56 flex items-center bg-gradient-to-tr from-blue-200 via-white to-orange-100">
         {/* Background image or illustration */}
         <img
           src="/images/banner_1.png" // Replace with your actual image path

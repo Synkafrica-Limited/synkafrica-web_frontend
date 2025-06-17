@@ -7,12 +7,13 @@ import ExploreDiningSection from '../customer_landingpage/Explore_dining';
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-gray-50">
-      <BookingFlow />
-      <ExperiencesSection />
-      <BecomeVendorSection />
-      <ExploreCarsSection />
-      <ExploreDiningSection/>
+      <div className="space-y-5">
+        <BookingFlow />
+        <ExperiencesSection />
+        <BecomeVendorSection />
+        <ExploreCarsSection />
+        <ExploreDiningSection />
+      </div>
     </main>
-
   );
 }
