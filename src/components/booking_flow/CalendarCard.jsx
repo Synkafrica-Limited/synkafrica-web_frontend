@@ -99,7 +99,7 @@ export default function CalendarCard({ start, end, onChange, onClose }) {
         }
 
         return (
-            <div className="flex flex-col items-center flex-1">
+            <div className="flex flex-col items-center flex-1 min-w-[220px]">
                 <div className="font-bold text-lg mb-2">{MONTHS[month]} {year}</div>
                 <table className="w-full text-center select-none">
                     <thead>
@@ -117,9 +117,9 @@ export default function CalendarCard({ start, end, onChange, onClose }) {
     }
 
     return (
-        <div className="absolute z-30 left-0 mt-2 bg-white rounded-xl shadow-2xl p-8 min-w-[700px]">
+        <div className="absolute z-30 left-0 mt-2 bg-white rounded-xl shadow-2xl p-4 sm:p-8 w-full max-w-full min-w-[90vw] sm:min-w-[700px] sm:max-w-2xl">
             {/* Date Range Display */}
-            <div className="flex justify-center mb-6 space-x-4">
+            <div className="flex flex-col sm:flex-row justify-center mb-6 space-y-2 sm:space-y-0 sm:space-x-4">
                 <div className="bg-gray-100 rounded-md px-4 py-2 text-center min-w-[120px]">
                     <div className="text-xs text-gray-500">Start date</div>
                     <div className="text-base font-medium text-gray-800">{formatDate(range.start)}</div>
@@ -130,12 +130,12 @@ export default function CalendarCard({ start, end, onChange, onClose }) {
                 </div>
             </div>
             {/* Calendar */}
-            <div className="flex gap-8 items-start">
+            <div className="flex flex-col gap-4 items-center sm:flex-row sm:gap-8">
                 {/* Prev Month */}
                 <Button
                     variant="outline"
                     size="sm"
-                    className="w-10 h-10 border border-primary-200 rounded-lg flex items-center justify-center text-primary-500 text-2xl mr-2"
+                    className="w-10 h-10 border border-primary-200 rounded-lg flex items-center justify-center text-primary-500 text-2xl mr-0 sm:mr-2"
                     onClick={() => {
                         if (viewMonth === 0) {
                             setViewMonth(11);
@@ -151,12 +151,12 @@ export default function CalendarCard({ start, end, onChange, onClose }) {
                 {/* Month 1 */}
                 {renderMonth(viewYear, viewMonth)}
                 {/* Month 2 */}
-                {renderMonth(nextMonthYear, nextMonth)}
+                <div className="hidden sm:block">{renderMonth(nextMonthYear, nextMonth)}</div>
                 {/* Next Month */}
                 <Button
                     variant="outline"
                     size="sm"
-                    className="w-10 h-10 border border-primary-200 rounded-lg flex items-center justify-center text-primary-500 text-2xl ml-2"
+                    className="w-10 h-10 border border-primary-200 rounded-lg flex items-center justify-center text-primary-500 text-2xl ml-0 sm:ml-2"
                     onClick={() => {
                         if (viewMonth === 11) {
                             setViewMonth(0);
