@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+import "../ui/buttons"
+
 const Navbar1 = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showSearchBar, setShowSearchBar] = useState(false);
@@ -153,7 +155,7 @@ const Navbar1 = () => {
               // Sign In Button
               <button
                 onClick={toggleLogin}
-                className="bg-orange-500 text-white px-6 py-2 rounded-full hover:bg-orange-600 transition-colors font-medium"
+                className="bg-primary-500 text-white px-6 py-2 rounded-lg hover:bg-primary-400 active:bg-primary-600 transition-colors font-medium"
               >
                 Sign In
               </button>

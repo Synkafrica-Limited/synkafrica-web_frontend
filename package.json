@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-icons/all-files": "^4.1.0",
     "framer-motion": "^12.18.1",
     "lucide-react": "^0.515.0",
     "next": "15.3.3",
