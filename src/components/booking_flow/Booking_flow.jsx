@@ -8,7 +8,7 @@ import CarBookingForm         from './CarBookingForm'
 import BeachBookingForm       from './BeachBookingForm'
 import DiningBookingForm      from './DiningBookingForm'
 import ConvenienceBookingForm from './ConvenienceBookingForm'
-// import FlightBookingForm   from './FlightBookingForm'
+import FlightComingSoonTab   from './FlightsBookingForm'
 
 const SERVICES = [
   'Cars',
@@ -83,7 +83,7 @@ export default function BookingFlow() {
         />
       )}
 
-      {/* {activeService === 'Flight' && <FlightBookingForm onSearch={handleSearch} />} */}
+      {activeService === 'Flight' && <FlightComingSoonTab />}
     </div>
   )
 }

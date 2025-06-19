@@ -195,10 +195,10 @@ const Navbar1 = () => {
                       Write a review
                     </Link>
                     <Link
-                      href="/profile"
+                      href="/dashboard/customer"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     >
-                      Profile Settings
+                      Profile
                     </Link>
                     <div className="border-t border-gray-100 mt-1">
                       <button
@@ -370,7 +370,7 @@ const Navbar1 = () => {
                       Messages
                     </Link>
                     <Link
-                      href="/profile"
+                      href="/dashboard/customer"
                       className="block py-4 text-gray-900 font-medium hover:text-orange-500 transition-colors border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >

@@ -34,7 +34,7 @@ const beaches = [
 
 function BeachCard({ name, price, rating, review, image }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 flex flex-col overflow-hidden w-full max-w-xs">
+    <div className="bg-white rounded-2xl border border-gray-200 flex flex-col overflow-hidden w-full max-w-xs mx-auto sm:mx-0">
       <div className="p-4 pb-2 flex-1">
         <div className="font-semibold text-base mb-1">{name}</div>
         <div className="text-gray-600 text-sm">{price}</div>
@@ -55,10 +55,10 @@ function BeachCard({ name, price, rating, review, image }) {
 
 export default function ExploreBeachSection() {
   return (
-    <section className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-1">
+    <section className="max-w-7xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
         <div>
-          <h2 className="text-2xl font-semibold">Explore beach in Lagos</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold">Explore beaches in Lagos</h2>
           <p className="text-gray-500 text-sm">
             Soak up the sun in style with our beach service
           </p>
@@ -66,12 +66,12 @@ export default function ExploreBeachSection() {
         <Button
           variant="outline"
           size="sm"
-          className="border border-primary-500 text-primary-500 px-6 py-2 rounded-md font-medium text-base hover:bg-primary-50 transition"
+          className="border border-primary-500 text-primary-500 px-6 py-2 rounded-md font-medium text-base hover:bg-primary-50 transition mt-2 sm:mt-0"
         >
           See all
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 mt-4">
         {beaches.map((beach, idx) => (
           <BeachCard key={idx} {...beach} />
         ))}
