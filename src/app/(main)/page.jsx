@@ -8,7 +8,7 @@ import FaqSection from '../customer_landingpage/Faqs';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen">
       <div className="space-y-5">
         <BookingFlow />
         <ExperiencesSection />
