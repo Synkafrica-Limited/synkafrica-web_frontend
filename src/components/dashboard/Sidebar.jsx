@@ -1,66 +1,127 @@
 // src/components/dashboard/Sidebar.jsx
-"use client";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
+"use client"
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import Image from "next/image"
 import {
+  IoGlobeOutline,
   IoPersonOutline,
   IoLogOutOutline,
   IoDocumentTextOutline,
   IoChatbubbleEllipsesOutline,
-  IoMenu,
-} from "react-icons/io5";
+  IoCloseOutline,
+  IoMenu
+} from "react-icons/io5"
 
 const menu = [
-  { label: "Profile", icon: <IoPersonOutline />, href: "/dashboard" },
-  { label: "Bookings", icon: <IoDocumentTextOutline />, href: "/dashboard/bookings" },
-  { label: "Reviews", icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/reviews" },
-  { label: "Log Out", icon: <IoLogOutOutline />, href: "/logout" },
-];
+  { label: "My Profile", icon: <IoPersonOutline />, href: "/dashboard" },
+  { label: "Bookings",   icon: <IoDocumentTextOutline />, href: "/dashboard/bookings" },
+  { label: "Reviews",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/reviews" },
+  { label: "Sign Out",   icon: <IoLogOutOutline />, href: "/logout" },
+]
 
-export default function Sidebar() {
-  const [open, setOpen] = useState(false);
+export default function Sidebar({ active }) {
+  const [open, setOpen] = useState(false)
+
+  // Prevent background scroll when nav is open
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
+    document.body.style.overflow = open ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [open])
 
   return (
     <>
-      {/* mobile hamburger */}
-      <button onClick={() => setOpen(!open)} className="md:hidden p-4 text-2xl text-primary-500">
+      {/* ── MOBILE HAMBURGER (fixed top-left) ───────────────────────────── */}
+      <button
+        className="fixed top-4 left-4 z-50 md:hidden p-2 text-2xl text-primary-500"
+        onClick={() => setOpen(true)}
+        aria-label="Open menu"
+      >
         <IoMenu />
       </button>
 
+      {/* ── MOBILE BACKDROP ─────────────────────────────── */}
+      {open && (
+        <div
+          className="fixed inset-0 bg-black/30 z-40 md:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* ── MOBILE DRAWER ─────────────────────────────── */}
       <aside
         className={`
-          fixed inset-x-0 top-0 z-40 bg-white rounded-b-3xl shadow-lg transition-transform
-          ${open ? "translate-y-0" : "-translate-y-full"}
-          md:static md:translate-y-0 md:rounded-r-3xl md:rounded-b-none md:shadow md:w-[220px]
+          fixed inset-y-0 left-0 z-50
+          w-3/4 max-w-xs bg-white shadow-2xl rounded-tr-3xl rounded-br-3xl
+          transform transition-transform duration-300
+          ${open ? "translate-x-0" : "-translate-x-full"}
+          md:hidden
         `}
-        style={{ maxHeight: open ? "90vh" : 0, overflow: open ? "auto" : "hidden" }}
       >
-        <div className="flex justify-center p-6">
-          <Link href="/dashboard">
-            <Image src="/images/brand/synkafrica-logo-w-text.png" width={120} height={40} alt="Logo"/>
-          </Link>
+        <div className="flex items-center justify-between px-6 py-5 border-b">
+          {/* Currency selector */}
+          <div className="flex items-center space-x-2">
+            <IoGlobeOutline className="text-xl text-gray-600" />
+            <span className="text-sm font-medium text-gray-800">USD</span>
+          </div>
+          {/* Close button */}
+          <button
+            onClick={() => setOpen(false)}
+            className="text-2xl text-gray-600"
+            aria-label="Close menu"
+          >
+            <IoCloseOutline />
+          </button>
         </div>
-        <nav className="flex flex-col">
+        <nav className="px-4 py-6 flex flex-col space-y-4">
           {menu.map(({ label, icon, href }) => (
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-3 px-8 py-3 text-base font-medium hover:bg-gray-50"
               onClick={() => setOpen(false)}
+              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition"
             >
-              <span className="text-xl">{icon}</span>
-              {label}
+              <span className="text-xl text-gray-700">{icon}</span>
+              <span className="font-medium text-gray-800">{label}</span>
             </Link>
           ))}
         </nav>
       </aside>
 
-      {open && <div className="fixed inset-0 bg-black/20 z-30" onClick={() => setOpen(false)} />}
+      {/* ── DESKTOP SIDEBAR ─────────────────────────────── */}
+      <aside className="hidden md:flex md:flex-col md:w-60 bg-white border-r border-gray-200 min-h-screen">
+        <div className="px-8 py-6">
+          <Link href="/dashboard">
+            <Image
+              src="/images/brand/synkafrica-logo-w-text.png"
+              alt="Synkafrica Logo"
+              width={120}
+              height={40}
+              priority
+            />
+          </Link>
+        </div>
+        <nav className="flex-1 px-4 py-2 space-y-1">
+          {menu.map(({ label, icon, href }) => {
+            const isActive = active === href
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`
+                  flex items-center space-x-3 px-4 py-3 rounded-lg transition
+                  ${isActive
+                    ? "bg-primary-50 border-l-4 border-primary-500 text-primary-600 font-medium"
+                    : "text-gray-700 hover:bg-gray-50"}
+                `}
+              >
+                <span className="text-xl">{icon}</span>
+                <span>{label}</span>
+              </Link>
+            )
+          })}
+        </nav>
+      </aside>
     </>
-  );
+  )
 }
