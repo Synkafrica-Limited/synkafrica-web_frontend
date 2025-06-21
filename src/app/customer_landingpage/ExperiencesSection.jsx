@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "@/components/ui/Buttons";
+import { ArrowRight } from 'lucide-react';
 
 const experiences = [
   {
@@ -40,11 +41,10 @@ export default function ExperiencesSection() {
               <div className="text-gray-500 text-sm mb-4 flex-1">{exp.desc}</div>
               <Button
                 variant="filled"
+                icon={<ArrowRight />}
                 size="md"
-                className="mt-auto bg-primary-500 hover:bg-primary-600 text-white px-5 py-2 rounded-md font-medium flex items-center transition"
-              >
-                View Details <span className="ml-2 text-lg">→</span>
-              </Button>
+                className="w-full mb-4"
+              >View Details</Button>
             </div>
           </div>
         ))}

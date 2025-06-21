@@ -1,62 +1,74 @@
 import React from "react";
-import Button from "../../components/ui/buttons"; 
-import { ArrowRight } from 'lucide-react';
+import Button from "../../components/ui/buttons";
+import {
+	ArrowRight,
+	MapPin,
+	Users,
+	Fuel,
+	Settings,
+	Star,
+	Clock,
+	Filter,
+
+	X,
+} from "lucide-react";
+import Link from "next/link";
 
 const cars = [
 	{
 		label: "Great Deal",
 		labelColor: "bg-purple-700",
 		title: "Luxury Package",
-		desc: "Mercedes-Benz GLE Coupe 4MATIC",
+		desc: "Toyota Land Cruiser V8",
 		img: "/images/car1.png", // Replace with your actual image path
 		features: [
-			{ icon: "", text: "Chauffeur" },
-			{ icon: "❄️", text: "A/C" },
-			{ icon: "⛽", text: "Unlimited mileage" },
+			{ icon: <Users className="w-4 h-4 text-gray-400" />, text: "Chauffeur" },
+			{ icon: <Clock className="w-4 h-4 text-gray-400" />, text: "A/C" },
+			{ icon: <Fuel className="w-4 h-4 text-gray-400" />, text: "Unlimited mileage" },
 		],
-		price: "$140",
+		price: "₦45,000",
 		per: "/d",
 	},
 	{
 		label: "Great Deal",
 		labelColor: "bg-purple-700",
 		title: "Star Package",
-		desc: "Cadillac Escalade Platinum 4WD",
+		desc: "Lexus GX 460",
 		img: "/images/car2.png",
 		features: [
-			{ icon: "🧑‍✈️", text: "Chauffeur" },
-			{ icon: "❄️", text: "A/C" },
-			{ icon: "⛽", text: "Unlimited mileage" },
+			{ icon: <Users className="w-4 h-4 text-gray-400" />, text: "Chauffeur" },
+			{ icon: <Clock className="w-4 h-4 text-gray-400" />, text: "A/C" },
+			{ icon: <Fuel className="w-4 h-4 text-gray-400" />, text: "Unlimited mileage" },
 		],
-		price: "$160",
+		price: "₦16,000",
 		per: "/d",
 	},
 	{
 		label: "Great Deal",
 		labelColor: "bg-purple-700",
 		title: "Luxury Package",
-		desc: "Lexus GX 460",
+		desc: "Cardillac Escalade ESV",
 		img: "/images/car3.png",
 		features: [
-			{ icon: "🧑‍✈️", text: "Chauffeur" },
-			{ icon: "❄️", text: "A/C" },
-			{ icon: "⛽", text: "Unlimited mileage" },
+			{ icon: <Users className="w-4 h-4 text-gray-400" />, text: "Chauffeur" },
+			{ icon: <Clock className="w-4 h-4 text-gray-400" />, text: "A/C" },
+			{ icon: <Fuel className="w-4 h-4 text-gray-400" />, text: "Unlimited mileage" },
 		],
-		price: "$120",
+		price: "₦35,000",
 		per: "/d",
 	},
 	{
 		label: "Great Deal",
 		labelColor: "bg-purple-700",
 		title: "Sun Package",
-		desc: "Toyota Land Cruiser",
+		desc: "Mercedes-Benz GLE Coupe 4MATIC",
 		img: "/images/car4.png",
 		features: [
-			{ icon: "🧑‍✈️", text: "Chauffeur" },
-			{ icon: "❄️", text: "A/C" },
-			{ icon: "⛽", text: "Unlimited mileage" },
+			{ icon: <Users className="w-4 h-4 text-gray-400" />, text: "Chauffeur" },
+			{ icon: <Clock className="w-4 h-4 text-gray-400" />, text: "A/C" },
+			{ icon: <Fuel className="w-4 h-4 text-gray-400" />, text: "Unlimited mileage" },
 		],
-		price: "$90",
+		price: "₦45,000",
 		per: "/d",
 	},
 ];
@@ -115,12 +127,19 @@ export default function ExploreCarsSection() {
 									<span className="text-xs text-gray-500">{car.per}</span>
 								</div>
 							</div>
-							<Button
-								variant="filled"
-								icon={<ArrowRight />}
-								size="md"
+							<Link
+								href="/car-rental"
 								className="w-full mb-4"
-							>Reserve</Button>
+							>
+								<Button
+									variant="filled"
+									icon={<ArrowRight />}
+									size="md"
+									className="w-full"
+								>
+									Reserve
+								</Button>
+							</Link>
 						</div>
 					</div>
 				))}

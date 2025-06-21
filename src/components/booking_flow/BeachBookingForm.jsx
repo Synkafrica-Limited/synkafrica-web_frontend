@@ -5,7 +5,7 @@ import { IoLocationOutline, IoCalendarOutline } from 'react-icons/io5';
 import Button from '@/components/ui/Buttons';
 import CalendarCard from './CalendarCard';
 import PopularDestinationsCard from './PopularDestinationsCard';
-import Input from '../ui/input';
+import { GuestSelectorDropdown } from './GuestSelectorDropdown';
 
 // helper
 const formatDate = d =>
@@ -21,8 +21,9 @@ export default function BeachBookingForm({
   const [dateRange, setDateRange]     = useState({ start:null,end:null })
   const [pickupFocused, setPickupFocused]   = useState(false)
   const [calendarOpen, setCalendarOpen]     = useState(false)
-  const [guests, setGuests] = useState(1)
   const pickupRef = useRef(null)
+  const [adults, setAdults] = useState(1)
+  const [children, setChildren] = useState(0)
   return (
     <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
       {/* Beach location input */}
@@ -95,15 +96,14 @@ export default function BeachBookingForm({
         )}
       </div>
       {/* Guests */}
-      <Input
-        type="number"
-        min={1}
-        className="px-3 py-2 w-full"
-        placeholder="Guests"
-        value={guests}
-        onChange={e => setGuests(+((e && e.target) ? e.target.value : e))}
-      />
-
+      <div>
+        <GuestSelectorDropdown
+          adults={adults}
+          children={children}
+          setAdults={setAdults}
+          setChildren={setChildren}
+        />
+      </div>
       {/* Search */}
       <div>
         <Button
@@ -115,7 +115,10 @@ export default function BeachBookingForm({
               pickup,pickupSub,
               dropoff,dropoffSub,
               dateRange,
-              pickupTime,dropoffTime
+              pickupTime,dropoffTime,
+              guests: adults + children,
+              children,
+              adults,
             })
           }
         >

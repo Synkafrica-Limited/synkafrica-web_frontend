@@ -14,9 +14,9 @@ import {
 } from "react-icons/io5"
 
 const menu = [
-  { label: "My Profile", icon: <IoPersonOutline />, href: "/dashboard" },
-  { label: "Bookings",   icon: <IoDocumentTextOutline />, href: "/dashboard/bookings" },
-  { label: "Reviews",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/reviews" },
+  { label: "My Profile", icon: <IoPersonOutline />, href: "/dashboard/customer/" },
+  { label: "Bookings",   icon: <IoDocumentTextOutline />, href: "/dashboard/customer/bookings" },
+  { label: "Reviews",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/customer/reviews" },
   { label: "Sign Out",   icon: <IoLogOutOutline />, href: "/logout" },
 ]
 
@@ -91,7 +91,7 @@ export default function Sidebar({ active }) {
       {/* ── DESKTOP SIDEBAR ─────────────────────────────── */}
       <aside className="hidden md:flex md:flex-col md:w-60 bg-white border-r border-gray-200 min-h-screen">
         <div className="px-8 py-6">
-          <Link href="/dashboard">
+          <Link href="/">
             <Image
               src="/images/brand/synkafrica-logo-w-text.png"
               alt="Synkafrica Logo"
@@ -109,12 +109,16 @@ export default function Sidebar({ active }) {
                 key={href}
                 href={href}
                 className={`
-                  flex items-center space-x-3 px-4 py-3 rounded-lg transition
+                  flex items-center space-x-3 px-4 py-3 rounded-lg transition relative
                   ${isActive
-                    ? "bg-primary-50 border-l-4 border-primary-500 text-primary-600 font-medium"
+                    ? "text-primary-600 font-semibold bg-primary-50"
                     : "text-gray-700 hover:bg-gray-50"}
                 `}
               >
+                {/* Active indicator bar */}
+                {isActive && (
+                  <span className="absolute right-0 top-2 bottom-2 w-1.5 rounded-l bg-primary-500" />
+                )}
                 <span className="text-xl">{icon}</span>
                 <span>{label}</span>
               </Link>

@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useRef } from 'react'
 import { IoLocationOutline, IoCalendarOutline, IoPersonCircle, IoChevronDown } from 'react-icons/io5';
 import Button from '@/components/ui/Buttons';
@@ -7,6 +6,7 @@ import CalendarCard from './CalendarCard';
 import TimeSelectCard from './TimeSelectCard';
 import PopularDestinationsCard from './PopularDestinationsCard';
 import Input from '../ui/input';
+import { GuestSelectorDropdown } from './GuestSelectorDropdown';
 
 // helper
 export const formatDate = d =>
@@ -25,11 +25,14 @@ export default function DiningBookingForm({
   const [pickupFocused, setPickupFocused] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [timeSelectOpen, setTimeSelectOpen] = useState(false)
-  const [guests, setGuests] = useState(1)
+  const [adults, setAdults] = useState(1)
+  const [children, setChildren] = useState(0)
 
   const pickupRef = useRef(null);
+
+  // Responsive: stack on mobile, grid on larger screens
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 w-full">
       {/* Restaurant input */}
       <div className="relative">
         <label className="sr-only">Restaurants</label>
@@ -41,9 +44,7 @@ export default function DiningBookingForm({
               ? 'border-blue-500 shadow-[0_0_0_2px_rgba(37,99,235,0.2)]'
               : 'border-gray-300'
             }`}
-          onClick={()=>{
-            setPickupFocused(true)
-          }}
+          onClick={()=>{ setPickupFocused(true) }}
         >
           <IoLocationOutline className="text-gray-400 mr-2" />
           <div className="flex flex-col w-full overflow-hidden">
@@ -69,7 +70,6 @@ export default function DiningBookingForm({
           />
         )}
       </div>
-
 
       {/* Date */}
       <div className="relative">
@@ -101,7 +101,7 @@ export default function DiningBookingForm({
       </div>
 
       {/* Time */}
-      <div className="relative w-full md:max-w-[220px] flex-1">
+      <div className="relative w-full flex-1">
         <div
           tabIndex={0}
           className="flex items-center border border-gray-300 rounded-md px-3 py-2 bg-white h-[55px] w-full cursor-pointer min-w-0"
@@ -109,7 +109,7 @@ export default function DiningBookingForm({
         >
           <IoPersonCircle className="text-gray-400 mr-2 text-2xl" />
           <div className="flex-1">
-            <div className="text-[8px] text-gray-500">Reservations</div>
+            <div className="text-[10px] text-gray-500">Reservations</div>
             <div className="text-sm font-medium text-gray-900">
               {pickupTime||'--:--'} / {dropoffTime||'--:--'}
             </div>
@@ -133,24 +133,36 @@ export default function DiningBookingForm({
       </div>
 
       {/* Guests */}
-      <Input
-        type="number"
-        min={1}
-        className="px-3 py-2 w-full"
-        placeholder="Guests"
-        value={guests}
-        onChange={e => setGuests(+((e && e.target) ? e.target.value : e))}
-      />
+      <div>
+        <GuestSelectorDropdown
+          adults={adults}
+          children={children}
+          setAdults={setAdults}
+          setChildren={setChildren}
+        />
+      </div>
 
       {/* Search */}
-      <Button
-        variant="filled"
-        size="md"
-        className="w-full h-[55px] flex items-center justify-center col-span-1 sm:col-span-1"
-        onClick={() => onSearch({ pickup, pickupSub, dateRange, pickupTime, guests })}
-      >
-        Search →
-      </Button>
+      <div className="flex flex-col justify-end">
+        <Button
+          variant="filled"
+          size="md"
+          className="w-full h-[55px] flex items-center justify-center"
+          onClick={() =>
+            onSearch({
+              pickup,
+              pickupSub,
+              dateRange,
+              pickupTime,
+              guests: adults + children,
+              adults,
+              children,
+            })
+          }
+        >
+          Search →
+        </Button>
+      </div>
     </div>
   );
 }

@@ -15,7 +15,6 @@ export default function ProfilePage() {
     <div className="min-h-screen flex flex-col bg-[#FAF8F6]">
       {/* Navbar */}
       {/* <Navbar1 /> */}
-      
       {/* Dashboard Main Content */}
       <div className="flex-1 flex flex-col md:flex-row w-full h-full">
 

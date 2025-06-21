@@ -1,6 +1,8 @@
 import React from "react";
 import Button from "../../components/ui/buttons"; // Adjust the import path as needed
 
+import { ArrowRight } from "lucide-react";
+
 const beaches = [
   {
     name: "Landmark beach",
@@ -63,13 +65,12 @@ export default function ExploreBeachSection() {
             Soak up the sun in style with our beach service
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="border border-primary-500 text-primary-500 px-6 py-2 rounded-md font-medium text-base hover:bg-primary-50 transition mt-2 sm:mt-0"
-        >
-          See all
-        </Button>
+      <Button
+                variant="filled"
+                icon={<ArrowRight />}
+                size="md"
+                className=" mb-4"
+              >See all</Button>
       </div>
       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 mt-4">
         {beaches.map((beach, idx) => (
