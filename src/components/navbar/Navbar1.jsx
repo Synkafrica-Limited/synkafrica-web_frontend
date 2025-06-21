@@ -65,10 +65,10 @@ const Navbar1 = () => {
                   Discover
                 </Link>
                 <Link
-                  href="/rental-cars"
+                  href="/car-rental"
                   className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
                 >
-                  Rental Cars
+                  Car Rental
                 </Link>
                 <Link
                   href="/review"
@@ -124,10 +124,10 @@ const Navbar1 = () => {
                   Discover
                 </Link>
                 <Link
-                  href="/rental-cars"
+                  href="/car-rental"
                   className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
                 >
-                  Rental Cars
+                  Car Rental
                 </Link>
                 <Link
                   href="/review"

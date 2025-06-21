@@ -35,8 +35,7 @@ export default function Button({
 
   const variants = {
     filled: [
-      "bg-primary-500 text-white",
-      "hover:bg-primary-400 active:bg-primary-600",
+      "bg-primary-500 hover:bg-primary-400 active:bg-primary-600 text-white py-4 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl",
       "disabled:bg-primary-200 disabled:text-white disabled:cursor-not-allowed",
     ].join(" "),
     outline: [

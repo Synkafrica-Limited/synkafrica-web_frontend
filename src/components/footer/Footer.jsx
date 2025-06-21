@@ -19,8 +19,8 @@ const Footer = () => {
           <Image
             src="/images/brand/synkafrica-logo-single.png"
             alt="Synk Africa Logo"
-            width={80}
-            height={30}
+            width={40}
+            height={20}
           />
 
           {/* Main Navigation */}
@@ -121,7 +121,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/services/car-rentals"
+                  href="./"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Car Rentals

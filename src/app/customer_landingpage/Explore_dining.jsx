@@ -1,5 +1,6 @@
 import React from "react";
-import Button from "../../components/ui/buttons"; // Adjust path as needed
+import Button from "../../components/ui/buttons"; 
+import { ArrowRight } from "lucide-react";
 
 const diningData = [
   {
@@ -113,13 +114,13 @@ export default function ExploreDiningSection() {
               Savor every moment with our dinning service
             </p>
           </div>
-          <Button
-            variant="filled"
-            size="md"
-            className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-md font-medium flex items-center transition"
-          >
-            See all <span className="ml-2 text-lg">→</span>
-          </Button>
+            
+            <Button
+                variant="filled"
+                icon={<ArrowRight />}
+                size="md"
+                className=" mb-4"
+              >See all</Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {diningData.map((item, idx) => (
