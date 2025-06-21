@@ -6,6 +6,7 @@ import CalendarCard from './CalendarCard';
 import TimeSelectCard from './TimeSelectCard';
 import PopularDestinationsCard from './PopularDestinationsCard';
 import Input from '../ui/input';
+import { GuestSelectorDropdown } from './GuestSelectorDropdown';
 
 // helper
 export const formatDate = d =>
@@ -24,11 +25,14 @@ export default function DiningBookingForm({
   const [pickupFocused, setPickupFocused] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [timeSelectOpen, setTimeSelectOpen] = useState(false)
-  const [guests, setGuests] = useState(1)
+  const [adults, setAdults] = useState(1)
+  const [children, setChildren] = useState(0)
 
   const pickupRef = useRef(null);
+
+  // Responsive: stack on mobile, grid on larger screens
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 w-full">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 w-full">
       {/* Restaurant input */}
       <div className="relative">
         <label className="sr-only">Restaurants</label>
@@ -105,7 +109,7 @@ export default function DiningBookingForm({
         >
           <IoPersonCircle className="text-gray-400 mr-2 text-2xl" />
           <div className="flex-1">
-            <div className="text-[8px] text-gray-500">Reservations</div>
+            <div className="text-[10px] text-gray-500">Reservations</div>
             <div className="text-sm font-medium text-gray-900">
               {pickupTime||'--:--'} / {dropoffTime||'--:--'}
             </div>
@@ -130,23 +134,31 @@ export default function DiningBookingForm({
 
       {/* Guests */}
       <div>
-        <Input
-          type="number"
-          min={1}
-          className="px-3 py-2 w-full h-[55px] rounded-md border border-gray-300"
-          placeholder="Guests"
-          value={guests}
-          onChange={e => setGuests(+((e && e.target) ? e.target.value : e))}
+        <GuestSelectorDropdown
+          adults={adults}
+          children={children}
+          setAdults={setAdults}
+          setChildren={setChildren}
         />
       </div>
 
       {/* Search */}
-      <div>
+      <div className="flex flex-col justify-end">
         <Button
           variant="filled"
           size="md"
           className="w-full h-[55px] flex items-center justify-center"
-          onClick={() => onSearch({ pickup, pickupSub, dateRange, pickupTime, guests })}
+          onClick={() =>
+            onSearch({
+              pickup,
+              pickupSub,
+              dateRange,
+              pickupTime,
+              guests: adults + children,
+              adults,
+              children,
+            })
+          }
         >
           Search →
         </Button>

@@ -44,7 +44,7 @@ export default function ExperiencesSection() {
                 icon={<ArrowRight />}
                 size="md"
                 className="w-full mb-4"
-              >Reserve</Button>
+              >View Details</Button>
             </div>
           </div>
         ))}

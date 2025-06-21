@@ -27,31 +27,31 @@ const Footer = () => {
           <nav className="hidden lg:flex space-x-8 mb-6 lg:mb-0">
             <Link
               href="/about"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
             >
               About Us
             </Link>
             <Link
               href="/careers"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
             >
               Careers
             </Link>
             <Link
               href="/partner"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
             >
               Partner With Us
             </Link>
             <Link
-              href="/explore"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              href="/discover"
+              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
             >
-              Explore
+              Discover
             </Link>
             <Link
               href="/support"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
             >
               Support
             </Link>
@@ -121,7 +121,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="./"
+                  href="/car-rental"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Car Rentals

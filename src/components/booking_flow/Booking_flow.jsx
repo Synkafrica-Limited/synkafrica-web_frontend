@@ -28,14 +28,15 @@ export default function BookingFlow() {
 
   return (
     <div className="max-w-5xl mx-auto p-4">
-      {/* Tabs */}
-      <div className="flex justify-center space-x-4 mb-4">
+      {/* Responsive Tabs */}
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-4">
         {SERVICES.map(svc => (
           <Button
             key={svc}
             variant={activeService === svc ? 'filled' : 'none'}
             size="sm"
             onClick={() => setActiveService(svc)}
+            className="flex-1 min-w-[120px] sm:min-w-[unset] text-xs sm:text-sm"
           >
             {svc}
           </Button>
@@ -74,7 +75,8 @@ export default function BookingFlow() {
             { city: 'Lagos Island', location: 'The enclave restaurant' },
             { city: 'Port Harcourt', location: 'Hungry belly' },
           ]}
-        onSearch={handleSearch} />
+          onSearch={handleSearch}
+        />
       )}
 
       {activeService === 'Convenience Services' && (
