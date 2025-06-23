@@ -1,5 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
+import Button from "../ui/buttons";
+//icon
+import { IoLogoTwitter, IoLogoFacebook, IoArrowForward, IoLogoInstagram } from "react-icons/io5";
+
 
 const Footer = () => {
   return (
@@ -259,22 +263,19 @@ const Footer = () => {
           <p className="text-gray-600 text-sm mb-4 lg:mb-0">
             Copyright © 2025 synKafrica | All Right Reserved
           </p>
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors flex items-center space-x-2">
-            <span>Sign Up</span>
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
-          </button>
+          <Link href="/signup">
+          <Button
+            variant="filled"
+            icon={
+              <IoArrowForward className="w-5 h-5" />
+            }
+            className="bg-[#E26A3D] text-white font-semibold rounded-md px-6 py-2 hover:bg-[#E26A3D]/90 transition-colors"
+            size="md"
+          >
+            Sign Up
+          </Button>
+          </Link>
+          
         </div>
 
         {/* Mobile Navigation */}

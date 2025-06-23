@@ -9,6 +9,7 @@ import {
   IoLogOutOutline,
   IoDocumentTextOutline,
   IoChatbubbleEllipsesOutline,
+  IoCashOutline,
   IoCloseOutline,
   IoMenu
 } from "react-icons/io5"
@@ -17,7 +18,8 @@ const menu = [
   { label: "My Profile", icon: <IoPersonOutline />, href: "/dashboard/customer/" },
   { label: "Bookings",   icon: <IoDocumentTextOutline />, href: "/dashboard/customer/bookings" },
   { label: "Feedback",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/customer/feedback" },
-  { label: "Log Out",   icon: <IoLogOutOutline />, href: "/logout" },
+  { label: "Payment History",    icon: <IoCashOutline />, href: "/dashboard/customer/payment-history" },
+  { label: "Log Out",   icon: <IoLogOutOutline />, href: "/" },
 ]
 
 export default function Sidebar({ active }) {

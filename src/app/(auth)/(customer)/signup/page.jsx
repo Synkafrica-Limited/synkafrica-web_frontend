@@ -230,7 +230,7 @@ export default function SignUpScreen() {
           </p>
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <Link href="/signin" className="text-blue-600 hover:underline font-medium">
+            <Link href="/login" className="text-blue-600 hover:underline font-medium">
               Sign in
             </Link>
           </p>
