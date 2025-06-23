@@ -16,8 +16,8 @@ import {
 const menu = [
   { label: "My Profile", icon: <IoPersonOutline />, href: "/dashboard/customer/" },
   { label: "Bookings",   icon: <IoDocumentTextOutline />, href: "/dashboard/customer/bookings" },
-  { label: "Reviews",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/customer/reviews" },
-  { label: "Sign Out",   icon: <IoLogOutOutline />, href: "/logout" },
+  { label: "Feedback",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/customer/feedback" },
+  { label: "Log Out",   icon: <IoLogOutOutline />, href: "/logout" },
 ]
 
 export default function Sidebar({ active }) {
@@ -79,10 +79,20 @@ export default function Sidebar({ active }) {
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition"
+              className={`
+                flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 relative
+                ${active === href
+                  ? "text-primary-600 font-semibold bg-primary-50"
+                  : "text-gray-700 hover:bg-primary-50 hover:text-primary-600"}
+                group
+              `}
             >
-              <span className="text-xl text-gray-700">{icon}</span>
-              <span className="font-medium text-gray-800">{label}</span>
+              {/* Animated active indicator for mobile */}
+              {active === href && (
+                <span className="absolute right-0 top-2 bottom-2 w-1.5 rounded-l bg-primary-500 transition-all duration-300" />
+              )}
+              <span className={`text-xl transition-transform duration-200 group-hover:scale-110 ${active === href ? "text-primary-600" : ""}`}>{icon}</span>
+              <span className={`transition-colors duration-200 ${active === href ? "text-primary-600" : ""}`}>{label}</span>
             </Link>
           ))}
         </nav>
@@ -109,18 +119,19 @@ export default function Sidebar({ active }) {
                 key={href}
                 href={href}
                 className={`
-                  flex items-center space-x-3 px-4 py-3 rounded-lg transition relative
+                  flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 relative
                   ${isActive
                     ? "text-primary-600 font-semibold bg-primary-50"
-                    : "text-gray-700 hover:bg-gray-50"}
+                    : "text-gray-700 hover:bg-gray-50 hover:text-primary-600"}
+                  group
                 `}
               >
                 {/* Active indicator bar */}
                 {isActive && (
-                  <span className="absolute right-0 top-2 bottom-2 w-1.5 rounded-l bg-primary-500" />
+                  <span className="absolute right-0 top-2 bottom-2 h-40 w-3.5 rounded-l bg-primary-500 transition-all duration-300" />
                 )}
-                <span className="text-xl">{icon}</span>
-                <span>{label}</span>
+                <span className={`text-xl transition-transform duration-200 group-hover:scale-110 ${isActive ? "text-primary-600" : ""}`}>{icon}</span>
+                <span className={`transition-colors duration-200 ${isActive ? "text-primary-600" : ""}`}>{label}</span>
               </Link>
             )
           })}
