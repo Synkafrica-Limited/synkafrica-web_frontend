@@ -11,14 +11,15 @@ import {
   IoChatbubbleEllipsesOutline,
   IoCashOutline,
   IoCloseOutline,
-  IoMenu
+  IoMenu,
+  IoHomeOutline,
 } from "react-icons/io5"
 
 const menu = [
+  { label: "Home", icon: <IoHomeOutline />, href: "/" },
   { label: "My Profile", icon: <IoPersonOutline />, href: "/dashboard/customer/" },
   { label: "Bookings",   icon: <IoDocumentTextOutline />, href: "/dashboard/customer/bookings" },
   { label: "Feedback",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/customer/feedback" },
-  { label: "Payment History",    icon: <IoCashOutline />, href: "/dashboard/customer/payment-history" },
   { label: "Log Out",   icon: <IoLogOutOutline />, href: "/" },
 ]
 
