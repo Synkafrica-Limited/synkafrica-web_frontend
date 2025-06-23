@@ -248,7 +248,7 @@ const Navbar1 = () => {
                       Orders
                     </Link>
                     <Link
-                      href="/write-review"
+                      href="/dashboard/customer/feedback"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded transition-all duration-200"
                     >
                       Write a review

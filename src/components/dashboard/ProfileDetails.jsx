@@ -55,6 +55,23 @@ function ProfileDetails({ user, onEdit }) {
               {user.phone || <span className="text-gray-400">-</span>}
             </div>
           </div>
+          <div>
+            <div className="text-xs text-gray-500">Nationality</div>
+            <div className="font-medium break-words">
+              {user.nationality || <span className="text-gray-400">-</span>}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-gray-500">National Identity</div>
+            <div className="font-medium break-words">
+              {user.national_identity || <span className="text-gray-400">-</span>}
+            </div>
+          </div>
+          <div></div>
+            <div className="text-xs text-gray-500">Expiry Date</div>
+            <div className="font-medium break-words">
+              {user.expiry || <span className="text-gray-400">-</span>}
+            </div>
         </div>
       </div>
     </div>

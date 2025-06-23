@@ -5,7 +5,15 @@ function ProfileCard({ user }) {
   return (
     <div className="bg-white rounded-2xl shadow p-4 sm:p-6 flex flex-col items-center w-full max-w-xs mx-auto min-w-0">
       <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-900 flex items-center justify-center text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-3">
-        {user.initials}
+        {user.profileImage ? (
+          <img
+            src={user.profileImage}
+            alt="Profile"
+            className="w-full h-full rounded-full object-cover"
+          />
+        ) : (
+          user.initials
+        )}
       </div>
       <div className="text-base sm:text-lg font-semibold text-center break-words">
         {user.name}

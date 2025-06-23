@@ -39,7 +39,7 @@ export default function Button({
       "disabled:bg-primary-200 disabled:text-white disabled:cursor-not-allowed",
     ].join(" "),
     outline: [
-      "border-2 border-primary-500 text-primary-500 bg-transparent",
+      "border-2 border-primary-500 hover:bg-primary-400 hover:text-white active:bg-primary-600 text-primary-500 py-4 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl",
       "hover:bg-primary-50 active:bg-primary-100",
       "disabled:border-primary-200 disabled:text-primary-200 disabled:cursor-not-allowed",
     ].join(" "),
