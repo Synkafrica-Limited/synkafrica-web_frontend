@@ -132,7 +132,7 @@ export function EditProfileModal({ user, onClose, onSave }) {
             <div className="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6 md:mb-8">
              This information helps us provide a better experience for you.
              Profile details are used to personalize your bookings and ensure smooth communication.
-             
+
             </div>
             <form
               onSubmit={handleSubmit}
@@ -156,7 +156,7 @@ export function EditProfileModal({ user, onClose, onSave }) {
               </div>
               <div>
                 <label className="block text-xs font-semibold mb-1">
-                  Traveler Type
+                  Work Type
                 </label>
                 <select
                   name="travelerType"
@@ -165,8 +165,11 @@ export function EditProfileModal({ user, onClose, onSave }) {
                   className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm"
                 >
                   <option value="">Select</option>
-                  <option value="Adult">Adult</option>
-                  <option value="Child">Child</option>
+                  <option value="Business">Business</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Transportation">Transportation</option>
+                  <option value="Health care">Health care</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
               {/* First/Last Name */}
