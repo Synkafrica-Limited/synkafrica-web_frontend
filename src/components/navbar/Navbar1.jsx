@@ -6,7 +6,7 @@ import Image from "next/image";
 
 import "../ui/buttons"
 
-const Navbar1 = () => {
+const Navbar1 = ({ onBecomeVendor }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -96,17 +96,31 @@ const Navbar1 = () => {
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 {/* More Dropdown */}
-                <div className="relative" ref={moreRef}>
+                <div
+                  className="relative"
+                  ref={moreRef}
+                  onMouseEnter={() => setShowMoreDropdown(true)}
+                  onMouseLeave={() => setShowMoreDropdown(false)}
+                  tabIndex={1}
+                >
                   <button
                     type="button"
                     className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 group focus:outline-none"
-                    onClick={() => setShowMoreDropdown((v) => !v)}
+                    aria-haspopup="true"
+                    aria-expanded={showMoreDropdown}
+                    onFocus={() => setShowMoreDropdown(true)}
                   >
                     More
                     <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                   </button>
+                  {/* Dropdown: keep open while mouse is over dropdown or button */}
                   {showMoreDropdown && (
-                    <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-48 bg-white rounded-2xl shadow-lg py-3 z-50 flex flex-col space-y-1 animate-fadeIn">
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2 mt-3 w-48 bg-white rounded-2xl shadow-lg py-3 z-50 flex flex-col space-y-1 animate-fadeIn"
+                      onMouseEnter={() => setShowMoreDropdown(true)}
+                      onMouseLeave={() => setShowMoreDropdown(false)}
+                      onMouseDown={e => e.preventDefault()}
+                    >
                       <Link
                         href="/dining"
                         className="block px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200"
@@ -128,13 +142,16 @@ const Navbar1 = () => {
                       >
                         Beach Resorts
                       </Link>
-                      <Link
-                        href="/list-property"
-                        className="block px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200"
-                        onClick={() => setShowMoreDropdown(false)}
+                      <button
+                        type="button"
+                        className="block text-left px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 w-full"
+                        onClick={() => {
+                          setShowMoreDropdown(false);
+                          if (typeof onBecomeVendor === "function") onBecomeVendor();
+                        }}
                       >
                         Become a vendor
-                      </Link>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -373,28 +390,28 @@ const Navbar1 = () => {
               <div className="p-6 space-y-1">
                 <Link
                   href="/car-rental"
-                  className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
+                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Car rental
                 </Link>
                 <Link
                   href="/dining"
-                  className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
+                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dining
                 </Link>
                 <Link
                   href="/beach-resorts"
-                  className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
+                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Beach & Resorts
                 </Link>
                 <Link
                   href="/laundry-services"
-                  className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
+                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Laundry Services
@@ -403,46 +420,49 @@ const Navbar1 = () => {
                   <>
                     <Link
                       href="/write-review"
-                      className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
+                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Write a review
                     </Link>
                     <Link
                       href="/bookings"
-                      className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
+                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Bookings
                     </Link>
                     <Link
                       href="/messages"
-                      className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
+                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Messages
                     </Link>
                     <Link
                       href="/dashboard/customer"
-                      className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
+                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Profile
                     </Link>
                     <Link
                       href="/account-info"
-                      className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
+                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:w-full hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Account Info
                     </Link>
-                    <Link
-                      href="/list-property"
-                      className="block py-4 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      List your property
-                    </Link>
+                    <button
+                        type="button"
+                        className=" flex py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 w-full rounded-lg transition-all duration-200 border-b border-gray-100"
+                        onClick={() => {
+                          setShowMoreDropdown(false);
+                          if (typeof onBecomeVendor === "function") onBecomeVendor();
+                        }}
+                      >
+                        Become a vendor
+                      </button>
                   </>
                 )}
                 {!isLoggedIn ? (
@@ -451,7 +471,7 @@ const Navbar1 = () => {
                       toggleLogin();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="w-full mt-6 bg-orange-500 text-white px-6 py-3 rounded-full hover:bg-orange-600 transition-colors font-medium duration-200"
+                    className="w-full mt-6 bg-primary-500 text-white px-6 py-3 rounded-full hover:bg-primary-600 transition-colors font-medium duration-200"
                   >
                     Sign In
                   </button>
@@ -461,7 +481,7 @@ const Navbar1 = () => {
                       toggleLogin();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="block w-full text-left py-4 text-gray-900 font-medium hover:text-red-600 transition-all duration-200 border-b border-gray-100"
+                    className="block w-full text-left py-4 hover:px-9 text-gray-900 font-medium hover:text-red-600 transition-all duration-200 border-b border-gray-100"
                   >
                     Sign out
                   </button>

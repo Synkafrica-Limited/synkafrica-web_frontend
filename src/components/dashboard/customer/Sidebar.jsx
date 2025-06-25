@@ -20,7 +20,7 @@ const menu = [
   { label: "My Profile", icon: <IoPersonOutline />, href: "/dashboard/customer/" },
   { label: "Bookings",   icon: <IoDocumentTextOutline />, href: "/dashboard/customer/bookings" },
   { label: "Feedback",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/customer/feedback" },
-  { label: "Log Out",   icon: <IoLogOutOutline />, href: "/" },
+  { label: "Log Out", icon: <IoLogOutOutline />, href: "/log-out" },
 ]
 
 export default function Sidebar({ active }) {
@@ -79,7 +79,7 @@ export default function Sidebar({ active }) {
         <nav className="px-4 py-6 flex flex-col space-y-4">
           {menu.map(({ label, icon, href }) => (
             <Link
-              key={href}
+              key={href + label} // Ensures uniqueness
               href={href}
               onClick={() => setOpen(false)}
               className={`
@@ -119,10 +119,10 @@ export default function Sidebar({ active }) {
             const isActive = active === href
             return (
               <Link
-                key={href}
+                key={href + label}
                 href={href}
                 className={`
-                  flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 relative
+                  flex space-x-3 py-4 hover:px-9 text-gray-900 font-normal hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration- border-gray-100
                   ${isActive
                     ? "text-primary-600 font-semibold bg-primary-50"
                     : "text-gray-700 hover:bg-gray-50 hover:text-primary-600"}

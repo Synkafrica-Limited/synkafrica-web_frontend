@@ -1,6 +1,6 @@
 "use client";
 
-import Sidebar from "@/components/dashboard/Sidebar";
+import Sidebar from "@/components/dashboard/customer/Sidebar";
 
 export default function DashboardLayout({ children }) {
   // You could even derive “active” from usePathname() from next/navigation
