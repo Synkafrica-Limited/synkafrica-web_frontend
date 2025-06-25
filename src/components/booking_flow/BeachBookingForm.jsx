@@ -9,18 +9,18 @@ import { GuestSelectorDropdown } from './GuestSelectorDropdown';
 
 // helper
 const formatDate = d =>
-  d ? new Date(d).toLocaleString('en-US',{month:'short',day:'numeric'}) : '--'
+  d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric' }) : '--'
 
 export default function BeachBookingForm({
   popularDestinations = [],
-  onSearch = () => {}
+  onSearch = () => { }
 }) {
   // all the local state
-  const [pickup, setPickup]           = useState('')
-  const [pickupSub, setPickupSub]     = useState('')
-  const [dateRange, setDateRange]     = useState({ start:null,end:null })
-  const [pickupFocused, setPickupFocused]   = useState(false)
-  const [calendarOpen, setCalendarOpen]     = useState(false)
+  const [pickup, setPickup] = useState('')
+  const [pickupSub, setPickupSub] = useState('')
+  const [dateRange, setDateRange] = useState({ start: null, end: null })
+  const [pickupFocused, setPickupFocused] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
   const pickupRef = useRef(null)
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
@@ -37,7 +37,7 @@ export default function BeachBookingForm({
               ? 'border-blue-500 shadow-[0_0_0_2px_rgba(37,99,235,0.2)]'
               : 'border-gray-300'
             }`}
-          onClick={()=>{
+          onClick={() => {
             setPickupFocused(true)
             setDropoffFocused(false)
           }}
@@ -58,7 +58,7 @@ export default function BeachBookingForm({
         {pickupFocused && (
           <PopularDestinationsCard
             destinations={popularDestinations}
-            onSelect={dest=>{
+            onSelect={dest => {
               setPickup(dest.city)
               setPickupSub(dest.airport)
               setPickupFocused(false)
@@ -67,13 +67,13 @@ export default function BeachBookingForm({
         )}
       </div>
 
-       {/* Date */}
+      {/* Date */}
       <div className="relative">
         <label className="sr-only">Date</label>
         <button
           type="button"
           className="w-full flex flex-col items-start justify-center border border-gray-300 rounded-md px-3 py-2 bg-white text-left h-[55px]"
-          onClick={()=>setCalendarOpen(true)}
+          onClick={() => setCalendarOpen(true)}
         >
           <div className="flex items-center">
             <IoCalendarOutline className="text-gray-700 mr-2 text-xl" />
@@ -81,17 +81,19 @@ export default function BeachBookingForm({
               <div className="text-xs text-gray-700">Date</div>
               <div className="text-sm font-medium text-gray-900">
                 {dateRange.start ? formatDate(dateRange.start) : 'Select'}
-                {dateRange.end   ? ` - ${formatDate(dateRange.end)}` : ''}
+                {dateRange.end ? ` - ${formatDate(dateRange.end)}` : ''}
               </div>
             </div>
           </div>
         </button>
         {calendarOpen && (
           <CalendarCard
+            mode="single" // <-- Add this line for single date selection
             start={dateRange.start}
-            end={dateRange.end}
-            onChange={setDateRange}
-            onClose={()=>setCalendarOpen(false)}
+            onChange={({ date }) => {
+              setDateRange({ start: date, end: null });
+            }}
+            onClose={() => setCalendarOpen(false)}
           />
         )}
       </div>
@@ -110,12 +112,12 @@ export default function BeachBookingForm({
           variant="filled"
           size="md"
           className="w-full h-[55px] flex items-center justify-center"
-          onClick={()=>
+          onClick={() =>
             onSearch({
-              pickup,pickupSub,
-              dropoff,dropoffSub,
+              pickup, pickupSub,
+              dropoff, dropoffSub,
               dateRange,
-              pickupTime,dropoffTime,
+              pickupTime, dropoffTime,
               guests: adults + children,
               children,
               adults,

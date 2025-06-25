@@ -1,6 +1,7 @@
 "use client";
 import Button from "@/components/ui/buttons";
 import React from "react";
+import Link from "next/link";
 
 function ProfileProgress({ progress, onEdit, onViewBookingInfo, onCompleteBooking }) {
   return (
@@ -27,14 +28,18 @@ function ProfileProgress({ progress, onEdit, onViewBookingInfo, onCompleteBookin
         >
           <span className="mr-1">①</span> Update profile
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-[#E26A3D] text-[#E26A3D] bg-[#E26A3D]/10"
-          onClick={onViewBookingInfo}
+        <Link
+          href="/dashboard/customer/bookings"
         >
-          <span className="mr-1">②</span> View booking information
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-[#E26A3D] text-[#E26A3D] bg-[#E26A3D]/10"
+            onClick={onViewBookingInfo}
+          >
+            <span className="mr-1">②</span> View booking information
+          </Button>
+        </Link>
         <Button
           variant="outline"
           size="sm"

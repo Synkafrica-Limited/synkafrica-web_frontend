@@ -92,10 +92,12 @@ export default function DiningBookingForm({
         </button>
         {calendarOpen && (
           <CalendarCard
+            mode="single"
             start={dateRange.start}
-            end={dateRange.end}
-            onChange={setDateRange}
-            onClose={()=>setCalendarOpen(false)}
+            onChange={({ date }) => {
+              setDateRange({ start: date, end: null });
+            }}
+            onClose={() => setCalendarOpen(false)}
           />
         )}
       </div>

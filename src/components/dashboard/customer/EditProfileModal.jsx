@@ -1,10 +1,11 @@
 "use client";
 import { useState, useRef } from "react";
-import Button from "../ui/buttons";
+import Button from "../../ui/buttons";
 import { FiCamera } from "react-icons/fi";
 import ReactCountryFlag from "react-country-flag";
 import countryList from "react-select-country-list";
 import Select from "react-select";
+import CalendarCard from "@/components/booking_flow/CalendarCard"; // Add this import
 
 // --- EditProfileModal Component ---
 export function EditProfileModal({ user, onClose, onSave }) {
@@ -24,6 +25,8 @@ export function EditProfileModal({ user, onClose, onSave }) {
   });
   const [profileImage, setProfileImage] = useState(user.profileImage || null);
   const fileInputRef = useRef(null);
+  const [showDobCalendar, setShowDobCalendar] = useState(false);
+  const [showExpiryCalendar, setShowExpiryCalendar] = useState(false);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -236,15 +239,34 @@ export function EditProfileModal({ user, onClose, onSave }) {
                 </div>
               </div>
               {/* Date of Birth & Email */}
-              <div>
+              <div className="relative">
                 <label className="block text-xs font-semibold mb-1">Date of birth</label>
                 <input
                   name="dob"
-                  type="date"
-                  value={form.dob}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm"
+                  type="text"
+                  readOnly
+                  value={form.dob ? new Date(form.dob).toLocaleDateString() : ""}
+                  onClick={() => setShowDobCalendar(true)}
+                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm cursor-pointer bg-white"
+                  placeholder="Select date of birth"
                 />
+                {showDobCalendar && (
+                  <div className="absolute z-50 left-0 top-16 w-full">
+                    <CalendarCard
+                      mode="single"
+                      start={form.dob ? new Date(form.dob) : null}
+                      onChange={({ date }) => {
+                        setForm((prev) => ({
+                          ...prev,
+                          dob: date ? date.toISOString().slice(0, 10) : "",
+                        }));
+                        setShowDobCalendar(false);
+                      }}
+                      onClose={() => setShowDobCalendar(false)}
+                      labelSingle="Date of birth"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-semibold mb-1">Email Address</label>
@@ -307,16 +329,34 @@ export function EditProfileModal({ user, onClose, onSave }) {
                   placeholder="national_identity Number"
                 />
               </div>
-              <div>
+              <div className="relative">
                 <label className="block text-xs font-semibold mb-1">Expiry Date</label>
                 <input
                   name="expiry"
-                  type="date"
-                  value={form.expiry}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm"
+                  type="text"
+                  readOnly
+                  value={form.expiry ? new Date(form.expiry).toLocaleDateString() : ""}
+                  onClick={() => setShowExpiryCalendar(true)}
+                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm cursor-pointer bg-white"
                   placeholder="Expiry Date"
                 />
+                {showExpiryCalendar && (
+                  <div className="absolute z-50 left-0 top-16 w-full">
+                    <CalendarCard
+                      mode="single"
+                      start={form.expiry ? new Date(form.expiry) : null}
+                      onChange={({ date }) => {
+                        setForm((prev) => ({
+                          ...prev,
+                          expiry: date ? date.toISOString().slice(0, 10) : "",
+                        }));
+                        setShowExpiryCalendar(false);
+                      }}
+                      onClose={() => setShowExpiryCalendar(false)}
+                      labelSingle="Expiry date"
+                    />
+                  </div>
+                )}
               </div>
               {/* Save Button */}
               <div className="md:col-span-2 mt-4 md:mt-6 flex justify-end">

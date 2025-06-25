@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import ProfileCard from "@/components/dashboard/ProfileCard";
-import ProfileProgress from "@/components/dashboard/ProfileProgress";
-import ProfileDetails from "@/components/dashboard/ProfileDetails";
-import { EditProfileModal } from "../../../components/dashboard/EditProfileModal";
+import ProfileCard from "@/components/dashboard/customer/ProfileCard";
+import ProfileProgress from "@/components/dashboard/customer/ProfileProgress";
+import ProfileDetails from "@/components/dashboard/customer/ProfileDetails";
+import { EditProfileModal } from "../../../components/dashboard/customer/EditProfileModal";
 
 // --- Main Profile Page ---
 const initialUser = {
