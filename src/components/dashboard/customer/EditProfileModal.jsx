@@ -6,6 +6,8 @@ import ReactCountryFlag from "react-country-flag";
 import countryList from "react-select-country-list";
 import Select from "react-select";
 import CalendarCard from "@/components/booking_flow/CalendarCard"; // Add this import
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 // --- EditProfileModal Component ---
 export function EditProfileModal({ user, onClose, onSave }) {
@@ -80,6 +82,11 @@ export function EditProfileModal({ user, onClose, onSave }) {
   const selectedCountry = countryOptions.find(
     (c) => c.rawLabel === form.nationality
   );
+
+  // Get country code for phone input (default to 'ng' for Nigeria)
+  const countryCode =
+    selectedCountry?.code?.toLowerCase() ||
+    (form.phone?.startsWith("+234") ? "ng" : "us");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -282,13 +289,26 @@ export function EditProfileModal({ user, onClose, onSave }) {
               {/* Phone & Nationality */}
               <div>
                 <label className="block text-xs font-semibold mb-1">Mobile No</label>
-                <input
-                  name="phone"
-                  type="tel"
+                <PhoneInput
+                  country={countryCode}
                   value={form.phone}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm"
-                  placeholder="+234 Mobile No"
+                  onChange={(value, data) => {
+                    setForm((prev) => ({
+                      ...prev,
+                      phone: "+" + value,
+                      nationality: data.countryName || prev.nationality,
+                    }));
+                  }}
+                  inputClass="!w-full !text-xs sm:!text-sm !border !rounded-md !px-3 !py-2"
+                  buttonClass="!border-none"
+                  containerClass="!w-full"
+                  inputProps={{
+                    name: "phone",
+                    required: true,
+                    autoFocus: false,
+                  }}
+                  placeholder="Enter mobile number"
+                  enableSearch
                 />
               </div>
               <div>

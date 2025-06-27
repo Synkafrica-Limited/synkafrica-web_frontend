@@ -11,12 +11,12 @@ export default function TimeSelectCard({
     "01:00pm", "02:00pm", "03:00pm", "04:00pm", "05:00pm",
     "06:00pm", "07:00pm", "08:00am", "09:00am", "10:00am"
   ],
-  labels = { pickup: "Pick up time", dropoff: "Drop off time" }, // <-- Add this prop for custom labels
+  labels = { pickup: "Pick up time", dropoff: "Drop off time" },
 }) {
   const [activeTab, setActiveTab] = useState("pickup");
 
   return (
-    <div className="absolute left-0 top-[52px] w-[95vw] max-w-md sm:w-[400px] bg-white border border-gray-200 rounded-xl shadow-2xl z-20 p-4 sm:p-6">
+    <div className="absolute left-0 top-[52px] w-[98vw] max-w-full sm:w-[400px] sm:max-w-md bg-white border border-gray-200 rounded-xl shadow-2xl z-20 p-3 sm:p-6">
       {/* Tabs */}
       <div className="flex mb-4 gap-2">
         <button
@@ -86,7 +86,7 @@ export default function TimeSelectCard({
       {/* Done Button */}
       <div className="flex justify-end mt-6">
         <button
-          className={`bg-primary-500 text-white px-8 py-2 rounded-md font-medium text-base transition ${
+          className={`bg-primary-500 text-white px-6 py-2 rounded-md font-medium text-base transition ${
             pickupTime && dropoffTime ? "" : "opacity-60 cursor-not-allowed"
           }`}
           disabled={!(pickupTime && dropoffTime)}
@@ -95,6 +95,19 @@ export default function TimeSelectCard({
           Done
         </button>
       </div>
+      {/* Responsive tweaks */}
+      <style jsx>{`
+        @media (max-width: 640px) {
+          div[role="dialog"], .absolute {
+            left: 50% !important;
+            transform: translateX(-50%);
+            min-width: 0 !important;
+            width: 98vw !important;
+            max-width: 100vw !important;
+            padding: 0.75rem !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
