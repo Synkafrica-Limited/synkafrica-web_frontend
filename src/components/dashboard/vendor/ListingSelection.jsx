@@ -24,7 +24,7 @@ const options = [
 ];
 
 export default function ListingSelection({ onClose }) {
-  const [selected, setSelected] = useState("cars");
+  const [selected, setSelected] = useState("services");
   const router = useRouter();
 
   const handleNext = () => {
