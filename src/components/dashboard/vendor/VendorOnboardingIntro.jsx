@@ -27,9 +27,6 @@ function VendorOnboardingIntro({
       description: "Choose a starting price, verify a few details, then publish your listing."
     }
   ],
-  ctaLabel = "Get Started",
-  ctaHref = "/dashboard/vendor/cars",
-  cta
 }) {
   return (
     <div className="flex flex-col px-2 sm:px-6 py-8">

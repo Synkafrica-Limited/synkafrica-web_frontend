@@ -1,10 +1,10 @@
 import React from "react";
 import Button from "../../components/ui/buttons"; 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight,  ChevronLeft, ChevronRight } from "lucide-react";
 
 const diningData = [
   {
-    image: "/images/dining1.jpg",
+    img: "/images/dining1.jpg",
     city: "Lagos",
     name: "See Lagos Restaurants",
     rating: 4.3,
@@ -16,7 +16,7 @@ const diningData = [
     offerColor: "bg-blue-600",
   },
   {
-    image: "/images/dining2.jpg",
+    img: "/images/dining2.jpg",
     city: "Lagos",
     name: "234 Restaurant & Lounge",
     rating: 4.3,
@@ -28,7 +28,7 @@ const diningData = [
     offerColor: "bg-blue-600",
   },
   {
-    image: "/images/dining3.png",
+    img: "/images/dining3.png",
     city: "Lagos",
     name: "The Enclave Restaurant",
     rating: 4.3,
@@ -40,7 +40,7 @@ const diningData = [
     offerColor: "bg-blue-700",
   },
   {
-    image: "/images/dining4.png",
+    img: "/images/dining4.png",
     city: "Lagos",
     name: "Hungry Belly Restaurant & Bar",
     rating: 4.3,
@@ -58,16 +58,16 @@ function DiningCard({ data }) {
     <div className="flex flex-col w-full max-w-xs rounded-2xl overflow-hidden">
       <div className="relative">
         <img
-          src={data.image}
+          src={data.img}
           alt={data.name}
           className="h-40 w-full object-cover rounded-xl"
         />
         {/* Carousel arrows */}
-        <button className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full p-1 shadow">
-          <img src="icons\arrow-left.png" alt="arrow-right" />
+        <button className="bg-white absolute left-2 top-1/2 -translate-y-1/2 rounded-full p-1 shadow">
+          <ChevronLeft />
         </button>
-        <button className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 shadow">
-          <img src="icons\arrow-right.png" alt="arrow-right" />
+        <button className="bg-white absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 shadow">
+          <ChevronRight  />
         </button>
       </div>
       <div className="mt-3">
@@ -100,7 +100,7 @@ export default function ExploreDiningSection() {
       {/* Background image and overlay */}
       <div className="absolute inset-0 rounded-2xl overflow-hidden">
         <img
-          src="images\dining_bg.png"
+          src="\images\dining_bg.png"
           alt="Dining background"
           className="w-full h-full object-cover"
         />
