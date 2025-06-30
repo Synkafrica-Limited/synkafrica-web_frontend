@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Star, Users, DoorOpen, Snowflake, Settings, Gauge, MapPin } from "lucide-react";
 
 export default function ReviewPage() {
@@ -8,6 +9,7 @@ export default function ReviewPage() {
   const [review, setReview] = useState("");
   const [hoveredStar, setHoveredStar] = useState(0);
   const [sending, setSending] = useState(false);
+  const router = useRouter();
 
   const handleStarClick = (starIndex) => {
     setRating(starIndex);
@@ -27,6 +29,7 @@ export default function ReviewPage() {
       console.log("Review submitted:", { rating, review });
       // Handle review submission logic here
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+      router.push("/feedback-received");
     } finally {
       setSending(false);
     }
