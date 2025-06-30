@@ -1,13 +1,14 @@
 // src/app/dashboard/bookings/page.jsx
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { MoreHorizontal } from 'lucide-react';
 
 const BookingsPage = () => {
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(null);
+  const dropdownRef = useRef(null);
 
   // Sample booking data - in real app this would come from API/state management
   const [bookings, setBookings] = useState([
@@ -32,19 +33,43 @@ const BookingsPage = () => {
     // }
   ]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(null);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showDropdown]);
+
   const handleBookingClick = (booking) => {
+    // Don't navigate if dropdown is open
+    if (showDropdown) return;
+    
     // Navigate to details page based on service type
     const detailsPath = `/bookings/${booking.serviceType}/${booking.id}`;
     router.push(detailsPath);
   };
 
   const handleDropdownClick = (e, bookingId) => {
-    e.stopPropagation(); // Prevent booking click when clicking dropdown
+    e.stopPropagation();
+    e.preventDefault();
     setShowDropdown(showDropdown === bookingId ? null : bookingId);
   };
 
   const handleBookAgain = (e, booking) => {
     e.stopPropagation();
+    e.preventDefault();
     // Logic to rebook the same service
     console.log('Book again:', booking);
     setShowDropdown(null);
@@ -52,14 +77,11 @@ const BookingsPage = () => {
 
   const handleGiveReview = (e, booking) => {
     e.stopPropagation();
+    e.preventDefault();
     // Logic to give review
     console.log('Give review:', booking);
     setShowDropdown(null);
-  };
-
-  // Close dropdown when clicking outside
-  const handleOverlayClick = () => {
-    setShowDropdown(null);
+    router.push(`/review`);
   };
 
   return (
@@ -79,7 +101,7 @@ const BookingsPage = () => {
       </h1>
 
       {/* Completed Bookings Section */}
-      <div className="bg-white rounded-lg border border-gray-200">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-visible">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
             Completed bookings
@@ -95,9 +117,9 @@ const BookingsPage = () => {
           </div>
         ) : (
           /* Bookings Content */
-          <div className="relative">
+          <div className="relative overflow-visible">
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto overflow-y-visible">
               <table className="w-full">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
@@ -143,34 +165,39 @@ const BookingsPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {booking.amount}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 relative">
-                        <button
-                          onClick={(e) => handleDropdownClick(e, booking.id)}
-                          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                          aria-label="More actions"
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div 
+                          ref={showDropdown === booking.id ? dropdownRef : null}
+                          className="relative"
                         >
-                          <MoreHorizontal className="w-4 h-4 text-gray-600" />
-                        </button>
-                        
-                        {/* Dropdown Menu */}
-                        {showDropdown === booking.id && (
-                          <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                            <div className="py-1">
-                              <button
-                                onClick={(e) => handleBookAgain(e, booking)}
-                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                              >
-                                Book again
-                              </button>
-                              <button
-                                onClick={(e) => handleGiveReview(e, booking)}
-                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                              >
-                                Give a review
-                              </button>
+                          <button
+                            onClick={(e) => handleDropdownClick(e, booking.id)}
+                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            aria-label="More actions"
+                          >
+                            <MoreHorizontal className="w-4 h-4 text-gray-600" />
+                          </button>
+                          
+                          {/* Dropdown Menu */}
+                          {showDropdown === booking.id && (
+                            <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-md shadow-xl border border-gray-200 z-[9999]">
+                              <div className="py-1">
+                                <button
+                                  onClick={(e) => handleBookAgain(e, booking)}
+                                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                  Book again
+                                </button>
+                                <button
+                                  onClick={(e) => handleGiveReview(e, booking)}
+                                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                  Give a review
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -183,7 +210,7 @@ const BookingsPage = () => {
               {bookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors last:border-b-0"
+                  className="p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors last:border-b-0 relative"
                   onClick={() => handleBookingClick(booking)}
                 >
                   <div className="flex justify-between items-start">
@@ -192,28 +219,45 @@ const BookingsPage = () => {
                         <h3 className="font-medium text-gray-900 truncate">
                           {booking.service}
                         </h3>
-                        <div className="relative ml-2 flex-shrink-0">
+                        <div 
+                          ref={showDropdown === booking.id ? dropdownRef : null}
+                          className="relative ml-2 flex-shrink-0"
+                          style={{ zIndex: showDropdown === booking.id ? 101 : 'auto' }}
+                        >
                           <button
                             onClick={(e) => handleDropdownClick(e, booking.id)}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            className="p-2 hover:bg-gray-100 rounded-full transition-colors touch-manipulation"
                             aria-label="More actions"
+                            style={{ 
+                              WebkitTapHighlightColor: 'transparent',
+                              minHeight: '44px',
+                              minWidth: '44px'
+                            }}
                           >
                             <MoreHorizontal className="w-4 h-4 text-gray-600" />
                           </button>
                           
                           {/* Mobile Dropdown Menu */}
                           {showDropdown === booking.id && (
-                            <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                            <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-md shadow-xl border border-gray-200 z-[9999]">
                               <div className="py-1">
                                 <button
                                   onClick={(e) => handleBookAgain(e, booking)}
-                                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                  className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation"
+                                  style={{ 
+                                    WebkitTapHighlightColor: 'transparent',
+                                    minHeight: '44px'
+                                  }}
                                 >
                                   Book again
                                 </button>
                                 <button
                                   onClick={(e) => handleGiveReview(e, booking)}
-                                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                  className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation"
+                                  style={{ 
+                                    WebkitTapHighlightColor: 'transparent',
+                                    minHeight: '44px'
+                                  }}
                                 >
                                   Give a review
                                 </button>
@@ -251,14 +295,6 @@ const BookingsPage = () => {
           </div>
         )}
       </div>
-
-      {/* Overlay to close dropdown when clicking outside */}
-      {showDropdown && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={handleOverlayClick}
-        />
-      )}
     </div>
   );
 };

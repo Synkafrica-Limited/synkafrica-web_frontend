@@ -458,7 +458,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                         className=" flex py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 w-full rounded-lg transition-all duration-200 border-b border-gray-100"
                         onClick={() => {
                           setShowMoreDropdown(false);
-                          if (typeof onBecomeVendor === "function") onBecomeVendor();
+                          if (typeof onBecomeVendorO === "function") onBecomeVendor();
                         }}
                       >
                         Become a vendor
