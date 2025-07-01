@@ -17,9 +17,9 @@ import {
 
 const menu = [
   { label: "Home", icon: <IoHomeOutline />, href: "/" },
-  { label: "My Profile", icon: <IoPersonOutline />, href: "/dashboard/customer/" },
-  { label: "Bookings",   icon: <IoDocumentTextOutline />, href: "/dashboard/customer/bookings" },
-  { label: "Feedback",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/customer/feedback" },
+  { label: "My Profile", icon: <IoPersonOutline />, href: "/dashboard/(customer)/" },
+  { label: "Bookings",   icon: <IoDocumentTextOutline />, href: "/dashboard/(customer)/bookings" },
+  { label: "Feedback",    icon: <IoChatbubbleEllipsesOutline />, href: "/dashboard/(customer)/feedback" },
   { label: "Log Out", icon: <IoLogOutOutline />, href: "/log-out" },
 ]
 
