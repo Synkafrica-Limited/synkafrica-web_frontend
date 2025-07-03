@@ -33,15 +33,16 @@ export default function ServiceTypeSelection() {
             onClick={() => setSelected(svc.value)}
             className={`
               flex flex-col items-center justify-center border rounded-2xl bg-white
-              px-6 py-8 shadow-sm transition-all text-3xl
+              px-8 py-14 shadow-sm transition-all text-5xl
               ${selected === svc.value
                 ? "border-[#E26A3D] shadow-lg"
                 : "border-gray-200 hover:border-[#E26A3D]/60"
               }
+              min-h-[200px] sm:min-h-[220px] w-full
             `}
           >
-            <div className="mb-4">{svc.icon}</div>
-            <div className="text-lg font-semibold text-gray-900">{svc.label}</div>
+            <div className="mb-6">{svc.icon}</div>
+            <div className="text-2xl font-semibold text-gray-900">{svc.label}</div>
           </button>
         ))}
       </div>
