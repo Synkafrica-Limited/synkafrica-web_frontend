@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-
 import "../ui/buttons"
 
 const Navbar1 = ({ onBecomeVendor }) => {
@@ -142,8 +141,8 @@ const Navbar1 = ({ onBecomeVendor }) => {
                       >
                         Beach Resorts
                       </Link>
-                      <button
-                        type="button"
+                      <Link
+                      href={'dashboard/business'}
                         className="block text-left px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 w-full"
                         onClick={() => {
                           setShowMoreDropdown(false);
@@ -151,7 +150,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                         }}
                       >
                         Become a vendor
-                      </button>
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -265,13 +264,13 @@ const Navbar1 = ({ onBecomeVendor }) => {
                       Orders
                     </Link>
                     <Link
-                      href="/dashboard/customer/feedback"
+                      href="/dashboard/(customer)/feedback"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded transition-all duration-200"
                     >
                       Write a review
                     </Link>
                     <Link
-                      href="/dashboard/customer"
+                      href="/dashboard"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded transition-all duration-200"
                     >
                       Profile
@@ -426,7 +425,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                       Write a review
                     </Link>
                     <Link
-                      href="/bookings"
+                      href="/dashboard/(customer)"
                       className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -440,7 +439,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                       Messages
                     </Link>
                     <Link
-                      href="/dashboard/customer"
+                      href="/dashboard/(customer)"
                       className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -453,8 +452,8 @@ const Navbar1 = ({ onBecomeVendor }) => {
                     >
                       Account Info
                     </Link>
-                    <button
-                        type="button"
+                    <Link
+                    href={'/dashboard/business'}
                         className=" flex py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 w-full rounded-lg transition-all duration-200 border-b border-gray-100"
                         onClick={() => {
                           setShowMoreDropdown(false);
@@ -462,7 +461,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                         }}
                       >
                         Become a vendor
-                      </button>
+                      </Link>
                   </>
                 )}
                 {!isLoggedIn ? (
