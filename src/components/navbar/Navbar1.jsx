@@ -121,14 +121,14 @@ const Navbar1 = ({ onBecomeVendor }) => {
                       onMouseDown={e => e.preventDefault()}
                     >
                       <Link
-                        href="/dining"
+                        href="/dining-reservations"
                         className="block px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200"
                         onClick={() => setShowMoreDropdown(false)}
                       >
                         Reservations
                       </Link>
                       <Link
-                        href="/services"
+                        href="/laundry-services"
                         className="block px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200"
                         onClick={() => setShowMoreDropdown(false)}
                       >
@@ -142,7 +142,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                         Beach Resorts
                       </Link>
                       <Link
-                      href={'dashboard/business'}
+                      href={'/signup'}
                         className="block text-left px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 w-full"
                         onClick={() => {
                           setShowMoreDropdown(false);
@@ -409,7 +409,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   Beach & Resorts
                 </Link>
                 <Link
-                  href="/laundry-services"
+                  href="/laundry-service"
                   className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

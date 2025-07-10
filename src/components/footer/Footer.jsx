@@ -97,7 +97,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/services/convenience"
+                  href="/laundry-service"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Convenience Services
@@ -105,7 +105,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/services/dining"
+                  href="/dining-reservations"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Dining & Restaurant Reservations
