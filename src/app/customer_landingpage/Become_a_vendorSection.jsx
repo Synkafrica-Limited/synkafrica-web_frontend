@@ -21,7 +21,7 @@ export default function BecomeVendorSection() {
           <Button
             variant="outline"
             size="md"
-            className="w-full border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary-500 hover:border-primary-500 transition"
+            className="w-full border-2 border-white text-white bg-transparent hover:bg-black hover:text-primary-500 hover:border-primary-500 transition"
           >
             List your products <span className="ml-2 text-lg">→</span>
           </Button>
