@@ -164,8 +164,8 @@ export default function EmailValidationScreen() {
               disabled={!isCodeValid}
               className={`w-full py-3.5 px-4 rounded-lg font-medium transition-all duration-200 ${
                 isCodeValid
-                  ? "bg-orange-500 hover:bg-orange-600 text-white shadow-sm"
-                  : "bg-orange-300 text-white cursor-not-allowed"
+                  ? "bg-primary-500 hover:bg-primary-400 active:bg-primary-600 text-white shadow-sm"
+                  : "bg-gray-200 text-white cursor-not-allowed"
               }`}
             >
               Continue

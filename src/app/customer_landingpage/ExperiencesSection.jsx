@@ -1,25 +1,33 @@
+"use client";
 import React from "react";
 import Button from "@/components/ui/Buttons";
+import { ArrowRight } from 'lucide-react';
+import { useRouter } from "next/navigation";
 
 const experiences = [
   {
     title: "Beach Experiences",
     desc: "Relax and unwind with our premium beach services.",
-    img: "/images/beach_exp.jpg", // Replace with your actual image path
+    img: "/images/beach_exp.jpg",
+    link: "/beach-resorts",
   },
   {
     title: "Dining Reservations",
     desc: "Your VIP pass to the city’s best spot, without the wait.",
-    img: "/images/dining_reserv.png", // Replace with your actual image path
+    img: "/images/dining_reserv.png",
+    link: "/dining-reservations",
   },
   {
     title: "Convenience Services",
     desc: "Discover ultimate convenience services at your fingertips.",
-    img: "/images/convenience_services.png", // Replace with your actual image path
+    img: "/images/convenience_services.png",
+    link: "/laundry-service",
   },
 ];
 
 export default function ExperiencesSection() {
+  const router = useRouter();
+
   return (
     <section className="max-w-7xl mx-auto px-4 py-8">
       <h2 className="text-2xl font-semibold mb-1">Experiences</h2>
@@ -40,10 +48,12 @@ export default function ExperiencesSection() {
               <div className="text-gray-500 text-sm mb-4 flex-1">{exp.desc}</div>
               <Button
                 variant="filled"
+                icon={<ArrowRight />}
                 size="md"
-                className="mt-auto bg-primary-500 hover:bg-primary-600 text-white px-5 py-2 rounded-md font-medium flex items-center transition"
+                className="w-full mb-4"
+                onClick={() => router.push(exp.link)}
               >
-                View Details <span className="ml-2 text-lg">→</span>
+                View Details
               </Button>
             </div>
           </div>

@@ -1,61 +1,74 @@
 import React from "react";
-import Button from "../../components/ui/buttons"; // Adjust the import path if needed
+import Button from "../../components/ui/buttons";
+import {
+	ArrowRight,
+	MapPin,
+	Users,
+	Fuel,
+	Settings,
+	Star,
+	Clock,
+	Filter,
+
+	X,
+} from "lucide-react";
+import Link from "next/link";
 
 const cars = [
 	{
 		label: "Great Deal",
 		labelColor: "bg-purple-700",
 		title: "Luxury Package",
-		desc: "Mercedes-Benz GLE Coupe 4MATIC",
+		desc: "Toyota Land Cruiser V8",
 		img: "/images/car1.png", // Replace with your actual image path
 		features: [
-			{ icon: "🧑‍✈️", text: "Chauffeur" },
-			{ icon: "❄️", text: "A/C" },
-			{ icon: "⛽", text: "Unlimited mileage" },
+			{ icon: <Users className="w-4 h-4 text-gray-400" />, text: "Chauffeur" },
+			{ icon: <Clock className="w-4 h-4 text-gray-400" />, text: "A/C" },
+			{ icon: <Fuel className="w-4 h-4 text-gray-400" />, text: "Unlimited mileage" },
 		],
-		price: "$140",
+		price: "₦45,000",
 		per: "/d",
 	},
 	{
 		label: "Great Deal",
 		labelColor: "bg-purple-700",
 		title: "Star Package",
-		desc: "Cadillac Escalade Platinum 4WD",
+		desc: "Lexus GX 460",
 		img: "/images/car2.png",
 		features: [
-			{ icon: "🧑‍✈️", text: "Chauffeur" },
-			{ icon: "❄️", text: "A/C" },
-			{ icon: "⛽", text: "Unlimited mileage" },
+			{ icon: <Users className="w-4 h-4 text-gray-400" />, text: "Chauffeur" },
+			{ icon: <Clock className="w-4 h-4 text-gray-400" />, text: "A/C" },
+			{ icon: <Fuel className="w-4 h-4 text-gray-400" />, text: "Unlimited mileage" },
 		],
-		price: "$160",
+		price: "₦16,000",
 		per: "/d",
 	},
 	{
 		label: "Great Deal",
 		labelColor: "bg-purple-700",
 		title: "Luxury Package",
-		desc: "Lexus GX 460",
+		desc: "Cardillac Escalade ESV",
 		img: "/images/car3.png",
 		features: [
-			{ icon: "🧑‍✈️", text: "Chauffeur" },
-			{ icon: "❄️", text: "A/C" },
-			{ icon: "⛽", text: "Unlimited mileage" },
+			{ icon: <Users className="w-4 h-4 text-gray-400" />, text: "Chauffeur" },
+			{ icon: <Clock className="w-4 h-4 text-gray-400" />, text: "A/C" },
+			{ icon: <Fuel className="w-4 h-4 text-gray-400" />, text: "Unlimited mileage" },
 		],
-		price: "$120",
+		price: "₦35,000",
 		per: "/d",
 	},
 	{
 		label: "Great Deal",
 		labelColor: "bg-purple-700",
 		title: "Sun Package",
-		desc: "Toyota Land Cruiser",
+		desc: "Mercedes-Benz GLE Coupe 4MATIC",
 		img: "/images/car4.png",
 		features: [
-			{ icon: "🧑‍✈️", text: "Chauffeur" },
-			{ icon: "❄️", text: "A/C" },
-			{ icon: "⛽", text: "Unlimited mileage" },
+			{ icon: <Users className="w-4 h-4 text-gray-400" />, text: "Chauffeur" },
+			{ icon: <Clock className="w-4 h-4 text-gray-400" />, text: "A/C" },
+			{ icon: <Fuel className="w-4 h-4 text-gray-400" />, text: "Unlimited mileage" },
 		],
-		price: "$90",
+		price: "₦45,000",
 		per: "/d",
 	},
 ];
@@ -68,16 +81,19 @@ export default function ExploreCarsSection() {
 					<h2 className="text-2xl font-semibold">Explore cars</h2>
 					<p className="text-gray-500 text-sm">
 						Explore our car services, fast and tailored to get you where you need
-						to be. Hassle free.
+						to be Hassle free.
 					</p>
 				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					className="border border-primary-500 text-primary-500 px-4 py-2 rounded-md font-medium text-sm hover:bg-primary-50 transition"
-				>
-					See all cars
-				</Button>
+				<Link href={"/car-rental"}>
+					<Button
+						variant="outline"
+						size="sm"
+						className="border border-primary-500 text-primary-500 px-4 py-2 rounded-md font-medium text-sm hover:bg-primary-50 transition"
+
+					>
+						See all cars
+					</Button>
+				</Link>
 			</div>
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-4">
 				{cars.map((car, idx) => (
@@ -100,7 +116,7 @@ export default function ExploreCarsSection() {
 							</span>
 							<div className="font-semibold text-base mb-1">{car.title}</div>
 							<div className="text-gray-500 text-xs mb-2">{car.desc}</div>
-							<div className="flex items-center gap-2 text-xs text-gray-700 mb-2">
+							<div className="flex items-center gap-1 text-xs text-gray-700 mb-2">
 								{car.features.map((f, i) => (
 									<span key={i} className="flex items-center gap-1">
 										<span>{f.icon}</span>
@@ -114,13 +130,19 @@ export default function ExploreCarsSection() {
 									<span className="text-xs text-gray-500">{car.per}</span>
 								</div>
 							</div>
-							<Button
-								variant="filled"
-								size="md"
+							<Link
+								href="/car-rental"
 								className="w-full mb-4"
 							>
-								Reserve <span className="ml-2 text-lg">→</span>
-							</Button>
+								<Button
+									variant="filled"
+									icon={<ArrowRight />}
+									size="md"
+									className="w-full"
+								>
+									Reserve
+								</Button>
+							</Link>
 						</div>
 					</div>
 				))}
