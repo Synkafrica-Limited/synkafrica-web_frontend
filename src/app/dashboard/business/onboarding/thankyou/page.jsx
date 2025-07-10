@@ -19,7 +19,9 @@ export default function ThankYouPage() {
         Thank You for Completing Your Onboarding!
       </h1>
       <p className="text-lg text-gray-600 mb-6 text-center max-w-xl">
-        Your business profile is now set up and ready to go. You can now access your full dashboard experience, manage your business, add more services, and connect with customers.
+        Your business profile is now set up and ready to go. You can now access
+        your full dashboard experience, manage your business, add more services,
+        and connect with customers.
       </p>
       <ul className="mb-8 text-gray-700 text-base max-w-lg mx-auto list-disc pl-6">
         <li>Manage your business profile and services</li>
@@ -37,7 +39,13 @@ export default function ThankYouPage() {
         Launch Dashboard
       </Button>
       <div className="mt-10 text-sm text-gray-400 text-center">
-        Need help? <a href="mailto:support@synkafrica.com" className="underline text-[#E26A3D]">Contact Support</a>
+        Need help?{" "}
+        <a
+          href="mailto:support@synkafrica.com"
+          className="underline text-[#E26A3D]"
+        >
+          Contact Support
+        </a>
       </div>
     </div>
   );
