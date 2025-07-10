@@ -1,26 +1,33 @@
+"use client";
 import React from "react";
 import Button from "@/components/ui/Buttons";
 import { ArrowRight } from 'lucide-react';
+import { useRouter } from "next/navigation";
 
 const experiences = [
   {
     title: "Beach Experiences",
     desc: "Relax and unwind with our premium beach services.",
-    img: "/images/beach_exp.jpg", // Replace with your actual image path
+    img: "/images/beach_exp.jpg",
+    link: "/beach-resorts",
   },
   {
     title: "Dining Reservations",
     desc: "Your VIP pass to the city’s best spot, without the wait.",
-    img: "/images/dining_reserv.png", // Replace with your actual image path
+    img: "/images/dining_reserv.png",
+    link: "/dining-reservations",
   },
   {
     title: "Convenience Services",
     desc: "Discover ultimate convenience services at your fingertips.",
-    img: "/images/convenience_services.png", // Replace with your actual image path
+    img: "/images/convenience_services.png",
+    link: "/laundry-service",
   },
 ];
 
 export default function ExperiencesSection() {
+  const router = useRouter();
+
   return (
     <section className="max-w-7xl mx-auto px-4 py-8">
       <h2 className="text-2xl font-semibold mb-1">Experiences</h2>
@@ -44,7 +51,10 @@ export default function ExperiencesSection() {
                 icon={<ArrowRight />}
                 size="md"
                 className="w-full mb-4"
-              >View Details</Button>
+                onClick={() => router.push(exp.link)}
+              >
+                View Details
+              </Button>
             </div>
           </div>
         ))}

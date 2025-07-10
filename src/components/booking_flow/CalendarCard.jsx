@@ -196,7 +196,7 @@ export default function CalendarCard({
     );
 
     return (
-        <div className="absolute z-30 left-0 mt-2 bg-white rounded-xl shadow-2xl p-2 sm:p-4 w-full max-w-full min-w-[90vw] sm:min-w-[340px] sm:max-w-md">
+        <div className="absolute z-30 left-0 mt-2 bg-white rounded-xl shadow-2xl p-2 sm:p-4 w-full max-w-full min-w-[90vw] sm:min-w-[540px] sm:max-w-md">
             {/* Date Range/Single Date Display */}
             {dateDisplay}
             {/* Calendar */}
