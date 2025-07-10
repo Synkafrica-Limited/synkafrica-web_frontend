@@ -1,0 +1,459 @@
+"use client";
+
+import { useState } from "react";
+import { Star, Clock, Package, Shield, CheckCircle } from "lucide-react";
+
+const ServiceDetailsPage = ({ 
+  service, 
+  onReserve, 
+  platformName = "Syncafrica",
+  platformTheme = {
+    primary: "bg-primary-500",
+    primaryHover: "bg-primary-600"
+  }
+}) => {
+  // Default service data structure for reference
+  const defaultService = {
+    id: "",
+    name: "",
+    tagline: "",
+    rating: 0,
+    reviewCount: 0,
+    location: "",
+    price: 0,
+    currency: "₦",
+    mainImage: "/api/placeholder/600/400",
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      country: "",
+      zipCode: "",
+    },
+    workingHours: {
+      monday: { open: "9:00 AM", close: "6:00 PM" },
+      tuesday: { open: "9:00 AM", close: "6:00 PM" },
+      wednesday: { open: "9:00 AM", close: "6:00 PM" },
+      thursday: { open: "9:00 AM", close: "6:00 PM" },
+      friday: { open: "9:00 AM", close: "6:00 PM" },
+      saturday: { open: "10:00 AM", close: "4:00 PM" },
+      sunday: { open: "Closed", close: "" },
+    },
+    services: [],
+    portfolio: [],
+    reviews: [],
+    policies: {
+      cancellation: "Cancel at least 1 day before the pick-up date for a full refund.",
+      completion: "An email will be sent to your registered email upon booking completion."
+    },
+    qualityBadge: {
+      title: "Service providers on " + platformName,
+      subtitle: "are vetted for quality",
+      description: "Service providers are evaluated for their professional experience, portfolio of strong work, and reputation for excellence."
+    }
+  };
+
+  // Merge provided service data with defaults
+  const serviceData = { ...defaultService, ...service };
+  
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  const renderStars = (rating) => {
+    return [...Array(5)].map((_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${
+          i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
+        }`}
+      />
+    ));
+  };
+
+  const handleReserve = () => {
+    if (onReserve) {
+      onReserve(serviceData.id, serviceData);
+    }
+  };
+
+  const getServiceIcon = (serviceTitle) => {
+    // You can customize this logic based on service types
+    const iconMap = {
+      "wash": Package,
+      "iron": Package,
+      "fold": Package,
+      "packaging": Package,
+      "delivery": Package,
+    };
+    
+    const key = serviceTitle.toLowerCase();
+    const IconComponent = Object.keys(iconMap).find(k => key.includes(k)) 
+      ? iconMap[Object.keys(iconMap).find(k => key.includes(k))]
+      : Package;
+    
+    return IconComponent;
+  };
+
+  return (
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Service Card & Info */}
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-8 space-y-6">
+              {/* Service Card */}
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200">
+                  <img
+                    src={serviceData.mainImage}
+                    alt={serviceData.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-20" />
+                  <div className="absolute top-4 left-4 flex space-x-2">
+                    {serviceData.portfolio.slice(0, 4).map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-8 h-8 bg-white bg-opacity-20 rounded-full"
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                    {serviceData.name}
+                  </h1>
+                  <p className="text-gray-600 text-sm mb-4">
+                    {serviceData.tagline}
+                  </p>
+                  <div className="flex items-center mb-4">
+                    <div className="flex items-center">
+                      {renderStars(Math.floor(serviceData.rating))}
+                      <span className="ml-2 text-sm font-semibold text-gray-900">
+                        {serviceData.rating}
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-500 ml-2">
+                      • {serviceData.reviewCount} reviews •{" "}
+                      {serviceData.location}
+                    </span>
+                  </div>
+                  <div className="mb-6">
+                    <span className="text-2xl font-bold text-gray-900">
+                      From {serviceData.currency}
+                      {serviceData.price.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-gray-500 ml-1">per item</span>
+                  </div>
+                  <button
+                    onClick={handleReserve}
+                    className="w-full bg-primary-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-primary-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    Reserve
+                  </button>
+                </div>
+              </div>
+
+              {/* Address & Working Hours */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  Location & Hours
+                </h3>
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-2">Address</h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {serviceData.address.street}
+                    <br />
+                    {serviceData.address.city}, {serviceData.address.state}
+                    <br />
+                    {serviceData.address.country} {serviceData.address.zipCode}
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">
+                    Working Hours
+                  </h4>
+                  <div className="space-y-2">
+                    {Object.entries(serviceData.workingHours).map(
+                      ([day, hours]) => (
+                        <div
+                          key={day}
+                          className="flex justify-between items-center text-sm"
+                        >
+                          <span className="text-gray-600 capitalize">
+                            {day}
+                          </span>
+                          <span
+                            className={`font-medium ${
+                              hours.open === "Closed"
+                                ? "text-red-500"
+                                : "text-gray-900"
+                            }`}
+                          >
+                            {hours.open === "Closed"
+                              ? "Closed"
+                              : `${hours.open} - ${hours.close}`}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Services */}
+            {serviceData.services.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                  Our Services
+                </h2>
+                <div className="space-y-6">
+                  {serviceData.services.map((service, index) => {
+                    const IconComponent = getServiceIcon(service.title);
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="w-16 h-16 bg-primary-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <IconComponent className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 mb-2">
+                            {service.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm leading-relaxed">
+                            {service.description}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Portfolio */}
+            {serviceData.portfolio.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                  Portfolio
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {serviceData.portfolio.map((image, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 cursor-pointer hover:scale-105 transition-transform"
+                      onClick={() => setSelectedImageIndex(index)}
+                    >
+                      <img
+                        src={image}
+                        alt={`Portfolio ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                          <Package className="w-8 h-8 text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Reviews */}
+            {serviceData.reviews.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Reviews</h2>
+                  <div className="flex items-center space-x-2">
+                    <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                    <span className="font-semibold text-gray-900">
+                      {serviceData.rating} • {serviceData.reviewCount} reviews
+                    </span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {serviceData.reviews.map((review) => (
+                    <div key={review.id} className="p-4 rounded-xl bg-gray-50">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-semibold text-sm">
+                            {review.name.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <span className="font-semibold text-gray-900">
+                              {review.name}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {review.timeAgo}
+                            </span>
+                          </div>
+                          <div className="flex items-center mb-2">
+                            {renderStars(review.rating)}
+                          </div>
+                          <p className="text-gray-600 text-sm">
+                            {review.location}
+                          </p>
+                          <p className="text-gray-700 text-sm mt-2 leading-relaxed">
+                            {review.comment}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Things to Know */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Things to Know
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-start space-x-3">
+                  <Clock className="w-6 h-6 text-primary-500 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">
+                      Booking policy
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      {serviceData.policies.cancellation}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">
+                      Order completion
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      {serviceData.policies.completion}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quality Badge */}
+            <div className="bg-primary-500 rounded-2xl p-8 text-center text-white">
+              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">
+                {serviceData.qualityBadge.title}
+              </h3>
+              <h4 className="text-lg font-semibold mb-2">
+                {serviceData.qualityBadge.subtitle}
+              </h4>
+              <p className="text-white text-opacity-80 text-sm max-w-md mx-auto">
+                {serviceData.qualityBadge.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Example usage component
+const ExampleUsage = () => {
+  const sampleService = {
+    id: "spin-sparkle",
+    name: "Spin & Sparkle",
+    tagline: "Wash green, wear clean - sustainable laundry made simple",
+    rating: 4.9,
+    reviewCount: 10,
+    location: "Lagos, Nigeria",
+    price: 1000,
+    currency: "₦",
+    mainImage: "/api/placeholder/600/400",
+    address: {
+      street: "123 Clean Street",
+      city: "Lagos",
+      state: "Lagos State",
+      country: "Nigeria",
+      zipCode: "100001",
+    },
+    workingHours: {
+      monday: { open: "9:00 AM", close: "6:00 PM" },
+      tuesday: { open: "9:00 AM", close: "6:00 PM" },
+      wednesday: { open: "9:00 AM", close: "6:00 PM" },
+      thursday: { open: "9:00 AM", close: "6:00 PM" },
+      friday: { open: "9:00 AM", close: "6:00 PM" },
+      saturday: { open: "10:00 AM", close: "4:00 PM" },
+      sunday: { open: "Closed", close: "" },
+    },
+    services: [
+      {
+        title: "Wash and Iron",
+        description: "Professional washing and ironing service with attention to detail and care for your garments.",
+      },
+      {
+        title: "Wash and Fold",
+        description: "Convenient wash and fold service for everyday laundry needs with quick turnaround.",
+      },
+      {
+        title: "Packaging",
+        description: "Professional packaging and delivery service to keep your clothes fresh and organized.",
+      },
+    ],
+    portfolio: [
+      "/api/placeholder/300/200",
+      "/api/placeholder/300/200",
+      "/api/placeholder/300/200",
+      "/api/placeholder/300/200",
+    ],
+    reviews: [
+      {
+        id: 1,
+        name: "Temi",
+        location: "Lagos, Nigeria",
+        rating: 5,
+        timeAgo: "2 hours ago",
+        comment: "Excellent service! My clothes came back perfectly clean and well-pressed. Will definitely use again.",
+      },
+      {
+        id: 2,
+        name: "Emma",
+        location: "Lagos, Nigeria",
+        rating: 5,
+        timeAgo: "4 hours ago",
+        comment: "Very professional and reliable. The pickup and delivery was seamless.",
+      },
+    ],
+  };
+
+  const handleReserve = (serviceId, serviceData) => {
+    console.log("Reserving service:", serviceId, serviceData);
+    // Handle reservation logic here
+  };
+
+  return (
+    <ServiceDetailsPage 
+      service={sampleService} 
+      onReserve={handleReserve}
+      platformName="Syncafrica"
+      platformTheme={{
+        primary: "bg-primary-500",
+        primaryHover: "bg-primary-600"
+      }}
+    />
+  );
+};
+
+export default ExampleUsage;
