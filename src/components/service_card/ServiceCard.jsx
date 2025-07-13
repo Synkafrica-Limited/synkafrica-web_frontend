@@ -9,7 +9,6 @@ import {
   Clock,
   Shield,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 const ServiceCard = ({
   id,
@@ -27,10 +26,8 @@ const ServiceCard = ({
   currency = "₦",
   availabilityText = "Available now",
   buttonText = "Book Now",
-  routePath = "/service", 
+  routePath = "/service",
 }) => {
-  const router = useRouter();
-
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const nextImage = (e) => {
@@ -57,17 +54,10 @@ const ServiceCard = ({
     return "Fair";
   };
 
-  const handleCardClick = () => {
-    if (onCardClick) {
-      router.push(`${routePath}/${id}`);
-      onCardClick(id);
-    }
-  };
-
   return (
     <div
       className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 cursor-pointer"
-      onClick={handleCardClick}
+      onClick={() => onCardClick(id)}
     >
       {/* Image Carousel */}
       <div className="relative h-48 sm:h-56 bg-gray-100 overflow-hidden">
@@ -176,7 +166,8 @@ const ServiceCard = ({
             <div className="flex flex-col flex-1 min-w-0">
               <div className="flex items-baseline gap-1">
                 <span className="text-lg sm:text-xl font-bold text-gray-900">
-                  {currency}{price}
+                  {currency}
+                  {price}
                 </span>
                 <span className="text-sm text-gray-600 font-medium">
                   /{priceUnit}
@@ -184,7 +175,8 @@ const ServiceCard = ({
               </div>
               {savings && (
                 <span className="text-sm text-green-600 font-semibold">
-                  Save {currency}{savings}
+                  Save {currency}
+                  {savings}
                 </span>
               )}
             </div>
@@ -207,7 +199,9 @@ const ServiceCard = ({
                 Include taxes & fees
               </span>
             )}
-            <span className="text-green-600 font-medium">• {availabilityText}</span>
+            <span className="text-green-600 font-medium">
+              • {availabilityText}
+            </span>
           </div>
         </div>
       </div>
@@ -226,19 +220,13 @@ const ServiceCardsGrid = ({
     sm: 1,
     md: 2,
     lg: 3,
-    xl: 4
+    xl: 4,
   },
   currency = "₦",
   routePath = "/service",
   buttonText = "Book Now",
-  availabilityText = "Available now"
+  availabilityText = "Available now",
 }) => {
-  const handleCardClick = (id) => {
-    console.log("Navigating to service detail page with ID:", id);
-    if (onCardClick) {
-      onCardClick(id);
-    }
-  };
 
   const getGridClasses = () => {
     const { sm, md, lg, xl } = columns;
@@ -254,7 +242,8 @@ const ServiceCardsGrid = ({
         {/* Header */}
         <div className="mb-8 sm:mb-10 text-center">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-            {title} in <span className={`text-${locationColor}`}>{locationName}</span>
+            {title} in{" "}
+            <span className={`text-${locationColor}`}>{locationName}</span>
           </h1>
           <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
             {subtitle}
@@ -281,7 +270,7 @@ const ServiceCardsGrid = ({
               routePath={routePath}
               buttonText={buttonText}
               availabilityText={availabilityText}
-              onCardClick={handleCardClick}
+              onCardClick={onCardClick}
             />
           ))}
         </div>
@@ -290,6 +279,5 @@ const ServiceCardsGrid = ({
   );
 };
 
-// Export both components for flexibility
 export { ServiceCard, ServiceCardsGrid };
 export default ServiceCardsGrid;

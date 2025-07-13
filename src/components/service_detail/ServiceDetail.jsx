@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Star, Clock, Package, Shield, CheckCircle } from "lucide-react";
 
-const ServiceDetailsPage = ({ 
+const ServiceDetails = ({ 
   service, 
   onReserve, 
   platformName = "Syncafrica",
@@ -76,7 +76,6 @@ const ServiceDetailsPage = ({
   };
 
   const getServiceIcon = (serviceTitle) => {
-    // You can customize this logic based on service types
     const iconMap = {
       "wash": Package,
       "iron": Package,
@@ -370,90 +369,5 @@ const ServiceDetailsPage = ({
   );
 };
 
-// Example usage component
-const ExampleUsage = () => {
-  const sampleService = {
-    id: "spin-sparkle",
-    name: "Spin & Sparkle",
-    tagline: "Wash green, wear clean - sustainable laundry made simple",
-    rating: 4.9,
-    reviewCount: 10,
-    location: "Lagos, Nigeria",
-    price: 1000,
-    currency: "₦",
-    mainImage: "/api/placeholder/600/400",
-    address: {
-      street: "123 Clean Street",
-      city: "Lagos",
-      state: "Lagos State",
-      country: "Nigeria",
-      zipCode: "100001",
-    },
-    workingHours: {
-      monday: { open: "9:00 AM", close: "6:00 PM" },
-      tuesday: { open: "9:00 AM", close: "6:00 PM" },
-      wednesday: { open: "9:00 AM", close: "6:00 PM" },
-      thursday: { open: "9:00 AM", close: "6:00 PM" },
-      friday: { open: "9:00 AM", close: "6:00 PM" },
-      saturday: { open: "10:00 AM", close: "4:00 PM" },
-      sunday: { open: "Closed", close: "" },
-    },
-    services: [
-      {
-        title: "Wash and Iron",
-        description: "Professional washing and ironing service with attention to detail and care for your garments.",
-      },
-      {
-        title: "Wash and Fold",
-        description: "Convenient wash and fold service for everyday laundry needs with quick turnaround.",
-      },
-      {
-        title: "Packaging",
-        description: "Professional packaging and delivery service to keep your clothes fresh and organized.",
-      },
-    ],
-    portfolio: [
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-    ],
-    reviews: [
-      {
-        id: 1,
-        name: "Temi",
-        location: "Lagos, Nigeria",
-        rating: 5,
-        timeAgo: "2 hours ago",
-        comment: "Excellent service! My clothes came back perfectly clean and well-pressed. Will definitely use again.",
-      },
-      {
-        id: 2,
-        name: "Emma",
-        location: "Lagos, Nigeria",
-        rating: 5,
-        timeAgo: "4 hours ago",
-        comment: "Very professional and reliable. The pickup and delivery was seamless.",
-      },
-    ],
-  };
 
-  const handleReserve = (serviceId, serviceData) => {
-    console.log("Reserving service:", serviceId, serviceData);
-    // Handle reservation logic here
-  };
-
-  return (
-    <ServiceDetailsPage 
-      service={sampleService} 
-      onReserve={handleReserve}
-      platformName="Syncafrica"
-      platformTheme={{
-        primary: "bg-primary-500",
-        primaryHover: "bg-primary-600"
-      }}
-    />
-  );
-};
-
-export default ExampleUsage;
+export default ServiceDetails;

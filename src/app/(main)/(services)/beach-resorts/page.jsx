@@ -1,135 +1,135 @@
-import BeachServicesGrid from "./components/BeachServicesGrid";
+"use client";
+
 import BookingFlow from "@/components/booking_flow/Booking_flow";
-import ServiceDetailsPage from "@/components/service_detail/ServiceDetail"; // Adjust path as needed
+import BeachServicesGrid from "./components/BeachServicesGrid";
 
 export default function BeachResortsPage() {
-  // Sample beach resort service data
-  const beachResortService = {
-    id: "paradise-beach-resort",
-    name: "Paradise Beach Resort",
-    tagline: "Where luxury meets the ocean - unforgettable beach experiences",
-    rating: 4.8,
-    reviewCount: 156,
-    location: "Lagos, Nigeria",
-    price: 25000,
-    currency: "₦",
-    mainImage: "/api/placeholder/600/400",
-    address: {
-      street: "1 Beach Paradise Drive",
-      city: "Victoria Island",
-      state: "Lagos State",
-      country: "Nigeria",
-      zipCode: "101241",
+  // TODO: Fetch beach services data from an API - Replace with actual data fetching logic
+  const beachServices = [
+    {
+      id: 1,
+      images: [
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=400&h=300&fit=crop",
+      ],
+      resortName: "Azure Sands Resort",
+      location: "Lagos",
+      rating: 4.8,
+      serviceType: "Private Cabana",
+      price: "25,000",
+      priceUnit: "day",
+      savings: "5,000",
+      isPopular: true,
     },
-    workingHours: {
-      monday: { open: "6:00 AM", close: "10:00 PM" },
-      tuesday: { open: "6:00 AM", close: "10:00 PM" },
-      wednesday: { open: "6:00 AM", close: "10:00 PM" },
-      thursday: { open: "6:00 AM", close: "10:00 PM" },
-      friday: { open: "6:00 AM", close: "11:00 PM" },
-      saturday: { open: "6:00 AM", close: "11:00 PM" },
-      sunday: { open: "6:00 AM", close: "10:00 PM" },
+    {
+      id: 2,
+      images: [
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=400&h=300&fit=crop",
+      ],
+      resortName: "Palm Breeze Beach",
+      location: "Lagos",
+      rating: 4.9,
+      serviceType: "Beachfront Suite",
+      price: "40,000",
+      priceUnit: "night",
+      savings: "8,000",
     },
-    services: [
-      {
-        title: "Beach Access & Lounging",
-        description: "Premium beach access with comfortable loungers, umbrellas, and stunning ocean views. Perfect for relaxation and sunbathing.",
-      },
-      {
-        title: "Water Sports Activities",
-        description: "Exciting water sports including jet skiing, paddle boarding, kayaking, and snorkeling with professional instructors.",
-      },
-      {
-        title: "Beachside Dining",
-        description: "Fresh seafood and tropical cocktails served right on the beach with spectacular sunset views.",
-      },
-      {
-        title: "Spa & Wellness",
-        description: "Rejuvenating spa treatments with ocean-inspired therapies and beachside massage services.",
-      },
-    ],
-    portfolio: [
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-    ],
-    reviews: [
-      {
-        id: 1,
-        name: "Adebayo",
-        location: "Lagos, Nigeria",
-        rating: 5,
-        timeAgo: "1 day ago",
-        comment: "Absolutely amazing experience! The beach is pristine and the service was exceptional. The sunset view from the restaurant is breathtaking.",
-      },
-      {
-        id: 2,
-        name: "Kemi",
-        location: "Abuja, Nigeria",
-        rating: 5,
-        timeAgo: "3 days ago",
-        comment: "Perfect getaway spot! The water sports were thrilling and the staff was incredibly friendly and helpful throughout our stay.",
-      },
-      {
-        id: 3,
-        name: "David",
-        location: "Port Harcourt, Nigeria",
-        rating: 4,
-        timeAgo: "1 week ago",
-        comment: "Great beach resort with excellent facilities. The spa treatments were very relaxing and the food was delicious.",
-      },
-      {
-        id: 4,
-        name: "Funmi",
-        location: "Ibadan, Nigeria",
-        rating: 5,
-        timeAgo: "2 weeks ago",
-        comment: "This place exceeded all expectations! Clean facilities, beautiful beach, and the staff went above and beyond to make our visit memorable.",
-      },
-    ],
-    policies: {
-      cancellation: "Cancel at least 24 hours before check-in for a full refund. Weather-related cancellations are fully refundable.",
-      completion: "Confirmation email with access details will be sent upon successful booking completion.",
+    {
+      id: 3,
+      images: [
+        "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop",
+      ],
+      resortName: "Coral Cove",
+      location: "Lagos",
+      rating: 4.7,
+      serviceType: "Family Villa",
+      price: "60,000",
+      priceUnit: "night",
     },
-    qualityBadge: {
-      title: "Beach resorts on our platform",
-      subtitle: "are verified for excellence",
-      description: "All beach resorts are thoroughly inspected for safety, cleanliness, and service quality to ensure an exceptional experience.",
-    }
-  };
+    {
+      id: 4,
+      images: [
+        "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=400&h=300&fit=crop",
+      ],
+      resortName: "Sunset Bay Resort",
+      location: "Lagos",
+      rating: 4.8,
+      serviceType: "Romantic Getaway",
+      price: "35,000",
+      priceUnit: "night",
+      isPopular: true,
+    },
+    {
+      id: 5,
+      images: [
+        "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&h=300&fit=crop",
+      ],
+      resortName: "Lagoon Escape",
+      location: "Lagos",
+      rating: 4.6,
+      serviceType: "Day Pass",
+      price: "10,000",
+      priceUnit: "person",
+    },
+    {
+      id: 6,
+      images: [
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=400&h=300&fit=crop",
+      ],
+      resortName: "Blue Wave Beach",
+      location: "Lagos",
+      rating: 4.5,
+      serviceType: "Group Picnic",
+      price: "15,000",
+      priceUnit: "group",
+    },
+    {
+      id: 7,
+      images: [
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?w=400&h=300&fit=crop",
+      ],
+      resortName: "Golden Sands",
+      location: "Lagos",
+      rating: 4.9,
+      serviceType: "Luxury Suite",
+      price: "55,000",
+      priceUnit: "night",
+      savings: "10,000",
+    },
+    {
+      id: 8,
+      images: [
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop",
+      ],
+      resortName: "Palm Shore Resort",
+      location: "Lagos",
+      rating: 4.7,
+      serviceType: "Couple's Retreat",
+      price: "30,000",
+      priceUnit: "night",
+    },
+  ];
 
-  // Handle reservation logic
-  const handleReservation = (serviceId, serviceData) => {
-    console.log("Booking beach resort:", serviceId);
-    console.log("Service data:", serviceData);
-    
-    // You can implement your booking logic here
-    // For example:
-    // - Open booking modal
-    // - Redirect to payment page
-    // - Add to cart
-    // - etc.
-    
-    alert(`Booking ${serviceData.name} for ₦${serviceData.price.toLocaleString()}`);
-  };
+  // Function to set user search result from booking flow - This function can be used to update the state or context with the search result
+  const setUserSearchResultFromBookingFlow = (searchResult) => {};
 
   return (
     <main className="min-h-screen">
       <div className="space-y-5">
+        {/* NOTE: Booking flow should handle all of its logic wiithin its component(Handling user input, fetching data) - the only stuff it should expose to other component where it'll be called in - 1. return: data gotten from the fetch request sent based on what the user typed in and searched for" */}
+        {/* NOTE: Booking flow should be particular to the service page - on switch between services button except it's on the home page(landing page) */}
         <BookingFlow />
-        
+        {/* Beach Resorts items */}
+        <BeachServicesGrid beachServices={beachServices} />
         <br />
         <br />
-        
-        {/* Beach Resort Service Details */}
-        <ServiceDetailsPage 
-          service={beachResortService}
-          onReserve={handleReservation}
-          platformName="BeachHub"
-        />
       </div>
     </main>
   );
