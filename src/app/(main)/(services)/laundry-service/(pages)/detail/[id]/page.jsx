@@ -18,7 +18,8 @@ export default function LaundryServiceDetailPage() {
     location: "Lagos, Nigeria",
     price: 1000,
     currency: "₦",
-    mainImage: "/api/placeholder/600/400",
+    mainImage: "/api/placeholder/600/400?laundry",
+    serviceType: "laundry", 
     address: {
       street: "123 Clean Street",
       city: "Lagos",
@@ -39,24 +40,31 @@ export default function LaundryServiceDetailPage() {
       {
         title: "Wash and Iron",
         description:
-          "Lorem ipsum dolor sit amet consectetur. Varius a tempus ut odio. Sagittis in gravida pellentesque scelerisque ut ultrices magna risus fermentum.",
+          "Professional washing and ironing service for all your garments. We use eco-friendly detergents and ensure your clothes are cleaned to perfection and pressed to a crisp finish.",
       },
       {
         title: "Wash and Fold",
         description:
-          "Lorem ipsum dolor sit amet consectetur. Varius a tempus ut odio. Sagittis in gravida pellentesque scelerisque ut ultrices magna risus fermentum.",
+          "Convenient wash and fold service perfect for everyday items. Your clothes are carefully sorted, washed with premium detergents, and neatly folded for easy storage.",
       },
       {
-        title: "Packaging",
+        title: "Dry Cleaning",
         description:
-          "Lorem ipsum dolor sit amet consectetur. Varius a tempus ut odio. Sagittis in gravida pellentesque scelerisque ut ultrices magna risus fermentum.",
+          "Expert dry cleaning for delicate fabrics and special garments. Our advanced cleaning process preserves fabric quality while removing tough stains and odors.",
+      },
+      {
+        title: "Pickup & Delivery",
+        description:
+          "Convenient pickup and delivery service right to your doorstep. Schedule online and we'll handle the rest, saving you time and effort.",
       },
     ],
     portfolio: [
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
-      "/api/placeholder/300/200",
+      "/api/placeholder/300/200?laundry1",
+      "/api/placeholder/300/200?laundry2",
+      "/api/placeholder/300/200?laundry3",
+      "/api/placeholder/300/200?laundry4",
+      "/api/placeholder/300/200?laundry5",
+      "/api/placeholder/300/200?laundry6",
     ],
     reviews: [
       {
@@ -66,7 +74,7 @@ export default function LaundryServiceDetailPage() {
         rating: 5,
         timeAgo: "2 hours ago",
         comment:
-          "Lorem ipsum dolor sit amet consectetur. Nulla sed volutpat nisl faucibus. Consectetur sodales nec libero vitae velit magna suspendisse sed.",
+          "Excellent service! My clothes came back perfectly clean and pressed. The pickup and delivery was so convenient. Highly recommend!",
       },
       {
         id: 2,
@@ -75,7 +83,7 @@ export default function LaundryServiceDetailPage() {
         rating: 5,
         timeAgo: "4 hours ago",
         comment:
-          "Lorem ipsum dolor sit amet consectetur. Nulla sed volutpat nisl faucibus. Consectetur sodales nec libero vitae velit magna suspendisse sed.",
+          "Spin & Sparkle saved my favorite shirt! They removed a stubborn stain I thought was permanent. Professional and reliable service.",
       },
       {
         id: 3,
@@ -84,7 +92,7 @@ export default function LaundryServiceDetailPage() {
         rating: 4,
         timeAgo: "8 hours ago",
         comment:
-          "Lorem ipsum dolor sit amet consectetur. Nulla sed volutpat nisl faucibus. Consectetur sodales nec libero vitae velit magna suspendisse sed.",
+          "Good quality washing and folding. My clothes smell fresh and are neatly organized. The pricing is fair and the staff is friendly.",
       },
       {
         id: 4,
@@ -93,9 +101,81 @@ export default function LaundryServiceDetailPage() {
         rating: 5,
         timeAgo: "6 hours ago",
         comment:
-          "Lorem ipsum dolor sit amet consectetur. Nulla sed volutpat nisl faucibus. Consectetur sodales nec libero vitae velit magna suspendisse sed.",
+          "Love their eco-friendly approach! My clothes are clean and I feel good about supporting sustainable practices. Will definitely use again.",
       },
     ],
+
+    laundryServices: [
+      {
+        name: "Regular Wash & Iron",
+        description: "Standard washing and pressing for everyday clothing items",
+        price: 800,
+        turnaround: "2-3 days"
+      },
+      {
+        name: "Express Wash & Iron",
+        description: "Fast turnaround washing and ironing for urgent items",
+        price: 1200,
+        turnaround: "Same day"
+      },
+      {
+        name: "Wash & Fold",
+        description: "Washing and neat folding service for casual wear",
+        price: 600,
+        turnaround: "2-3 days"
+      },
+      {
+        name: "Dry Cleaning",
+        description: "Professional dry cleaning for delicate and special garments",
+        price: 1500,
+        turnaround: "3-5 days"
+      },
+      {
+        name: "Bedding & Linens",
+        description: "Washing and pressing service for bed sheets, pillowcases, and towels",
+        price: 1000,
+        turnaround: "2-3 days"
+      },
+      {
+        name: "Curtains & Drapes",
+        description: "Specialized cleaning for curtains and heavy drapes",
+        price: 2000,
+        turnaround: "5-7 days"
+      },
+      {
+        name: "Stain Removal",
+        description: "Specialized treatment for tough stains and spots",
+        price: 500,
+        turnaround: "1-2 days"
+      },
+      {
+        name: "Shoe Cleaning",
+        description: "Professional cleaning and conditioning for leather and fabric shoes",
+        price: 1000,
+        turnaround: "2-3 days"
+      },
+      {
+        name: "Pickup & Delivery",
+        description: "Convenient doorstep pickup and delivery service",
+        price: 200,
+        turnaround: "On schedule"
+      },
+      {
+        name: "Garment Repair",
+        description: "Minor repairs like button replacement and hem adjustments",
+        price: 300,
+        turnaround: "3-5 days"
+      }
+    ],
+    policies: {
+      cancellation: "Orders can be cancelled up to 2 hours after pickup for a full refund. Items already in process are subject to a 50% charge.",
+      completion: "SMS and email notifications will be sent when your laundry is ready for pickup or delivery. Payment is due upon completion."
+    },
+    qualityBadge: {
+      title: "Laundry Services on Synkafrica",
+      subtitle: "are certified for quality and safety",
+      description: "All laundry service providers are verified for professional equipment, eco-friendly practices, and customer satisfaction standards."
+    }
   };
 
   const handleReserve = (id) => {

@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 
 import ServiceDetails from "@/components/service_detail/ServiceDetail";
 
-
 export default function BeachResortDetailPage() {
   const router = useRouter();
   
@@ -20,6 +19,7 @@ export default function BeachResortDetailPage() {
     price: 25000,
     currency: "₦",
     mainImage: "/api/placeholder/600/400?beach-resort",
+    serviceType: "beach-resort", 
     address: {
       street: "1 Ocean Drive",
       city: "Lekki",
@@ -68,6 +68,8 @@ export default function BeachResortDetailPage() {
       "/api/placeholder/300/200?beach2",
       "/api/placeholder/300/200?beach3",
       "/api/placeholder/300/200?beach4",
+      "/api/placeholder/300/200?beach5",
+      "/api/placeholder/300/200?beach6",
     ],
     reviews: [
       {
@@ -88,12 +90,168 @@ export default function BeachResortDetailPage() {
         comment:
           "Loved the food and the spa experience. Will definitely come back for another getaway.",
       },
+      {
+        id: 3,
+        name: "Emeka",
+        location: "Port Harcourt, Nigeria",
+        rating: 5,
+        timeAgo: "1 week ago",
+        comment:
+          "Perfect weekend getaway! The beach activities were amazing and the accommodation was top-notch.",
+      },
+      {
+        id: 4,
+        name: "Fatima",
+        location: "Kano, Nigeria",
+        rating: 4,
+        timeAgo: "2 weeks ago",
+        comment:
+          "Great resort with excellent amenities. The spa treatments were very relaxing.",
+      },
     ],
+
+    activities: [
+      {
+        name: "Jet Skiing",
+        description: "High-speed water adventure with safety equipment included",
+        duration: "30 minutes",
+        price: 15000,
+        priceUnit: "per person"
+      },
+      {
+        name: "Beach Volleyball",
+        description: "Join our daily beach volleyball tournaments",
+        duration: "1 hour",
+        price: 0,
+        priceUnit: "free"
+      },
+      {
+        name: "Kayaking",
+        description: "Explore the coastline with guided kayak tours",
+        duration: "45 minutes",
+        price: 8000,
+        priceUnit: "per person"
+      },
+      {
+        name: "Sunset Boat Cruise",
+        description: "Romantic evening cruise with complimentary drinks",
+        duration: "2 hours",
+        price: 25000,
+        priceUnit: "per couple"
+      },
+      {
+        name: "Snorkeling",
+        description: "Discover underwater life with guided snorkeling",
+        duration: "1 hour",
+        price: 12000,
+        priceUnit: "per person"
+      },
+      {
+        name: "Beach Photography",
+        description: "Professional photo shoots with ocean backdrop",
+        duration: "1 hour",
+        price: 20000,
+        priceUnit: "per session"
+      },
+      {
+        name: "Fishing Charter",
+        description: "Deep sea fishing with experienced guides",
+        duration: "4 hours",
+        price: 45000,
+        priceUnit: "per boat"
+      },
+      {
+        name: "Beach Yoga",
+        description: "Morning yoga sessions on the beach",
+        duration: "45 minutes",
+        price: 5000,
+        priceUnit: "per person"
+      }
+    ],
+    amenities: [
+      {
+        name: "Free WiFi",
+        available: true
+      },
+      {
+        name: "Swimming Pool",
+        available: true
+      },
+      {
+        name: "Fitness Center",
+        available: true
+      },
+      {
+        name: "Spa & Wellness",
+        available: true
+      },
+      {
+        name: "Restaurant",
+        available: true
+      },
+      {
+        name: "Bar & Lounge",
+        available: true
+      },
+      {
+        name: "Beach Bar",
+        available: true
+      },
+      {
+        name: "Parking",
+        available: true
+      },
+      {
+        name: "24/7 Security",
+        available: true
+      },
+      {
+        name: "Concierge",
+        available: true
+      },
+      {
+        name: "Laundry Service",
+        available: true
+      },
+      {
+        name: "Room Service",
+        available: true
+      }
+    ],
+    accommodation: {
+      roomType: "Deluxe Ocean View Suite",
+      capacity: 4,
+      bathrooms: 2,
+      features: [
+        "Private balcony with ocean view",
+        "King-size bed with premium linens",
+        "Sitting area with sofa bed",
+        "Mini-bar and coffee maker",
+        "Air conditioning",
+        "Flat-screen TV with cable",
+        "Safe deposit box",
+        "Complimentary toiletries",
+        "Hair dryer",
+        "Beach towels provided",
+        "Daily housekeeping",
+        "Complimentary bottled water"
+      ]
+    },
+    policies: {
+      cancellation: "Free cancellation up to 48 hours before check-in. Cancellations within 48 hours are subject to a 50% charge.",
+      completion: "Booking confirmation and check-in details will be sent to your email within 30 minutes of reservation."
+    },
+    qualityBadge: {
+      title: "Beach Resorts on Synkafrica",
+      subtitle: "are certified for excellence",
+      description: "All beach resorts are evaluated for safety standards, service quality, cleanliness, and guest satisfaction to ensure an exceptional experience."
+    }
   };
 
   // TODO: Implement reservation logic - go to a booking page or open a modal
   const handleReserve = (id) => {
-    router.push(`/laundry-service/booking/${id}`);
+    // Update this route to match your actual booking flow
+    router.push(`/beach-resort/booking/${id}`);
   };
 
   return (

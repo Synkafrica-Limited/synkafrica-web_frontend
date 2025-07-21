@@ -1,7 +1,9 @@
 "use client";
+
 import React from 'react';
-import ServiceCardsGrid from '../../../../../components/service_card/ServiceCard';
 import { useRouter } from 'next/navigation';
+
+import ServiceCardsGrid from '../../../../../components/service_card/ServiceCard';
 
 const BeachServicesGrid = ({ beachServices }) => {
   const router = useRouter();
