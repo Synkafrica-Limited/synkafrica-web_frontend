@@ -1,9 +1,12 @@
-const DiningReservationPage = () => {
+import React from 'react';
+import BookingComponent from '@/components/booking_component/Booking';
+
+const BookDiningReservation = ({ resortId, serviceType = 'resort' }) => {
     return (
-        <div>
-            <h1 className="text-3xl font-bold mb-4">Dining Reservations</h1>
+        <div className="container mx-auto px-4 py-8">
+            <BookingComponent serviceId={resortId} serviceType={serviceType} />
         </div>
     );
-}
+};
 
-export default DiningReservationPage;
+export default BookDiningReservation;
