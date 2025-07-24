@@ -251,7 +251,7 @@ export default function BeachResortDetailPage() {
   // TODO: Implement reservation logic - go to a booking page or open a modal
   const handleReserve = (id) => {
     // Update this route to match your actual booking flow
-    router.push(`/beach-resort/booking/${id}`);
+    router.push(`/beach-resorts/booking/${id}`);
   };
 
   return (

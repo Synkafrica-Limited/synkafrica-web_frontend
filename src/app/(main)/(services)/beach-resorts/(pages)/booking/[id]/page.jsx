@@ -1,12 +1,20 @@
-import React from 'react';
-import BookingComponent from '@/components/booking_component/Booking';
+"use client"
 
-const BookBeachResort = ({ resortId, serviceType = 'resort' }) => {
-    return (
-        <div className="container mx-auto px-4 py-8">
-            <BookingComponent serviceId={resortId} serviceType={serviceType} />
-        </div>
-    );
+import React from "react";
+import BookingForm from "@/app/(main)/(services)/components/booking_flow/booking";
+
+const BookingResortForm = ({ resortId, serviceType = "beachResort" }) => {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <BookingForm
+        serviceType={serviceType}
+        initialContactDetails={{}}
+        initialAddressDetails={{}}
+        companyName="YourCompany"
+        onBookingComplete={(bookingData) => {}}
+      />
+    </div>
+  );
 };
 
-export default BookBeachResort;
+export default BookingResortForm;
