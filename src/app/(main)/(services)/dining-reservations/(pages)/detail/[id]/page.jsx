@@ -196,7 +196,7 @@ export default function DiningServiceDetailPage() {
 
     // TODO: Implement reservation logic - go to a booking page or open a modal
     const handleReserve = (id) => {
-        router.push(`/dining-reservations/booking/${id}`);
+        router.push(`/dining-reservations/reserve/${id}`);
     };
 
     return (
