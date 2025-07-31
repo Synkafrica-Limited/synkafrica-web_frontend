@@ -189,10 +189,10 @@ const Footer = () => {
               </p>
               <p className="mt-4">
                 <a
-                  href="mailto:info@synkafrica.com"
+                  href="mailto:info@synkkafrica.com"
                   className="hover:text-gray-900 transition-colors"
                 >
-                  info@synkafrica.com
+                  info@synkkafrica.com
                 </a>
               </p>
             </div>
@@ -249,7 +249,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col lg:flex-row justify-between items-center pt-8 border-t border-gray-200">
           <p className="text-gray-600 text-sm mb-4 lg:mb-0">
-            Copyright © 2025 synKafrica | All Right Reserved
+            Copyright © 2025 synKKafrica | All Right Reserved
           </p>
           <Link href="/signup">
           <Button

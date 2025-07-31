@@ -3,7 +3,7 @@ import AppClientWrapper from "@/components/layout/AppClientWrapper";
 import Footer from "../../components/footer/Footer";
 
 export const metadata = {
-  title: "SynkAfrica",
+  title: "SynKKafrica",
   description: "Empowering mobility across Africa",
 };
 

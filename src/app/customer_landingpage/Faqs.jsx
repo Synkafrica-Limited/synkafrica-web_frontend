@@ -6,22 +6,22 @@ import { ChevronDown, ChevronUp } from "lucide-react"; // Ensure you have lucide
 
 const faqs = [
   {
-    question: "How do I find booking deals on Synkafrica?",
+    question: "How do I find booking deals on Synkkafrica?",
     answer:
-      "Simply use one of our booking simplified search engine to scan for deal gathered from different businesses. Synkafrica search results pages have loads of filter options to assist you find deals suitable for you.",
+      "Simply use one of our booking simplified search engine to scan for deal gathered from different businesses. Synkkafrica search results pages have loads of filter options to assist you find deals suitable for you.",
   },
   {
-    question: "What makes Synkafrica a great booking app?",
+    question: "What makes Synkkafrica a great booking app?",
     answer:
-      "On the Synkafrica app you’ll find various great booking offers found on the website and much more. Plus you get notifications directly to your phone. The Synkafrica app is much more than just booking app.",
+      "On the Synkkafrica app you’ll find various great booking offers found on the website and much more. Plus you get notifications directly to your phone. The Synkkafrica app is much more than just booking app.",
   },
   {
-    question: "How do I use Synkafrica to manage my bookings",
+    question: "How do I use Synkkafrica to manage my bookings",
     answer:
-      "Synkafrica  create a booking option in the menu section, you’ll get information about your completed bookings, and your future bookings already made. You can also make changes or cancel bookings.",
+      "Synkkafrica  create a booking option in the menu section, you’ll get information about your completed bookings, and your future bookings already made. You can also make changes or cancel bookings.",
   },
   {
-    question: "How do I use Synkafrica to manage my convenience services?",
+    question: "How do I use Synkkafrica to manage my convenience services?",
     answer: "",
   },
 ];
@@ -63,7 +63,7 @@ export default function FaqSection() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <h2 className="text-3xl font-bold mb-8">
-        Frequently asked questions about Synkafrica
+        Frequently asked questions about Synkkafrica
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
         {faqs.map((faq, idx) => (

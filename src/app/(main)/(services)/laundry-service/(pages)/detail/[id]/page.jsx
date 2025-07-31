@@ -172,7 +172,7 @@ export default function LaundryServiceDetailPage() {
       completion: "SMS and email notifications will be sent when your laundry is ready for pickup or delivery. Payment is due upon completion."
     },
     qualityBadge: {
-      title: "Laundry Services on Synkafrica",
+      title: "Laundry Services on Synkkafrica",
       subtitle: "are certified for quality and safety",
       description: "All laundry service providers are verified for professional equipment, eco-friendly practices, and customer satisfaction standards."
     }
@@ -186,7 +186,7 @@ export default function LaundryServiceDetailPage() {
     <ServiceDetails
       service={laundryServiceDetail}
       onReserve={() => handleReserve(laundryServiceDetail.id)}
-      platformName="Synkafrica"
+      platformName="Synkkafrica"
       platformTheme={{
         primary: "bg-primary-500",
         primaryHover: "bg-primary-600",

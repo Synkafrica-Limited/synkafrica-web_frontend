@@ -242,7 +242,7 @@ export default function BeachResortDetailPage() {
       completion: "Booking confirmation and check-in details will be sent to your email within 30 minutes of reservation."
     },
     qualityBadge: {
-      title: "Beach Resorts on Synkafrica",
+      title: "Beach Resorts on Synkkafrica",
       subtitle: "are certified for excellence",
       description: "All beach resorts are evaluated for safety standards, service quality, cleanliness, and guest satisfaction to ensure an exceptional experience."
     }

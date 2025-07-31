@@ -16,7 +16,7 @@ export default function BecomeVendorSection() {
         <div className="relative z-10 bg-primary-500 justify-center text-white rounded-lg p-8 h-[200px]] w-[250px]] ml-6 shadow-lg">
           <div className="font-semibold text-lg mb-1">Become a vendor</div>
           <div className="text-white text-sm mb-4 opacity-90">
-            Create & list your product, and earn with Synkafrica.
+            Create & list your product, and earn with Synkkafrica.
           </div>
           <Button
             variant="outline"
