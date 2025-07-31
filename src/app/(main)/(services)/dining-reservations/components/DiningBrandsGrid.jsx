@@ -22,7 +22,7 @@ const DiningBrandsGrid = ({ diningServices }) => {
             locationColor="red-500"
             currency="₦"
             routePath="/dining-reservations/detail"
-            buttonText="Reserve Table"
+            buttonText="Reserve"
             availabilityText="Open daily"
             onCardClick={handleCardClick}
         />
