@@ -121,9 +121,12 @@ export default function LaundryServicePage() {
   return (
     <main className="min-h-screen">
       <div className="space-y-5">
-        {/* NOTE: Booking flow should handle all of its logic wiithin its component(Handling user input, fetching data) - the only stuff it should expose to other component where it'll be called in - 1. return: "service selected by the user 2. return: data gotten from the fetch request sent based on what the user typed in and searched for" */}
-        {/* NOTE: Booking flow should be particular to the service page - on switch between services button except it's on the home page(landing page) */}
-        <BookingFlow />
+        <div className="p-4 border-b border-[#ebebec]">
+          <div className="max-w-4xl mx-auto">
+            <BookingFlow />
+          </div>
+        </div>
+
         {/* Laundry service items */}
         <LaundryServicesGrid laundryServices={laundryServices} />
         <br />
