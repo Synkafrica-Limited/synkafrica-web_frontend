@@ -138,7 +138,7 @@ const ServiceCard = ({
             className="bg-[#E05D3D] hover:bg-[#d54f32] text-white font-medium px-4 py-2 rounded-lg text-sm transition-colors duration-200"
             onClick={(e) => {
               e.stopPropagation();
-              // Handle book now logic here
+              onCardClick(id);
             }}
           >
             {buttonText}
