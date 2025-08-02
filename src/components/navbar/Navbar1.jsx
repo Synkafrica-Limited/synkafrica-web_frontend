@@ -34,7 +34,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
     setShowProfileDropdown(false);
   };
 
-  // Close dropdown when clicking outside
+  // Fix: Only close dropdown if click is outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (moreRef.current && !moreRef.current.contains(event.target)) {
@@ -48,11 +48,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
   }, [showMoreDropdown]);
 
   return (
-    <nav
-      className={`bg-white border-b border-[#f6f6f6] sticky top-0 z-50 transition-shadow duration-300 ${
-        isScrolled ? "shadow-[0_1px_1px_0_rgba(0,0,0,0.05)]" : ""
-      }`}
-    >
+    <nav className={`bg-white border-b border-[#f6f6f6] sticky top-0 z-50 transition-shadow duration-300 ${isScrolled ? "shadow-[0_1px_1px_0_rgba(0,0,0,0.05)]" : ""}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center h-18">
           {/* Brand Logo */}
@@ -107,7 +103,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                     className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 group focus:outline-none"
                     aria-haspopup="true"
                     aria-expanded={showMoreDropdown}
-                    onFocus={() => setShowMoreDropdown(true)}
+                    onClick={() => setShowMoreDropdown((v) => !v)}
                   >
                     More
                     <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
@@ -128,7 +124,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                         Reservations
                       </Link>
                       <Link
-                        href="/laundry-services"
+                        href="/laundry-service"
                         className="block px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200"
                         onClick={() => setShowMoreDropdown(false)}
                       >
@@ -209,13 +205,66 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   Review
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
-                <Link
-                  href="/more"
-                  className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 group"
+                {/* More Dropdown */}
+                <div
+                  className="relative"
+                  ref={moreRef}
+                  onMouseEnter={() => setShowMoreDropdown(true)}
+                  onMouseLeave={() => setShowMoreDropdown(false)}
+                  tabIndex={1}
                 >
-                  More
-                  <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
-                </Link>
+                  <button
+                    type="button"
+                    className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 group focus:outline-none"
+                    aria-haspopup="true"
+                    aria-expanded={showMoreDropdown}
+                    onClick={() => setShowMoreDropdown((v) => !v)}
+                  >
+                    More
+                    <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
+                  </button>
+                  {/* Dropdown: keep open while mouse is over dropdown or button */}
+                  {showMoreDropdown && (
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2 mt-3 w-48 bg-white rounded-2xl shadow-lg py-3 z-50 flex flex-col space-y-1 animate-fadeIn"
+                      onMouseEnter={() => setShowMoreDropdown(true)}
+                      onMouseLeave={() => setShowMoreDropdown(false)}
+                      onMouseDown={e => e.preventDefault()}
+                    >
+                      <Link
+                        href="/dining-reservations"
+                        className="block px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200"
+                        onClick={() => setShowMoreDropdown(false)}
+                      >
+                        Reservations
+                      </Link>
+                      <Link
+                        href="/laundry-service"
+                        className="block px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200"
+                        onClick={() => setShowMoreDropdown(false)}
+                      >
+                        Services
+                      </Link>
+                      <Link
+                        href="/beach-resorts"
+                        className="block px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200"
+                        onClick={() => setShowMoreDropdown(false)}
+                      >
+                        Beach Resorts
+                      </Link>
+                      <Link
+                      href={'/signup'}
+                        className="block text-left px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 w-full"
+                        onClick={() => {
+                          setShowMoreDropdown(false);
+                          if (typeof onBecomeVendor === "function") onBecomeVendor();
+                        }}
+                      >
+                        Become a vendor
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             {/* Currency Selector */}

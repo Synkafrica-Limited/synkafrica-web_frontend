@@ -169,22 +169,22 @@ const Footer = () => {
               Contact
             </h3>
             <div className="space-y-3 text-gray-600">
-              <p>Victoria Island, Maryland</p>
-              <p>Expressway, Lagos State</p>
+              <p>3 Adamo Street, Lekki Phase 1</p>
+              <p>Lagos State</p>
               <p className="mt-4">
                 <a
-                  href="tel:+2340812323392"
+                  href="tel:+1 8573 032 9886"
                   className="hover:text-gray-900 transition-colors"
                 >
-                  +234 0812 323 392
+                  +1 8573 032 9886
                 </a>
               </p>
               <p>
                 <a
-                  href="tel:+2340812123392"
+                  href="tel:+1 8573 032 9886"
                   className="hover:text-gray-900 transition-colors"
                 >
-                  +234 0812 123 392
+                  +1 8573 032 9886
                 </a>
               </p>
               <p className="mt-4">
