@@ -98,7 +98,7 @@ export default function SignInScreen() {
             <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
               Unlock a world of rewards with one account across
               <br className="hidden sm:block" />
-              synkafrica, Hotels.com, and Vrbo.
+              synkkafrica, Hotels.com, and Vrbo.
             </p>
           </div>
 

@@ -1,10 +1,10 @@
-# synkafrica-web_frontend
+# synkkafrica-web_frontend
 Next.js based web platforms - Vendor Dashboard, Landing Page, Customer Interface, Admin Panel (Backend &amp; Support)
 
 ---
 
 ````markdown
-# synKafrica Web Frontend
+# synKKafrica Web Frontend
 
 This is the **Next.js web platform** for **synKafrica**, a lifestyle aggregation service offering **transportation, laundry, restaurant booking, and beach services** through a single unified portal.
 
@@ -28,7 +28,7 @@ The application is structured using the **MVC (Model-View-Controller)** pattern,
 ## 🗂️ Folder Structure (MVC)
 
 ```bash
-synkafrica-web_frontend/
+synkkafrica-web_frontend/
 │
 ├── app/                 # Routes (App Router) + layout
 │   ├── page.tsx         # Home page (View)
@@ -59,7 +59,7 @@ synkafrica-web_frontend/
 ```bash
 # 1. Clone the repository
 git clone https://github.com/synkafrica/synkafrica-web_frontend.git
-cd synkafrica-web_frontend
+cd synkkafrica-web_frontend
 
 # 2. Install dependencies
 npm install

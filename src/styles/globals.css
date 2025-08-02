@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* SynkAfrica Design System Tokens - Tailwind v4+ @theme */
+/* SynkkAfrica Design System Tokens - Tailwind v4+ @theme */
 @theme {
   /* FONT FAMILY */
   --font-sans: 'Montserrat', sans-serif;

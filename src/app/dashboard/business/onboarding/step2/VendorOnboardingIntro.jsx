@@ -12,7 +12,7 @@ import Link from 'next/link';
  * @param {React.ReactNode} [props.cta] - Custom CTA node (optional, overrides ctaLabel/ctaHref)
  */
 function VendorOnboardingIntro({
-  title = "It’s easy to get\nstarted on Synkafrica",
+  title = "It’s easy to get\nstarted on Synkkafrica",
   steps = [
     {
       title: "1. Tell us about your business",

@@ -203,7 +203,7 @@ export default function DiningServiceDetailPage() {
         <ServiceDetails
             service={diningServiceDetail}
             onReserve={() => handleReserve(diningServiceDetail.id)}
-            platformName="Synkafrica"
+            platformName="Synkkafrica"
             platformTheme={{
                 primary: "bg-primary-500",
                 primaryHover: "bg-primary-600",

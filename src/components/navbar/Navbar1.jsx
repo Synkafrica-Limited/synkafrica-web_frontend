@@ -60,7 +60,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
             <Link href="/" className="flex items-center space-x-2 group">
               <Image
                 src="/images/brand/synkafrica-logo-w-text.png"
-                alt="Synk Africa Logo"
+                alt="Synkkafrica Logo"
                 width={150}
                 height={40}
                 className="transition-transform duration-300 group-hover:scale-105"

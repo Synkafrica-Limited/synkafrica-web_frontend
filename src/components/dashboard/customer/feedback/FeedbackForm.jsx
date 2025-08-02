@@ -23,8 +23,8 @@ export default function FeedbackForm({
   onSubmit,
   successMessage = "Your feedback has been submitted successfully!",
   title = "Share your reviews",
-  description = "Thanks for sending us your ideas, issues, or appreciations. We can’t respond individually, but we’ll pass it on to the teams who are working to help make Synkafrica better for everyone.",
-  contactMail = "support@synkafrica.com",
+  description = "Thanks for sending us your ideas, issues, or appreciations. We can’t respond individually, but we’ll pass it on to the teams who are working to help make Synkkafrica better for everyone.",
+  contactMail = "info@synkkafrica.com",
 }) {
   const [category, setCategory] = useState(categories[0]);
   const [feedback, setFeedback] = useState("");
@@ -79,13 +79,13 @@ export default function FeedbackForm({
               href="/"
               className="text-[#E26A3D] underline hover:text-[#c2552e]"
             >
-              Synkafrica
+              Synkkafrica
             </a>
           </div>
           {/* Illustration */}
           <div className="flex flex-col items-center mt-8 w-full">
             <HiOutlineEmojiHappy className="text-[#E26A3D] mb-4" style={{ fontSize: 120 }} />
-            <div className="text-lg text-gray-500 font-medium">Your voice makes Synkafrica better for everyone!</div>
+            <div className="text-lg text-gray-500 font-medium">Your voice makes Synkkafrica better for everyone!</div>
           </div>
         </div>
       </div>

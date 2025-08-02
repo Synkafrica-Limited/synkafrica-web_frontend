@@ -12,7 +12,7 @@ export default function NotFound() {
       <div className="w-full flex justify-center mb-8">
         <Image
           src="/images/brand/synkafrica-logo-w-text.png"
-          alt="Synk Africa Logo"
+          alt="Synkkafrica Logo"
           width={250}
           height={100}
           className="transition-transform duration-300 group-hover:scale-105"
