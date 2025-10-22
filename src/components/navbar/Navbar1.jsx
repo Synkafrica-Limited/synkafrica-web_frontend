@@ -49,7 +49,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
 
   return (
     <nav
-      className={`bg-white border-b border-gray-50 sticky top-0 z-50 transition-shadow duration-300 ${
+      className={`bg-white border-b border-[#f6f6f6] sticky top-0 z-50 transition-shadow duration-300 ${
         isScrolled ? "shadow-[0_1px_1px_0_rgba(0,0,0,0.05)]" : ""
       }`}
     >
@@ -60,7 +60,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
             <Link href="/" className="flex items-center space-x-2 group">
               <Image
                 src="/images/brand/synkafrica-logo-w-text.png"
-                alt="Synk Africa Logo"
+                alt="Synkkafrica Logo"
                 width={150}
                 height={40}
                 className="transition-transform duration-300 group-hover:scale-105"

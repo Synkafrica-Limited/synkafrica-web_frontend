@@ -196,14 +196,14 @@ export default function DiningServiceDetailPage() {
 
     // TODO: Implement reservation logic - go to a booking page or open a modal
     const handleReserve = (id) => {
-        router.push(`/dining-reservations/booking/${id}`);
+        router.push(`/dining-reservations/reserve/${id}`);
     };
 
     return (
         <ServiceDetails
             service={diningServiceDetail}
             onReserve={() => handleReserve(diningServiceDetail.id)}
-            platformName="Synkafrica"
+            platformName="Synkkafrica"
             platformTheme={{
                 primary: "bg-primary-500",
                 primaryHover: "bg-primary-600",

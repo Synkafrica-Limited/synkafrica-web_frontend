@@ -17,7 +17,7 @@ function ProfileProgress({ progress, onEdit, onViewBookingInfo, onCompleteBookin
         />
       </div>
       <div className="text-gray-600 text-sm mb-2">
-        Get the best of SynKafrica by updating your details
+        Get the best of SynKKafrica by updating your details
       </div>
       <div className="flex flex-wrap gap-2">
         <Button

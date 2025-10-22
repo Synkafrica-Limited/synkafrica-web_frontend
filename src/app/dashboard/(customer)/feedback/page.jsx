@@ -33,9 +33,9 @@ export default function ReviewsPage() {
     return (
       <FeedbackSuccess
         successMessage="Your feedback has been submitted successfully!"
-        contactMail="support@synkafrica.com"
+        contactMail="info@synkkafrica.com"
         exploreUrl="/"
-        exploreText="Synkafrica"
+        exploreText="Synkkafrica"
       />
     );
   }
@@ -51,7 +51,7 @@ export default function ReviewsPage() {
           <h1 className="text-2xl font-semibold mb-2">Share your reviews</h1>
           <hr className="mb-4" />
           <div className="text-gray-600 text-sm mb-6 max-w-xl">
-            Thanks for sending us your ideas, issues, or appreciations. We can’t respond individually, but we’ll pass it on to the teams who are working to help make Synkafrica better for everyone.
+            Thanks for sending us your ideas, issues, or appreciations. We can’t respond individually, but we’ll pass it on to the teams who are working to help make Synkkafrica better for everyone.
           </div>
           <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
             <div>
@@ -108,7 +108,7 @@ export default function ReviewsPage() {
               variant="outline"
               size="md"
               className="border border-[#E26A3D] text-[#E26A3D] rounded-md px-6 py-2 font-medium hover:bg-[#E26A3D]/10 transition"
-              onClick={() => window.open("mailto:support@synkafrica.com", "_blank")}
+              onClick={() => window.open("mailto:info@synkkafrica.com", "_blank")}
             >
               Contact us
             </Button>

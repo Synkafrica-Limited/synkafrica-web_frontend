@@ -1,9 +1,20 @@
-const DiningReservationPage = () => {
-    return (
-        <div>
-            <h1 className="text-3xl font-bold mb-4">Dining Reservations</h1>
-        </div>
-    );
-}
+"use client"
 
-export default DiningReservationPage;
+import React from "react";
+import BookingForm from "@/app/(main)/(services)/components/booking_flow/booking";
+
+const BookDiningReservation = ({ resortId, serviceType = "dining" }) => {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <BookingForm
+        serviceType="dining"
+        initialContactDetails={{}}
+        initialAddressDetails={{}}
+        companyName="YourCompany"
+        onBookingComplete={(bookingData) => {}}
+      />
+    </div>
+  );
+};
+
+export default BookDiningReservation;

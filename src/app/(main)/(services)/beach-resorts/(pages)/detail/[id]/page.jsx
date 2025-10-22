@@ -242,7 +242,7 @@ export default function BeachResortDetailPage() {
       completion: "Booking confirmation and check-in details will be sent to your email within 30 minutes of reservation."
     },
     qualityBadge: {
-      title: "Beach Resorts on Synkafrica",
+      title: "Beach Resorts on Synkkafrica",
       subtitle: "are certified for excellence",
       description: "All beach resorts are evaluated for safety standards, service quality, cleanliness, and guest satisfaction to ensure an exceptional experience."
     }
@@ -251,7 +251,7 @@ export default function BeachResortDetailPage() {
   // TODO: Implement reservation logic - go to a booking page or open a modal
   const handleReserve = (id) => {
     // Update this route to match your actual booking flow
-    router.push(`/beach-resort/booking/${id}`);
+    router.push(`/beach-resorts/booking/${id}`);
   };
 
   return (

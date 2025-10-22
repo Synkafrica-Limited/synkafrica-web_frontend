@@ -107,7 +107,7 @@ export default function Sidebar({ active }) {
           <Link href="/">
             <Image
               src="/images/brand/synkafrica-logo-w-text.png"
-              alt="Synkafrica Logo"
+              alt="Synkkafrica Logo"
               width={120}
               height={40}
               priority

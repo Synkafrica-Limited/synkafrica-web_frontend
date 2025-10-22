@@ -10,9 +10,9 @@ import { HiOutlineEmojiHappy } from "react-icons/hi";
  */
 export default function FeedbackSuccess({
   successMessage = "Your feedback has been submitted successfully!",
-  contactMail = "support@synkafrica.com",
+  contactMail = "info@synkkafrica.com",
   exploreUrl = "/",
-  exploreText = "Synkafrica",
+  exploreText = "Synkkafrica",
 }) {
   return (
     <div className="min-h-screen flex flex-col px-2 sm:px-6 py-8">
@@ -54,7 +54,7 @@ export default function FeedbackSuccess({
         {/* Illustration */}
         <div className="flex flex-col items-center mt-8 w-full">
           <HiOutlineEmojiHappy className="text-[#E26A3D] mb-4" style={{ fontSize: 120 }} />
-          <div className="text-lg text-gray-500 font-medium">Your voice makes Synkafrica better for everyone!</div>
+          <div className="text-lg text-gray-500 font-medium">Your voice makes Synkkafrica better for everyone!</div>
         </div>
       </div>
     </div>

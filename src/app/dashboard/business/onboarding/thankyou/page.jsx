@@ -10,7 +10,7 @@ export default function ThankYouPage() {
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
       <Image
         src="/images/brand/synkafrica-logo-w-text.png"
-        alt="SynkAfrica Logo"
+        alt="Synkkafrica Logo"
         width={120}
         height={120}
         className="mb-6"
@@ -41,7 +41,7 @@ export default function ThankYouPage() {
       <div className="mt-10 text-sm text-gray-400 text-center">
         Need help?{" "}
         <a
-          href="mailto:support@synkafrica.com"
+          href="mailto:info@synkkafrica.com"
           className="underline text-[#E26A3D]"
         >
           Contact Support
