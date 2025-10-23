@@ -1,17 +1,18 @@
 import "../../styles/globals.css";
-import Navbar1 from "../../components/navbar/Navbar1";
+import AppClientWrapper from "@/components/layout/AppClientWrapper";
 import Footer from "../../components/footer/Footer";
 
 export const metadata = {
-  title: "SynkAfrica",
+  title: "SynKKafrica",
   description: "Empowering mobility across Africa",
 };
 
 export default function RootLayout({ children }) {
   return (
     <div>
-      <Navbar1 />
-      {children}
+      <AppClientWrapper>
+        {children}
+      </AppClientWrapper>
       <Footer />
     </div>
   );

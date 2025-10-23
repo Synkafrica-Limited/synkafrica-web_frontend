@@ -1,6 +1,7 @@
 import { Montserrat, Montserrat_Alternates } from "next/font/google";
 import "../styles/globals.css"; 
 
+
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -16,15 +17,15 @@ const montserrat = Montserrat({
 
 
 export const metadata = {
-  title: "SynkAfrica",
+  title: "SynKKafrica",
   description: "Empowering mobility across Africa",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${montserrat.variable} ${montserratAlternates.variable}`}>
-        {children}
+       <body className="font-sans bg-[var(--background)] text-[var(--foreground)]">
+          {children}
         </body>
     </html>
   );
