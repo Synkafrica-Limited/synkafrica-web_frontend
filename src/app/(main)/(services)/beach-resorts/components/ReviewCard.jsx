@@ -5,7 +5,7 @@ export default function ReviewCard({ user, rating, date, text }) {
         <img src={user.avatar}  className="w-7 h-7 rounded-full" />
         <span className="font-semibold">{user.name}</span>
         <span className="text-xs text-gray-400">{user.location}</span>
-        <span className="text-xs text-orange-600">★ {rating}</span>
+        <span className="text-xs text-orange-600">★{rating}</span>
         <span className="text-xs text-gray-400">{date}</span>
       </div>
       <div className="text-gray-700 text-sm">{text}</div>

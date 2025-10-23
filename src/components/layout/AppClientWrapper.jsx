@@ -9,10 +9,8 @@ export default function AppClientWrapper({ children }) {
   return (
     <>
       <Navbar1 onBecomeVendor={() => setSignupComponent(true)} />
-      {/* {showListingSelection && (
-        <ListingSelection onClose={() => setShowListingSelection(false)} />
-      )} */}
+      {/* {showListingSelection && (<ListingSelection onClose={() => setShowListingSelection(false)} />)} */}
       {children}
     </>
-  );
+  );  
 }
