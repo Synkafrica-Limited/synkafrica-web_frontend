@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import Button from "../ui/buttons";
+import Buttons from '@/components/ui/Buttons'
 //icon
 import { IoLogoTwitter, IoLogoFacebook, IoArrowForward, IoLogoInstagram } from "react-icons/io5";
 
@@ -252,7 +252,7 @@ const Footer = () => {
             Copyright © 2025 synKKafrica | All Right Reserved
           </p>
           <Link href="/signup">
-          <Button
+          <Buttons
             variant="filled"
             icon={
               <IoArrowForward className="w-5 h-5" />
@@ -261,7 +261,7 @@ const Footer = () => {
             size="md"
           >
             Sign Up
-          </Button>
+          </Buttons>
           </Link>
           
         </div>

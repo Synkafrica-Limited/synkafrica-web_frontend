@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "@/components/ui/Buttons";
+import Buttons from "@/components/ui/Buttons";
 import {
 	ArrowRight,
 	MapPin,
@@ -85,14 +85,14 @@ export default function ExploreCarsSection() {
 					</p>
 				</div>
 				<Link href={"/car-rental"}>
-					<Button
+					<Buttons
 						variant="outline"
 						size="sm"
 						className="border border-primary-500 text-primary-500 px-4 py-2 rounded-md font-medium text-sm hover:bg-primary-50 transition"
 
 					>
 						See all cars
-					</Button>
+					</Buttons>
 				</Link>
 			</div>
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-4">
@@ -134,14 +134,14 @@ export default function ExploreCarsSection() {
 								href="/car-rental"
 								className="w-full mb-4"
 							>
-								<Button
+								<Buttons
 									variant="filled"
 									icon={<ArrowRight />}
 									size="md"
 									className="w-full"
 								>
 									Reserve
-								</Button>
+								</Buttons>
 							</Link>
 						</div>
 					</div>

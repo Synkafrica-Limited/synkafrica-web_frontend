@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "@/components/ui/Buttons"; 
+import Buttons from "@/components/ui/Buttons"; 
 import { ArrowRight,  ChevronLeft, ChevronRight } from "lucide-react";
 
 const diningData = [
@@ -115,12 +115,12 @@ export default function ExploreDiningSection() {
             </p>
           </div>
             
-            <Button
+            <Buttons
                 variant="filled"
                 icon={<ArrowRight />}
                 size="md"
                 className=" mb-4"
-              >See all</Button>
+              >See all</Buttons>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {diningData.map((item, idx) => (

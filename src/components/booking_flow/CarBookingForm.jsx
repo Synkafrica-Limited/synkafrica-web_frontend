@@ -9,7 +9,7 @@ import {
   IoPersonCircle,
   IoChevronDown
 } from 'react-icons/io5'
-import Button from '@/components/ui/Buttons'
+import Buttons from '@/components/ui/Buttons'
 import PopularDestinationsCard from './PopularDestinationsCard'
 import CalendarCard from './CalendarCard'
 import TimeSelectCard from './TimeSelectCard'
@@ -181,7 +181,7 @@ export default function CarBookingForm({
 
       {/* Search */}
       <div>
-        <Button
+        <Buttons
           variant="filled"
           size="md"
           className="w-full h-[55px] flex items-center justify-center"
@@ -195,7 +195,7 @@ export default function CarBookingForm({
           }
         >
           Search <span className="ml-2">→</span>
-        </Button>
+        </Buttons>
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
-import Button from "@/components/ui/Buttons";
+import Buttons from "@/components/ui/Buttons";
 
 function ImagePriceModal({ open, onClose, onSave, initial }) {
   const [image, setImage] = useState(initial?.image || null);
@@ -50,7 +50,7 @@ function ImagePriceModal({ open, onClose, onSave, initial }) {
                 onDrop={handleDrop}
                 onDragOver={e => e.preventDefault()}
               >
-                <Button variant="filled" size="md">Upload image</Button>
+                <Buttons variant="filled" size="md">Upload image</Buttons>
                 <span className="text-xs text-gray-400 mt-2">or drop an image</span>
                 <input
                   ref={fileInput}
@@ -81,14 +81,14 @@ function ImagePriceModal({ open, onClose, onSave, initial }) {
           </div>
         </div>
         <div className="flex w-full justify-between mt-8 border-t pt-8">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button
+          <Buttons variant="outline" onClick={onClose}>Cancel</Buttons>
+          <Buttons
             variant="filled"
             onClick={() => image && mainPrice && discountPrice && onSave({ image, mainPrice, discountPrice })}
             disabled={!image || !mainPrice || !discountPrice}
           >
             Save
-          </Button>
+          </Buttons>
         </div>
       </div>
     </div>
@@ -133,7 +133,7 @@ export default function Step5Page() {
                   <>
                     <img src={slide.image} alt="slide" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/10 flex flex-col justify-end p-2 opacity-0 group-hover:opacity-100 transition">
-                      <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); handleRemove(idx); }}>Remove</Button>
+                      <Buttons size="sm" variant="outline" onClick={e => { e.stopPropagation(); handleRemove(idx); }}>Remove</Buttons>
                     </div>
                     <div className="absolute left-2 bottom-2 bg-white/80 rounded px-2 py-1 text-xs font-semibold text-gray-800">
                       Price: ${slide.mainPrice}/{slide.discountPrice}

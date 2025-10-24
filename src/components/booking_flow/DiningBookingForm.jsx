@@ -1,7 +1,7 @@
 'use client'
 import { useState, useRef } from 'react'
 import { IoLocationOutline, IoCalendarOutline, IoPersonCircle, IoChevronDown } from 'react-icons/io5';
-import Button from '@/components/ui/Buttons';
+import Buttons from '@/components/ui/Buttons';
 import CalendarCard from './CalendarCard';
 import TimeSelectCard from './TimeSelectCard';
 import PopularDestinationsCard from './PopularDestinationsCard';
@@ -146,7 +146,7 @@ export default function DiningBookingForm({
 
       {/* Search */}
       <div className="flex flex-col justify-end">
-        <Button
+        <Buttons
           variant="filled"
           size="md"
           className="w-full h-[55px] flex items-center justify-center"
@@ -163,7 +163,7 @@ export default function DiningBookingForm({
           }
         >
           Search →
-        </Button>
+        </Buttons>
       </div>
     </div>
   );

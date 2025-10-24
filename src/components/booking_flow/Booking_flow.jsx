@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import Button from '@/components/ui/Buttons'
+import Buttons from '@/components/ui/Buttons'
 
 import CarBookingForm         from './CarBookingForm'
 import BeachBookingForm       from './BeachBookingForm'
@@ -31,7 +31,7 @@ export default function BookingFlow() {
       {/* Responsive Tabs */}
       <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-4">
         {SERVICES.map(svc => (
-          <Button
+          <Buttons
             key={svc}
             variant={activeService === svc ? 'filled' : 'none'}
             size="sm"
@@ -39,7 +39,7 @@ export default function BookingFlow() {
             className="flex-1 min-w-[120px] sm:min-w-[unset] text-xs sm:text-sm"
           >
             {svc}
-          </Button>
+          </Buttons>
         ))}
       </div>
 

@@ -380,12 +380,12 @@ export function EditProfileModal({ user, onClose, onSave }) {
               </div>
               {/* Save Button */}
               <div className="md:col-span-2 mt-4 md:mt-6 flex justify-end">
-                <Button
+                <Buttons
                   type="submit"
                   className="w-full md:w-full bg-primary-500 text-white rounded-md py-3 font-semibold text-base hover:bg-primary-600 transition disabled:opacity-50"
                 >
                   Save Information
-                </Button>
+                </Buttons>
               </div>
             </form>
           </div>

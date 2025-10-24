@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Button from "@/components/ui/Buttons";
+import Buttons from "@/components/ui/Buttons";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -15,7 +15,7 @@ function ConfirmationModal({ open, onClose, message }) {
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md flex flex-col items-center">
         <div className="text-2xl font-bold mb-4 text-center">Success!</div>
         <div className="text-gray-700 text-center mb-8">{message}</div>
-        <Button variant="filled" onClick={onClose}>OK</Button>
+        <Buttons variant="filled" onClick={onClose}>OK</Buttons>
       </div>
     </div>
   );
@@ -71,10 +71,10 @@ export default function VendorOnboardingLayout({ children }) {
           height={40}
         />
         <Link href="/">
-          <Button variant="outline" className="flex items-center space-x-1">
+          <Buttons variant="outline" className="flex items-center space-x-1">
             <ArrowLeft className="w-4 h-4" />
             <span>Exit</span>
-          </Button>
+          </Buttons>
         </Link>
       </header>
 
@@ -95,19 +95,19 @@ export default function VendorOnboardingLayout({ children }) {
         <div className="max-w-7xl mx-auto flex justify-between p-6 space-x-4">
           <div>
             {currentStep > 0 && (
-              <Button variant="outline" onClick={goBack}>
+              <Buttons variant="outline" onClick={goBack}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
-              </Button>
+              </Buttons>
             )}
           </div>
           <div>
             {currentStep < steps.length
               ? (
-                <Button variant="filled" onClick={goNext}>
+                <Buttons variant="filled" onClick={goNext}>
                   {currentStep === steps.length - 1 ? "Save" : "Next"}
                   <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                </Buttons>
               )
               : null}
           </div>

@@ -1,5 +1,5 @@
 "use client";
-import Button from "@/components/ui/Buttons";
+import Buttons from "@/components/ui/Buttons";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -30,14 +30,14 @@ export default function ThankYouPage() {
         <li>Access analytics and insights</li>
         <li>Update your payment and contact details anytime</li>
       </ul>
-      <Button
+      <Buttons
         variant="filled"
         size="lg"
         className="px-10 py-3 text-lg"
         onClick={() => router.push("/dashboard")}
       >
         Launch Dashboard
-      </Button>
+      </Buttons>
       <div className="mt-10 text-sm text-gray-400 text-center">
         Need help?{" "}
         <a

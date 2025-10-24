@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Button from "@/components/ui/Buttons";
+import Buttons from "@/components/ui/Buttons";
 import { ArrowRight } from 'lucide-react';
 import { useRouter } from "next/navigation";
 
@@ -46,7 +46,7 @@ export default function ExperiencesSection() {
             <div className="p-4 flex flex-col flex-1">
               <div className="font-semibold text-lg mb-1">{exp.title}</div>
               <div className="text-gray-500 text-sm mb-4 flex-1">{exp.desc}</div>
-              <Button
+              <Buttons
                 variant="filled"
                 icon={<ArrowRight />}
                 size="md"
@@ -54,7 +54,7 @@ export default function ExperiencesSection() {
                 onClick={() => router.push(exp.link)}
               >
                 View Details
-              </Button>
+              </Buttons>
             </div>
           </div>
         ))}

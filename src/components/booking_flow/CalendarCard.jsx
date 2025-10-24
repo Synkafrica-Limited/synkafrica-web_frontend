@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from "../ui/Buttons";
+import Buttons from '@/components/ui/Buttons';
 
 const MONTHS = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -202,7 +202,7 @@ export default function CalendarCard({
             {/* Calendar */}
             <div className="flex flex-col gap-2 items-center sm:flex-row sm:gap-4">
                 {/* Prev Month */}
-                <Button
+                <Buttons
                     variant="outline"
                     size="sm"
                     className="w-8 h-8 border border-primary-200 rounded-lg flex items-center justify-center text-primary-500 text-lg mr-0 sm:mr-2"
@@ -217,7 +217,7 @@ export default function CalendarCard({
                     type="button"
                 >
                     &#8592;
-                </Button>
+                </Buttons>
                 {/* Month 1 */}
                 {renderMonth(viewYear, viewMonth)}
                 {/* Month 2 (only for range mode) */}
@@ -225,7 +225,7 @@ export default function CalendarCard({
                     <div className="hidden sm:block">{renderMonth(nextMonthYear, nextMonth)}</div>
                 )}
                 {/* Next Month */}
-                <Button
+                <Buttons
                     variant="outline"
                     size="sm"
                     className="w-8 h-8 border border-primary-200 rounded-lg flex items-center justify-center text-primary-500 text-lg ml-0 sm:ml-2"
@@ -240,7 +240,7 @@ export default function CalendarCard({
                     type="button"
                 >
                     &#8594;
-                </Button>
+                </Buttons>
             </div>
             {/* Done Button */}
             <div className="flex justify-end mt-4">
