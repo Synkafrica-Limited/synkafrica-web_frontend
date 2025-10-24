@@ -2,18 +2,20 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
-import ShareQualificationsStep from "@/app/dashboard/business/onboarding/step3/components/ShareQualificationsStep";
+import NextDynamic from "next/dynamic";
+
+const ShareQualificationsStep = NextDynamic(
+  () =>
+    import(
+      "@/app/dashboard/business/onboarding/step3/components/ShareQualificationsStep"
+    ),
+  { ssr: false }
+);
 
 export default function Step3Page() {
   const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    // safe to access window/localStorage here
-    // const v = window.localStorage.getItem("x");
-  }, []);
-
-  if (!mounted) return null; // avoids SSR mismatch if render needs window
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
 
   return (
     <div className="p-6">
