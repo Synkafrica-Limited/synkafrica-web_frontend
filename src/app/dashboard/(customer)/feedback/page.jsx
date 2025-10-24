@@ -1,7 +1,7 @@
 // src/app/dashboard/reviews/page.jsx
 "use client";
 import { useState } from "react";
-import Button from "@/components/ui/buttons";
+import Button from "@/components/ui/Buttons";
 import { HiOutlineEmojiHappy } from "react-icons/hi";
 import FeedbackSuccess from "@/components/dashboard/customer/feedback/FeedbackSuccess";
 

@@ -1,5 +1,5 @@
 "use client";
-import Button from "@/components/ui/buttons";
+import Button from "@/components/ui/Buttons";
 import React from "react";
 import Link from "next/link";
 

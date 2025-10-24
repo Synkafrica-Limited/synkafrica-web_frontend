@@ -1,6 +1,6 @@
 // src/app/dashboard/business/onboarding/components/step4/BusinessDetailsStep.jsx
 "use client";
-import Button from "@/components/ui/buttons";
+import Button from "@/components/ui/Buttons";
 import { useState } from "react";
 
 export function AddBusinessEmail({ value, onSave, onCancel }) {

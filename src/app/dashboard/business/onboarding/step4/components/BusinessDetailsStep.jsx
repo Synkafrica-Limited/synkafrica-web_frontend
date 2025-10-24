@@ -1,8 +1,8 @@
 // src/app/dashboard/business/onboarding/components/step4/BusinessDetailsStep.jsx
 "use client";
 import { useState } from "react";
-import AddBusinessEmail from "./AddBusinessEmail";
-import AddBusinessNumber from "./AddBusinessNumber";
+import { AddBusinessEmail } from "./AddBusinessEmail";
+import { AddBusinessNumber } from "./AddBusinessNumber";
 import AddBusinessPayment from "./AddBusinessPayment";
 
 export default function BusinessDetailsStep() {

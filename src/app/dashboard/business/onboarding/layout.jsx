@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Button from "@/components/ui/buttons";
+import Button from "@/components/ui/Buttons";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
