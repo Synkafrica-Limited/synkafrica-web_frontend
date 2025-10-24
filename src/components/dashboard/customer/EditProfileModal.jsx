@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
-import Button from "../../ui/buttons";
+import Buttons from '@/components/ui/Buttons';
 import { FiCamera } from "react-icons/fi";
 import ReactCountryFlag from "react-country-flag";
 import countryList from "react-select-country-list";

@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../../components/ui/buttons"; // Adjust the import path as needed
+import Button from "@/components/ui/Buttons"; 
 
 import { ArrowRight } from "lucide-react";
 
