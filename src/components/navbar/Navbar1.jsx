@@ -14,6 +14,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showMoreDropdown, setShowMoreDropdown] = useState(false);
   const moreRef = useRef(null);
+  const hoverCloseTimeout = useRef(null);
 
   // Handle scroll to show/hide search bar
   useEffect(() => {
@@ -47,6 +48,34 @@ const Navbar1 = ({ onBecomeVendor }) => {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showMoreDropdown]);
+
+  // Helpers to add a small delay before closing the "More" dropdown
+  const openMore = () => {
+    if (hoverCloseTimeout.current) {
+      clearTimeout(hoverCloseTimeout.current);
+      hoverCloseTimeout.current = null;
+    }
+    setShowMoreDropdown(true);
+  };
+
+  const scheduleCloseMore = (delay = 200) => {
+    if (hoverCloseTimeout.current) {
+      clearTimeout(hoverCloseTimeout.current);
+    }
+    hoverCloseTimeout.current = setTimeout(() => {
+      setShowMoreDropdown(false);
+      hoverCloseTimeout.current = null;
+    }, delay);
+  };
+
+  // Cleanup any pending timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverCloseTimeout.current) {
+        clearTimeout(hoverCloseTimeout.current);
+      }
+    };
+  }, []);
 
   return (
     <nav className={`bg-white border-b border-[#f6f6f6] sticky top-0 z-50 transition-shadow duration-300 ${isScrolled ? "shadow-[0_1px_1px_0_rgba(0,0,0,0.05)]" : ""}`}>
@@ -95,8 +124,8 @@ const Navbar1 = ({ onBecomeVendor }) => {
                 <div
                   className="relative"
                   ref={moreRef}
-                  onMouseEnter={() => setShowMoreDropdown(true)}
-                  onMouseLeave={() => setShowMoreDropdown(false)}
+                  onMouseEnter={openMore}
+                  onMouseLeave={() => scheduleCloseMore(200)}
                   tabIndex={1}
                 >
                   <button
@@ -113,8 +142,8 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   {showMoreDropdown && (
                     <div
                       className="absolute left-1/2 -translate-x-1/2 mt-3 w-48 bg-white rounded-2xl shadow-lg py-3 z-50 flex flex-col space-y-1 animate-fadeIn"
-                      onMouseEnter={() => setShowMoreDropdown(true)}
-                      onMouseLeave={() => setShowMoreDropdown(false)}
+                      onMouseEnter={openMore}
+                      onMouseLeave={() => scheduleCloseMore(200)}
                       onMouseDown={e => e.preventDefault()}
                     >
                       <Link
@@ -139,7 +168,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                         Beach Resorts
                       </Link>
                       <Link
-                      href={'/signup'}
+                      href={'/home/business'}
                         className="block text-left px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 w-full"
                         onClick={() => {
                           setShowMoreDropdown(false);
@@ -210,8 +239,8 @@ const Navbar1 = ({ onBecomeVendor }) => {
                 <div
                   className="relative"
                   ref={moreRef}
-                  onMouseEnter={() => setShowMoreDropdown(true)}
-                  onMouseLeave={() => setShowMoreDropdown(false)}
+                  onMouseEnter={openMore}
+                  onMouseLeave={() => scheduleCloseMore(200)}
                   tabIndex={1}
                 >
                   <button
@@ -228,8 +257,8 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   {showMoreDropdown && (
                     <div
                       className="absolute left-1/2 -translate-x-1/2 mt-3 w-48 bg-white rounded-2xl shadow-lg py-3 z-50 flex flex-col space-y-1 animate-fadeIn"
-                      onMouseEnter={() => setShowMoreDropdown(true)}
-                      onMouseLeave={() => setShowMoreDropdown(false)}
+                      onMouseEnter={openMore}
+                      onMouseLeave={() => scheduleCloseMore(200)}
                       onMouseDown={e => e.preventDefault()}
                     >
                       <Link
@@ -254,7 +283,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                         Beach Resorts
                       </Link>
                       <Link
-                      href={'/signup'}
+                      href={'/home/business'}
                         className="block text-left px-6 py-2 text-gray-900 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 w-full"
                         onClick={() => {
                           setShowMoreDropdown(false);
@@ -308,13 +337,13 @@ const Navbar1 = ({ onBecomeVendor }) => {
                       <p className="text-xs text-gray-500">temifemi@gmail.com</p>
                     </div>
                     <Link
-                      href="/orders"
+                      href="/dashboard/bookings"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded transition-all duration-200"
                     >
-                      Orders
+                      Bookings
                     </Link>
                     <Link
-                      href="/dashboard/(customer)/feedback"
+                      href="/dashboard/feedback"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded transition-all duration-200"
                     >
                       Write a review
@@ -463,7 +492,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Laundry Services
+                  Convenience Services
                 </Link>
                 {isLoggedIn && (
                   <>
@@ -496,18 +525,11 @@ const Navbar1 = ({ onBecomeVendor }) => {
                       Profile
                     </Link>
                     <Link
-                      href="/account-info"
-                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:w-full hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Account Info
-                    </Link>
-                    <Link
-                    href={'/dashboard/business'}
+                    href={'/home/business'}
                         className=" flex py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 w-full rounded-lg transition-all duration-200 border-b border-gray-100"
                         onClick={() => {
                           setShowMoreDropdown(false);
-                          if (typeof onBecomeVendorO === "function") onBecomeVendor();
+                          if (typeof onBecomeVendor === "function") onBecomeVendor();
                         }}
                       >
                         Become a vendor
@@ -532,7 +554,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                     }}
                     className="block w-full text-left py-4 hover:px-9 text-gray-900 font-medium hover:text-red-600 transition-all duration-200 border-b border-gray-100"
                   >
-                    Sign out
+                    Sign Out
                   </button>
                 )}
               </div>

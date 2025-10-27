@@ -159,9 +159,9 @@ export default function BecomeVendorPage() {
          
 
 			{/* How it works */}
-			<section className="py-12 sm:py-16 bg-gray-200">
+			<section className="py-12 sm:py-16 bg-primary-100">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<h2 className="text-2xl sm:text-3xl font-bold text-gray-900">How it works</h2>
+					<h2 className="text-2xl sm:text-3xl font-bold text-secondary-900">How it works</h2>
 					<div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
 						{[
 							{ step: 1, title: "Create account", desc: "Tell us about your business and contact details." },
@@ -208,7 +208,7 @@ export default function BecomeVendorPage() {
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="rounded-3xl h-48 bg-linear-to-r from-primary-500 to-primary-200 text-white p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
 						<div>
-							<h3 className="text-2xl sm:text-3xl font-bold">Explore SynkAfrica</h3>
+							<h3 className="text-2xl sm:text-3xl font-bold">Explore SynkkAfrica</h3>
 							<p className="mt-2 text-white/90">Create an account instantly and start accepting bookings and payments.</p>
 						</div>
 						<div className="flex items-center gap-3">

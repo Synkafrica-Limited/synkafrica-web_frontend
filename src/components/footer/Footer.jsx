@@ -104,6 +104,14 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Beach & Resorts
+                </Link>
+              </li>
+              <li>
+                
+              </li>
+              <li>
                 <Link
                   href="/dining-reservations"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
@@ -119,22 +127,6 @@ const Footer = () => {
                   Car Rentals
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/services/flights"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Flights Bookings
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/services/vendor-listings"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Vendor listings
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -146,7 +138,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/vendor/list-cars"
+                  href="/home/business"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   List your cars
@@ -154,7 +146,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/vendor/showcase"
+                  href="/home/business"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Showcase your services
@@ -218,20 +210,21 @@ const Footer = () => {
                   Careers
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/partner"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Partner With Us
-                </Link>
-              </li>
+
               <li>
                 <Link
                   href="/explore"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Explore
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/careers"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Careers
                 </Link>
               </li>
               <li>
@@ -280,12 +273,6 @@ const Footer = () => {
               className="text-gray-600 hover:text-gray-900 transition-colors"
             >
               Careers
-            </Link>
-            <Link
-              href="/partner"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Partner With Us
             </Link>
             <Link
               href="/explore"
