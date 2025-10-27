@@ -11,42 +11,7 @@ export default function BecomeVendorPage() {
 		<>
 			<VendorSimpleNavbar />
 			<main className="min-h-screen bg-white">
-			{/* Hero */}
-			{/* <section className="relative overflow-hidden">
-			<div className="absolute inset-0 -z-10 from-orange-50 to-white bg-linear-to-b" />
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14 sm:pt-16 sm:pb-20">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-						<div>
-							<p className="uppercase tracking-wide text-xs text-orange-600 font-semibold">For African businesses</p>
-							<h1 className="text-3xl sm:text-5xl font-extrabold leading-tight text-gray-900 mt-3">
-								Become a vendor on Synkkafrica
-							</h1>
-							<p className="mt-4 text-gray-600 text-base sm:text-lg">
-								Join a premium marketplace connecting travelers and locals with verified African services
-								from hospitality and dining to experiences, logistics, and more.
-							</p>
-							<div className="mt-6 flex flex-wrap gap-3">
-								<Link href="/dashboard/business/onboarding">
-									<Button variant="filled" size="lg">Get started</Button>
-								</Link>
-								<Link href="/terms">
-									<Button variant="outline" size="lg">View vendor terms</Button>
-								</Link>
-							</div>
-							<p className="mt-3 text-xs text-gray-500">Free listing during launch. Quick verification. No code needed.</p>
-						</div>
-						<div className="relative h-56 sm:h-80 md:h-[420px]">
-							<Image
-								src="/images/brand/Synkkafrica-hero-vendors.png"
-								alt="Synkkafrica Vendors"
-								fill
-								className="object-contain"
-								priority
-							/>
-						</div>
-					</div>
-				</div>
-			</section> */}
+			
 
 			   {/* Preview Section */}
             <section className="py-12 sm:py-16 border-gray-100">
@@ -75,6 +40,94 @@ export default function BecomeVendorPage() {
 								width={2400}
 								height={1400}
 								className="w-full h-auto"
+								priority
+							/>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			{/* Partners (As featured in) */}
+			<section className="py-20 sm:py-12 bg-gray-50">
+				<div className="max-w-7xl mx-auto max-h-3xl px-4 sm:px-6 lg:px-8">
+					<p className="text-center text-xs font-semibold uppercase tracking-wider text-gray-500">Some of Our Partners </p>
+					<div className="mt-6 grid grid-cols-3 sm:grid-cols-5 items-center gap-6 sm:gap-10 text-primary-800">
+						<div className="text-2xl font-black tracking-wider text-center opacity-80">Boat Naija</div>
+						<div className="text-2xl font-black tracking-wider text-center opacity-80">Living Lagos</div>
+						<div className="text-2xl font-black tracking-wider text-center col-span-1 sm:col-span-1 opacity-80">Gladiator.ng</div>
+						<div className="hidden sm:block text-2xl font-black tracking-wider text-center opacity-80">Villamonumentvi</div>
+						<div className="hidden sm:block text-2xl font-black tracking-wider text-center opacity-80">SLUSH</div>
+					</div>
+				</div>
+			</section>
+
+			{/* Use cases */}
+			<section className="py-12 sm:py-16">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+					<h2 className="text-center text-3xl sm:text-4xl font-extrabold text-gray-900">
+						Tools built for every type of vendor
+					</h2>
+					<div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+						{[
+							{ title: "Listings", desc: "Showcase your services and attract customers.", tone: "from-primary-900 to-primary-500", icon: "💳" },
+							{ title: "Payouts", desc: "Get paid for bookings delivered on with nice rates", tone: "from-primary-600 to-primary-500", icon: "💸" },
+							{ title: "Reach", desc: "Expand your customer base and increase sales with our platform.", tone: "from-primary-400 to-primary-300", icon: "💱" },
+							{ title: "Bookings", desc: "Manage and track your bookings effortlessly.", tone: "from-primary-900 to-primary-800", icon: "👜" },
+						].map((c, idx) => (
+							<div key={idx} className={`rounded-3xl p-6 sm:p-8 text-white shadow-lg bg-linear-to-br ${c.tone}`}>
+								<div className="text-3xl">{c.icon}</div>
+								<h3 className="mt-3 text-2xl font-semibold">{c.title}</h3>
+								<p className="mt-2 text-sm/6 opacity-90">{c.desc}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
+
+			{/* Vendor overview section (replaces old hero) */}
+			<section className="py-12 sm:py-16">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center rounded-3xl border border-gray-100 bg-white p-6 sm:p-10 shadow-sm">
+						<div>
+							<p className="uppercase tracking-wide text-xs text-primary-600 font-semibold">For African businesses</p>
+							<h2 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 mt-2">
+								Built for vendors, optimized for growth
+							</h2>
+							<p className="mt-3 text-gray-600 text-base">
+								Showcase services, manage bookings, and get paid quickly—all in one premium marketplace designed for African providers.
+							</p>
+							<ul className="mt-6 space-y-4">
+								{[
+									{ title: "Verified exposure", desc: "Be discovered by travelers and locals across the continent." },
+									{ title: "Fast payouts", desc: "Reliable settlement cycles and clear earnings." },
+									{ title: "Booking management", desc: "Simple tools for availability, pricing, and reviews." },
+									{ title: "Dedicated support", desc: "We help you onboard and scale smoothly." },
+								].map((f) => (
+									<li key={f.title} className="flex items-start gap-3">
+										<span className="mt-1 w-6 h-6 rounded-full bg-primary-500/10 text-primary-600 flex items-center justify-center text-sm">✓</span>
+										<div>
+											<p className="font-semibold text-gray-900">{f.title}</p>
+											<p className="text-gray-600 text-sm">{f.desc}</p>
+										</div>
+									</li>
+								))}
+							</ul>
+
+							<div className="mt-6 flex flex-wrap gap-3">
+								<Link href="/dashboard/business/onboarding">
+									<Button variant="filled" size="md">Get started</Button>
+								</Link>
+								<Link href="/terms">
+									<Button variant="outline" size="md">View Terms</Button>
+								</Link>
+							</div>
+						</div>
+						<div className="relative h-56 sm:h-80 md:h-[360px]">
+							<Image
+								src="/images/vendor/services.png"
+								alt="Synkkafrica vendor dashboard"
+								fill
+								className="object-contain"
 								priority
 							/>
 						</div>
@@ -150,21 +203,22 @@ export default function BecomeVendorPage() {
 				</div>
 			</section>
 
-			{/* Final CTA */}
-			<section className="py-12 sm:py-16">
-				<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-					<h3 className="text-2xl sm:text-3xl font-bold text-gray-900">Ready to grow with Synkkafrica?</h3>
-					<p className="text-gray-600 mt-3">
-						Join the platform built for outstanding African businesses. It takes just a few minutes to get
-						started and go live.
-					</p>
-					<div className="mt-6 flex justify-center gap-3">
-						<Link href="/dashboard/business/onboarding">
-							<Button variant="filled" size="lg">Get started</Button>
-						</Link>
-						<Link href="/login">
-							<Button variant="outline" size="lg">I already have an account</Button>
-						</Link>
+			{/* Final CTA – gradient banner */}
+			<section className="py-10 sm:py-16">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+					<div className="rounded-3xl h-48 bg-linear-to-r from-primary-500 to-primary-200 text-white p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+						<div>
+							<h3 className="text-2xl sm:text-3xl font-bold">Explore SynkAfrica</h3>
+							<p className="mt-2 text-white/90">Create an account instantly and start accepting bookings and payments.</p>
+						</div>
+						<div className="flex items-center gap-3">
+							<Link href="/dashboard/business/onboarding">
+								<Button variant="outline" size="lg" className="rounded-full border-white text-white hover:bg-primary-200 hover:text-secondary-700">Get started →</Button>
+							</Link>
+							<Link href="/login">
+								<Button variant="filled" size="md" className="rounded-full text-secondary-700 hover:bg-white/90">Log in</Button>
+							</Link>
+						</div>
 					</div>
 				</div>
 			</section>
