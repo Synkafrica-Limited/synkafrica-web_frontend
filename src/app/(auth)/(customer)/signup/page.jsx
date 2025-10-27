@@ -97,7 +97,7 @@ export default function SignUpScreen() {
             </h1>
             <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
               Join thousands of travelers and unlock exclusive rewards
-              <br className="hidden sm:block" />
+              {/* <br className="hidden sm:block" /> */}
               across synkkafrica, Hotels.com, and Vrbo.
             </p>
           </div>

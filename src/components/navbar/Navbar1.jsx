@@ -475,7 +475,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                       Write a review
                     </Link>
                     <Link
-                      href="/dashboard/(customer)"
+                      href="/dashboard"
                       className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -489,7 +489,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                       Messages
                     </Link>
                     <Link
-                      href="/dashboard/(customer)"
+                      href="/dashboard/"
                       className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >

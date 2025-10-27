@@ -34,74 +34,78 @@ export default function Sidebar({ active }) {
 
   return (
     <>
-      {/* ── MOBILE HAMBURGER (fixed top-left) ───────────────────────────── */}
+      {/* ── MOBILE HAMBURGER (aligned with navbar style) ────────────────── */}
       <button
-        className="fixed top-4 left-4 z-50 md:hidden p-2 text-2xl text-primary-500"
+        className="fixed top-4 left-4 z-50 md:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-full transition-all duration-200"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
       >
-        <IoMenu />
+        <IoMenu className="h-6 w-6" />
       </button>
 
-      {/* ── MOBILE BACKDROP ─────────────────────────────── */}
+      {/* ── MOBILE BACKDROP (navbar style) ──────────────────────────────── */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
           onClick={() => setOpen(false)}
         />
       )}
 
-      {/* ── MOBILE DRAWER ─────────────────────────────── */}
+      {/* ── MOBILE DRAWER (match navbar: width, shadow, transitions) ───── */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50
-          w-3/4 max-w-xs bg-white shadow-2xl rounded-tr-3xl rounded-br-3xl
-          transform transition-transform duration-300
+          fixed top-0 left-0 h-full w-80 bg-white shadow-xl
+          transform transition-transform duration-300 ease-in-out z-50 md:hidden
           ${open ? "translate-x-0" : "-translate-x-full"}
-          md:hidden
         `}
+        aria-hidden={!open}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b">
-          {/* Currency selector */}
+        {/* Header row matches navbar drawer */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center space-x-2">
-            <IoGlobeOutline className="text-xl text-gray-600" />
-            <span className="text-sm font-medium text-gray-800">USD</span>
+            <div className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center">
+              <IoGlobeOutline className="text-orange-500 text-sm" />
+            </div>
+            <span className="font-medium text-gray-900">USD</span>
           </div>
-          {/* Close button */}
           <button
             onClick={() => setOpen(false)}
-            className="text-2xl text-gray-600"
+            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-full transition-all duration-200"
             aria-label="Close menu"
           >
-            <IoCloseOutline />
+            <IoCloseOutline className="h-6 w-6" />
           </button>
         </div>
-        <nav className="px-4 py-6 flex flex-col space-y-4">
-          {menu.map(({ label, icon, href }) => (
-            <Link
-              key={href + label} // Ensures uniqueness
-              href={href}
-              onClick={() => setOpen(false)}
-              className={`
-                flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 relative
-                ${active === href
-                  ? "text-primary-600 font-semibold bg-primary-50"
-                  : "text-gray-700 hover:bg-primary-50 hover:text-primary-600"}
-                group
-              `}
-            >
-              {/* Animated active indicator for mobile */}
-              {active === href && (
-                <span className="absolute right-0 top-2 bottom-2 w-1.5 rounded-l bg-primary-500 transition-all duration-300" />
-              )}
-              <span className={`text-xl transition-transform duration-200 group-hover:scale-110 ${active === href ? "text-primary-600" : ""}`}>{icon}</span>
-              <span className={`transition-colors duration-200 ${active === href ? "text-primary-600" : ""}`}>{label}</span>
-            </Link>
-          ))}
-        </nav>
+
+        {/* Links area mirrors navbar link styling */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-2">
+            {menu.map(({ label, icon, href }) => {
+              const isActive = active === href
+              return (
+                <Link
+                  key={href + label}
+                  href={href}
+                  onClick={() => setOpen(false)}
+                  className={[
+                    "flex items-center gap-3 px-6 py-4 rounded-lg transition-all duration-200 border-b border-gray-100",
+                    isActive
+                      ? "bg-primary-50 text-primary-600 font-semibold"
+                      : "text-gray-900 hover:px-9 hover:bg-primary-50 hover:text-primary-600",
+                  ].join(" ")}
+                >
+                  <span className={`text-xl ${isActive ? "text-primary-600" : "text-gray-700"}`}>
+                    {icon}
+                  </span>
+                  <span>{label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
       </aside>
 
-      {/* ── DESKTOP SIDEBAR ─────────────────────────────── */}
+      {/* ── DESKTOP SIDEBAR (unchanged) ─────────────────────────────────── */}
       <aside className="hidden md:flex md:flex-col md:w-60 bg-white border-r border-gray-200 min-h-screen">
         <div className="px-8 py-6">
           <Link href="/">
@@ -129,7 +133,6 @@ export default function Sidebar({ active }) {
                   group
                 `}
               >
-                {/* Active indicator bar */}
                 {isActive && (
                   <span className="absolute right-0 top-2 bottom-2 h-40 w-3.5 rounded-l bg-primary-500 transition-all duration-300" />
                 )}
