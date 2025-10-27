@@ -1,6 +1,9 @@
-import { redirect } from 'next/navigation';
+import CustomerExplorePage from "@/app/home/(customer)/explore.jsx";
 
 export default function HomePage() {
-  // Temporarily point root (/) to the public customer landing for testing
-  redirect('/landing_page');
+  return (
+    <main className="space-y-8">
+      <CustomerExplorePage />
+    </main>
+  );
 }

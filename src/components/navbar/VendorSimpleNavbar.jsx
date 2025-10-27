@@ -7,7 +7,7 @@ export default function VendorSimpleNavbar() {
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur supports-backdrop-filter:bg-white/70 border-b border-gray-100">
       <div className="max-w-7xl mx-auto h-20 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        <Link href="/landing_page" aria-label="Synkafrica home" className="flex items-center">
+        <Link href="/" aria-label="Synkafrica home" className="flex items-center">
           <Image
             src="/images/brand/synkafrica-logo-single.png"
             alt="Synkafrica"

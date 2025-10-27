@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import ProfileCard from "@/components/dashboard/customer/ProfileCard";
-import ProfileProgress from "@/components/dashboard/customer/ProfileProgress";
-import ProfileDetails from "@/components/dashboard/customer/ProfileDetails";
-import { EditProfileModal } from "../../../components/dashboard/customer/EditProfileModal";
+import ProfileCard from "@/components/dashboard/customer/profile/ProfileCard";
+import ProfileProgress from "@/components/dashboard/customer/profile/ProfileProgress";
+import ProfileDetails from "@/components/dashboard/customer/profile/ProfileDetails";
+import {EditProfileModal} from "@/components/dashboard/customer/profile/EditProfileModal";
 
 // --- Main Profile Page ---
 const initialUser = {
@@ -57,7 +57,7 @@ export default function ProfilePage() {
       {/* Navbar */}
       {/* <Navbar1 /> */}
       {/* Dashboard Main Content */}
-      <div className="flex-1 flex flex-col w-full h-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex-1 flex flex-col w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Dashboard Content */}
         <section className="flex-1 flex flex-col gap-6 py-6 px-2 sm:px-4 md:px-8 lg:px-16">
           <div className="flex flex-col md:flex-row gap-6 w-full">

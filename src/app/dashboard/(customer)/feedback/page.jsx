@@ -2,7 +2,6 @@
 "use client";
 import { useState } from "react";
 import Buttons from "@/components/ui/Buttons";
-import { HiOutlineEmojiHappy } from "react-icons/hi";
 import FeedbackSuccess from "@/components/dashboard/customer/feedback/FeedbackSuccess";
 
 export default function ReviewsPage() {
@@ -98,7 +97,7 @@ export default function ReviewsPage() {
           </form>
         </div>
         {/* Right: Contact Us */}
-        <aside className="w-full md:w-72 flex-shrink-0">
+        <aside className="w-full md:w-72 shrink-0">
           <div className="bg-white border border-[#E26A3D]/30 rounded-xl p-6 flex flex-col items-start shadow-sm">
             <div className="font-semibold text-base mb-2">Need to get in touch?</div>
             <div className="text-gray-600 text-sm mb-4">
