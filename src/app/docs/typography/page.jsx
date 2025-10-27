@@ -1,4 +1,4 @@
-import Heading from '@/components/ui/Heading'
+import Heading from '@/components/ui/heading'
 import DisplayText from '@/components/ui/DisplayText'
 import Text from '@/components/ui/Text'
 import Caption from '@/components/ui/Caption'

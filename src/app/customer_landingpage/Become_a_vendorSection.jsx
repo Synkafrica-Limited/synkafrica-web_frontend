@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Buttons";
+import Buttons from "@/components/ui/Buttons";
 import React from "react";
 
 export default function BecomeVendorSection() {
@@ -18,13 +18,13 @@ export default function BecomeVendorSection() {
           <div className="text-white text-sm mb-4 opacity-90">
             Create & list your product, and earn with Synkkafrica.
           </div>
-          <Button
+          <Buttons
             variant="outline"
             size="md"
             className="w-full border-2 border-white text-white bg-transparent hover:bg-black hover:text-primary-500 hover:border-primary-500 transition"
           >
             List your products <span className="ml-2 text-lg">→</span>
-          </Button>
+          </Buttons>
         </div>
       </div>
     </section>

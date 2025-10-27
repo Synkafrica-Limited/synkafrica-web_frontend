@@ -1,4 +1,4 @@
-// src/components/ui/Button.jsx
+// src/components/ui/button.jsx
 import React from 'react'
 // Example: import { ArrowRight } from 'lucide-react' or import { FaArrowRight } from 'react-icons/fa'
 

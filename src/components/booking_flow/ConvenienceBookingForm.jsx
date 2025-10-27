@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { IoCalendarOutline, IoPersonCircle, IoChevronDown, IoChevronUp } from 'react-icons/io5'
-import Button from '@/components/ui/Buttons'
+import Buttons from '@/components/ui/Buttons'
 import CalendarCard from './CalendarCard'
 import TimeSelectCard from './TimeSelectCard'
 import { formatDate } from './CarBookingForm'
@@ -187,14 +187,14 @@ export default function ConvenienceBookingForm({ onSearch = () => {} }) {
 
         {/* Search */}
         <div className="w-full md:max-w-[140px] flex-1">
-          <Button
+          <Buttons
             variant="filled"
             size="md"
             className="w-full h-[55px] flex items-center justify-center bg-[#E26A3D] hover:bg-[#d45c2e] text-white"
             type="submit"
           >
             Search →
-          </Button>
+          </Buttons>
         </div>
       </div>
     </form>

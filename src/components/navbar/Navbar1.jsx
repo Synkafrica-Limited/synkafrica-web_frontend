@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import "../ui/buttons"
+import Buttons from '@/components/ui/Buttons';
+
 
 const Navbar1 = ({ onBecomeVendor }) => {
   const [isScrolled, setIsScrolled] = useState(false);

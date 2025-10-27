@@ -1,7 +1,7 @@
 // src/app/dashboard/business/onboarding/components/step4/BusinessDetailsStep.jsx
 "use client";
 import { useState } from "react";
-import Button from "@/components/ui/Buttons";
+import Buttons from "@/components/ui/Buttons";
 
 const BANKS = [
   "Bank name",
@@ -58,21 +58,21 @@ function AddBusinessPayment({ value, onSave, onCancel }) {
           />
         </form>
         <div className="flex w-full justify-between mt-8 border-t pt-8">
-          <Button
+          <Buttons
             variant="outline"
             className="text-[#E26A3D] rounded-md px-8 py-2 font-medium hover:bg-[#E26A3D]/10 transition"
             onClick={onCancel}
           >
             Cancel
-          </Button>
-          <Button
+          </Buttons>
+          <Buttons
             variant="filled"
             className={`bg-[#E26A3D] text-white rounded-md px-8 py-2 font-medium transition ${!isValid ? "opacity-50 cursor-not-allowed" : "hover:bg-[#c2552e]"}`}
             onClick={() => isValid && onSave(form)}
             disabled={!isValid}
           >
             Save
-          </Button>
+          </Buttons>
         </div>
       </div>
     </div>
