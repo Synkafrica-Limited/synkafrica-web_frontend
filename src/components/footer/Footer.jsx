@@ -77,7 +77,7 @@ const Footer = () => {
             </a>
             <a
               href="#"
-              className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity"
+              className="w-10 h-10 bg-linear-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity"
             >
               <IoLogoInstagram className="w-5 h-5 text-white" />
             </a>

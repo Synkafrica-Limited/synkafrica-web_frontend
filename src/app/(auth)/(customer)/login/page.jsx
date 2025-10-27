@@ -93,11 +93,11 @@ export default function SignInScreen() {
           {/* Title and Description */}
           <div className="text-center space-y-3">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Sign in or create an account
+              Sign in or Create an account
             </h1>
             <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
               Unlock a world of rewards with one account across
-              <br className="hidden sm:block" />
+              {/* <br className="hidden sm:block" /> */}
               synkkafrica, Hotels.com, and Vrbo.
             </p>
           </div>

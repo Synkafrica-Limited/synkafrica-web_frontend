@@ -116,7 +116,7 @@ export default function ConvenienceBookingForm({ onSearch = () => {} }) {
                 {(POPULAR_SERVICES[mainService] || []).map((s, idx) => (
                   <li
                     key={s}
-                    className="py-2 px-2 text-sm rounded cursor-pointer text-base text-gray-800 hover:bg-gray-50"
+                    className="py-2 px-2 text-sm rounded cursor-pointer text-gray-800 hover:bg-gray-50"
                     onClick={() => {
                       setSelectedServiceType(s)
                       setServiceTypeOpen(false)
