@@ -53,7 +53,7 @@ export default function ExperiencesSection() {
                 className="w-full mb-4"
                 onClick={() => router.push(exp.link)}
               >
-                View Details
+                Explore Now!
               </Buttons>
             </div>
           </div>

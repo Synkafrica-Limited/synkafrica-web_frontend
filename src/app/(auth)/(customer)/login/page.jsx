@@ -219,13 +219,9 @@ export default function SignInScreen() {
       <div className="px-6 pb-8 pt-4">
         <p className="text-center text-xs text-gray-500 leading-relaxed">
           By continuing, you have read and agree to our{" "}
-          <button className="text-blue-600 hover:underline">
-            Terms & Condition
-          </button>{" "}
+          <Link href="/terms" className="text-blue-600 hover:underline">Terms & Conditions</Link>{" "}
           and{" "}
-          <button className="text-blue-600 hover:underline">
-            Privacy Policy
-          </button>
+          <Link href="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</Link>
         </p>
       </div>
     </div>
