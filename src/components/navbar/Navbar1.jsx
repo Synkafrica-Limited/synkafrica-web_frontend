@@ -126,10 +126,10 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 <Link
-                  href="/review"
+                  href="/dashboard/bookings"
                   className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 group"
                 >
-                  Review
+                  Bookings
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 {/* More Dropdown */}
@@ -241,10 +241,10 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 <Link
-                  href="/review"
+                  href="/dashboard/bookings"
                   className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 group"
                 >
-                  Review
+                  Bookings
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 {/* More Dropdown */}
@@ -533,7 +533,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   Write a review
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/dashboard/bookings"
                   className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
