@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dotlottie/react-player": "^1.6.19",
     "@react-icons/all-files": "^4.1.0",
     "framer-motion": "^12.18.1",
     "leaflet": "^1.9.4",
