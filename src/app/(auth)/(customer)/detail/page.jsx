@@ -1,15 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import AuthLayout from "@/components/layout/AuthLayout";
 
 export default function NameInputScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [isFirstNameFocused, setIsFirstNameFocused] = useState(false);
-  const [isLastNameFocused, setIsLastNameFocused] = useState(false);
   const [firstNameError, setFirstNameError] = useState("");
   const [lastNameError, setLastNameError] = useState("");
   const [isFirstNameTouched, setIsFirstNameTouched] = useState(false);
@@ -50,7 +46,6 @@ export default function NameInputScreen() {
   };
 
   const handleFirstNameBlur = () => {
-    setIsFirstNameFocused(false);
     setIsFirstNameTouched(true);
 
     if (!firstName.trim()) {
@@ -63,7 +58,6 @@ export default function NameInputScreen() {
   };
 
   const handleLastNameBlur = () => {
-    setIsLastNameFocused(false);
     setIsLastNameTouched(true);
 
     if (!lastName.trim()) {
@@ -94,100 +88,74 @@ export default function NameInputScreen() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 sm:p-6 bg-white">
-        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <Link href="/verify-email">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </Link>
-        </button>
-        {/* Logo */}
-        <Image
-          src="/images/brand/synkafrica-logo-single.png"
-          alt="Synk Africa Logo"
-          width={80}
-          height={30}
-        />
-        <div className="w-10"></div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-8 max-w-md mx-auto w-full">
-        <div className="w-full space-y-8">
-          {/* Title and Description */}
-          <div className="text-center space-y-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              What's your name?
-            </h1>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-              Match your account name to the ID you use when
-              <br className="hidden sm:block" />
-              traveling, like a passport or license.
-            </p>
-          </div>
-
-          {/* Name Form */}
-          <div className="space-y-6">
-            {/* First Name Input */}
-            <div className="space-y-2">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={handleFirstNameChange}
-                  onFocus={() => setIsFirstNameFocused(true)}
-                  onBlur={handleFirstNameBlur}
-                  placeholder="First name"
-                  className={`w-full px-4 py-3.5 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 ${
-                    firstNameError
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }`}
-                />
-                {firstNameError && (
-                  <p className="mt-2 text-sm text-red-600">{firstNameError}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Last Name Input */}
-            <div className="space-y-2">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={handleLastNameChange}
-                  onFocus={() => setIsLastNameFocused(true)}
-                  onBlur={handleLastNameBlur}
-                  placeholder="Last name"
-                  className={`w-full px-4 py-3.5 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 ${
-                    lastNameError
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }`}
-                />
-                {lastNameError && (
-                  <p className="mt-2 text-sm text-red-600">{lastNameError}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Continue Button */}
-            <button
-              onClick={handleContinue}
-              disabled={!isFormValid}
-              className={`w-full py-3.5 px-4 rounded-lg font-medium transition-all duration-200 ${
-                isFormValid
-                  ? "bg-primary-500 hover:bg-primary-400 active:bg-primary-600 text-white shadow-sm"
-                  : "bg-gray-200 text-white cursor-not-allowed"
+    <AuthLayout
+      title="What's your name?"
+      subtitle={
+        <>
+          Match your account name to the ID you use when
+          <br className="hidden sm:block" />
+          traveling, like a passport or license.
+        </>
+      }
+      bgGradient="bg-linear-to-br from-blue-400 via-blue-500 to-purple-800"
+      cancelHref="/validate"
+    >
+      <div className="space-y-6">
+        {/* First Name Input */}
+        <div className="space-y-2">
+          <div className="relative">
+            <input
+              type="text"
+              value={firstName}
+              onChange={handleFirstNameChange}
+              onBlur={handleFirstNameBlur}
+              placeholder="First name"
+              className={`w-full px-5 py-4 border-2 rounded-xl focus:outline-none focus:ring-0 transition-colors text-gray-900 placeholder-gray-400 ${
+                firstNameError
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-gray-900"
               }`}
-            >
-              Continue
-            </button>
+            />
+            {firstNameError && (
+              <p className="mt-2 text-sm text-red-600">{firstNameError}</p>
+            )}
           </div>
         </div>
+
+        {/* Last Name Input */}
+        <div className="space-y-2">
+          <div className="relative">
+            <input
+              type="text"
+              value={lastName}
+              onChange={handleLastNameChange}
+              onBlur={handleLastNameBlur}
+              placeholder="Last name"
+              className={`w-full px-5 py-4 border-2 rounded-xl focus:outline-none focus:ring-0 transition-colors text-gray-900 placeholder-gray-400 ${
+                lastNameError
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-gray-900"
+              }`}
+            />
+            {lastNameError && (
+              <p className="mt-2 text-sm text-red-600">{lastNameError}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Continue Button */}
+        <button
+          onClick={handleContinue}
+          disabled={!isFormValid}
+          className={`w-full py-4 px-4 rounded-xl font-medium text-white transition-all duration-200 ${
+            isFormValid
+              ? "bg-linear-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:to-primary-400 shadow-md"
+              : "bg-primary-200 cursor-not-allowed"
+          }`}
+        >
+          Continue
+        </button>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
