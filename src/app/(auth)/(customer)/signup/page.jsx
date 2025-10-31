@@ -220,13 +220,13 @@ export default function SignUpScreen() {
         <div className="text-center space-y-3">
           <p className="text-xs text-gray-500 leading-relaxed">
             By creating an account, you agree to our{" "}
-            <button className="text-blue-600 hover:underline">
+            <Link href="/terms" className="text-blue-600 hover:underline">
               Terms & Conditions
-            </button>{" "}
+            </Link>{" "}
             and{" "}
-            <button className="text-blue-600 hover:underline">
+            <Link href="/privacy-policy" className="text-blue-600 hover:underline">
               Privacy Policy
-            </button>
+            </Link>
           </p>
           <p className="text-sm text-gray-600">
             Already have an account?{" "}

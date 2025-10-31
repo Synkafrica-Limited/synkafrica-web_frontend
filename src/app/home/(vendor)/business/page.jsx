@@ -74,7 +74,7 @@ export default function BecomeVendorPage() {
 						Manage your services, availability, and pricing all in one place with our intuitive vendor dashboard.
 					</p>
 					<div className="space-y-5 mt-8 flex justify-center">
-						<Link href="/dashboard/business/onboarding">
+						<Link href="/business/signup">
 							<Button size="lg" className="rounded-full px-8">
 								Get started <span className="ml-2">→</span>
 							</Button>
@@ -173,7 +173,7 @@ export default function BecomeVendorPage() {
                             </ul>
 
                             <div className="mt-6 flex flex-wrap gap-3">
-                                <Link href="/dashboard/business/onboarding">
+                                <Link href="/business/signup">
                                     <Button variant="filled" size="md">Get started</Button>
                                 </Link>
                                 <Link href="/terms">
@@ -295,7 +295,7 @@ export default function BecomeVendorPage() {
                             <p className="mt-2 text-white/90">Create an account instantly and start accepting bookings and payments.</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Link href="/dashboard/business/onboarding">
+                            <Link href="/business/signup">
                                 <Button variant="outline" size="lg" className="rounded-full border-white text-white hover:bg-primary-200 hover:text-secondary-700">Get started →</Button>
                             </Link>
                             <Link href="/login">

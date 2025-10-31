@@ -58,7 +58,7 @@ export default function VendorSignUpScreen() {
   const handleContinue = () => {
     if (!isValid) return;
     // In a real app, submit signup here then navigate to vendor OTP validation
-    router.push("/auth/(vendor)/validate");
+    router.push("/business/validate");
   };
 
   return (
@@ -168,7 +168,7 @@ export default function VendorSignUpScreen() {
             {/* Switch to sign in */}
             <p className="text-sm text-gray-600 text-center">
               Already have a vendor account? {" "}
-              <Link href="/login" className="text-blue-600 hover:underline font-medium">Sign in</Link>
+              <Link href="/business/login" className="text-blue-600 hover:underline font-medium">Sign in</Link>
             </p>
           </div>
         </div>
