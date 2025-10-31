@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Buttons from "@/components/ui/Buttons";
 import {
 	ArrowRight,
@@ -74,77 +75,84 @@ const cars = [
 ];
 
 export default function ExploreCarsSection() {
+	const CarCard = ({ car }) => (
+		<div className="bg-white rounded-xl shadow border border-gray-100 flex flex-col overflow-hidden">
+			<div className="p-4 pb-0">
+				<Image
+					src={car.img}
+					alt={car.title}
+					width={400}
+					height={160}
+					className="h-28 w-full object-contain mb-2"
+					priority={false}
+				/>
+			</div>
+			<div className="px-4 flex flex-col flex-1">
+				<span
+					className={`inline-block px-3 py-1 rounded-full w-[90px] text-xs font-semibold text-white mb-2 ${car.labelColor}`}
+				>
+					{car.label}
+				</span>
+				<div className="font-semibold text-base mb-1">{car.title}</div>
+				<div className="text-gray-500 text-xs mb-2">{car.desc}</div>
+				<div className="flex items-center gap-2 flex-wrap text-xs text-gray-700 mb-3">
+					{car.features.map((f, i) => (
+						<span key={i} className="flex items-center gap-1">
+							<span>{f.icon}</span>
+							<span>{f.text}</span>
+						</span>
+					))}
+				</div>
+				<div className="flex items-center justify-between mt-auto mb-4">
+					<div className="flex items-end gap-1">
+						<span className="font-bold text-lg">{car.price}</span>
+						<span className="text-xs text-gray-500">{car.per}</span>
+					</div>
+				</div>
+				<Link href="/car-rental" className="w-full mb-4">
+					<Buttons variant="filled" icon={<ArrowRight />} size="sm" className="w-full py-2">
+						Reserve
+					</Buttons>
+				</Link>
+			</div>
+		</div>
+	);
+
 	return (
 		<section className="max-w-7xl mx-auto px-4 py-8">
 			<div className="flex justify-between items-center mb-1">
 				<div>
 					<h2 className="text-2xl font-semibold">Explore cars</h2>
 					<p className="text-gray-500 text-sm">
-						Explore our car services, fast and tailored to get you where you need
-						to be Hassle free.
+						Explore our car services, fast and tailored to get
+						you where you need to be Hassle free.
 					</p>
 				</div>
 				<Link href={"/car-rental"}>
 					<Buttons
 						variant="outline"
 						size="sm"
-						className="border border-primary-500 text-primary-500 px-4 py-2 rounded-md font-medium text-sm hover:bg-primary-50 transition"
-
 					>
 						See all cars
 					</Buttons>
 				</Link>
 			</div>
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-5 mt-4">
+
+			{/* Mobile: horizontal slider with snap */}
+			<div className="mt-4 -mx-4 px-4 md:hidden">
+				<div className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth">
+					{cars.map((car, idx) => (
+						<div key={car.title + idx} className="snap-start shrink-0 min-w-72 w-80">
+							<CarCard car={car} />
+						</div>
+					))}
+				</div>
+			</div>
+
+			{/* Desktop: 4-column grid */}
+			<div className="hidden md:grid md:grid-cols-4 gap-5 mt-4">
 				{cars.map((car, idx) => (
-					<div
-						key={car.title + idx}
-						className="bg-white rounded-xl shadow border border-gray-100 flex flex-col overflow-hidden"
-					>
-						<div className="p-4 pb-0">
-							<img
-								src={car.img}
-								alt={car.title}
-								className="h-28 w-full object-contain mb-2"
-							/>
-						</div>
-						<div className="px-4 flex flex-col flex-1">
-							<span
-								className={`inline-block px-3 py-1 rounded-full w-[90px] text-xs font-semibold text-white mb-2 ${car.labelColor}`}
-							>
-								{car.label}
-							</span>
-							<div className="font-semibold text-base mb-1">{car.title}</div>
-							<div className="text-gray-500 text-xs mb-2">{car.desc}</div>
-							<div className="flex items-center gap-1 text-xs text-gray-700 mb-2">
-								{car.features.map((f, i) => (
-									<span key={i} className="flex items-center gap-1">
-										<span>{f.icon}</span>
-										<span>{f.text}</span>
-									</span>
-								))}
-							</div>
-							<div className="flex items-center justify-between mt-auto mb-4">
-								<div className="flex items-end gap-1">
-									<span className="font-bold text-lg">{car.price}</span>
-									<span className="text-xs text-gray-500">{car.per}</span>
-								</div>
-							</div>
-							<Link
-								href="/car-rental"
-								className="w-full mb-4"
-							>
-								<Buttons
-									variant="filled"
-									icon={<ArrowRight />}
-									size="md"
-									className="w-full"
-								>
-									Reserve
-								</Buttons>
-							</Link>
-						</div>
-					</div>
+					<CarCard key={car.title + idx} car={car} />
 				))}
 			</div>
 		</section>

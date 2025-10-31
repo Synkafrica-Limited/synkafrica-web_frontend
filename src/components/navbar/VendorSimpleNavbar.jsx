@@ -18,10 +18,10 @@ export default function VendorSimpleNavbar() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <Link href="/login">
+          <Link href="/business/login">
             <Buttons variant="outline" size="sm" className="text-md rounded-full px-6">Log in</Buttons>
           </Link>
-          <Link href="/dashboard/business/onboarding">
+          <Link href="/business/signup">
             <Buttons variant="filled" size="sm" className="text-md rounded-full px-8">Get started</Buttons>
           </Link>
         </div>

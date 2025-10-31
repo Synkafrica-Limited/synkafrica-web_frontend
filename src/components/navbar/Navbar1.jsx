@@ -77,8 +77,20 @@ const Navbar1 = ({ onBecomeVendor }) => {
     };
   }, []);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isMobileMenuOpen]);
+
   return (
-    <nav className={`bg-white border-b border-[#f6f6f6] sticky top-0 z-50 transition-shadow duration-300 ${isScrolled ? "shadow-[0_1px_1px_0_rgba(0,0,0,0.05)]" : ""}`}>
+    <>
+    <nav className={`sticky top-0 z-50 bg-white/90 backdrop-blur supports-backdrop-filter:bg-white/70 border-b border-gray-100 transition-shadow duration-300 ${isScrolled ? "shadow-[0_1px_1px_0_rgba(0,0,0,0.05)]" : ""}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center h-18">
           {/* Brand Logo */}
@@ -114,10 +126,10 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 <Link
-                  href="/review"
+                  href="/dashboard/bookings"
                   className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 group"
                 >
-                  Review
+                  Bookings
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 {/* More Dropdown */}
@@ -229,10 +241,10 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 <Link
-                  href="/review"
+                  href="/dashboard/bookings"
                   className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 group"
                 >
-                  Review
+                  Bookings
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
                 {/* More Dropdown */}
@@ -307,12 +319,8 @@ const Navbar1 = ({ onBecomeVendor }) => {
 
             {!isLoggedIn ? (
               // Sign In Button
-              <button
-                onClick={toggleLogin}
-                className="bg-primary-500 text-white px-6 py-2 rounded-lg hover:bg-primary-400 active:bg-primary-600 transition-colors font-medium duration-200"
-              >
-                Sign In
-              </button>
+              <Buttons variant="filled" size="md" className="rounded-full text-secondary-700 hover:bg-primary-200/90" onClick={toggleLogin}>Sign In</Buttons>
+
             ) : (
               // User Profile
               <div className="relative group">
@@ -329,6 +337,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
 
                 {/* Profile Dropdown */}
                 {showProfileDropdown && (
+                  
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 animate-fadeIn">
                     <div className="px-4 py-2 border-b border-gray-100">
                       <p className="text-sm font-medium text-gray-900">
@@ -354,13 +363,15 @@ const Navbar1 = ({ onBecomeVendor }) => {
                     >
                       Profile
                     </Link>
-                    <div className="border-t border-gray-100 mt-1">
-                      <button
+                    <div className="border-t border-gray-100 mt-1 px-2 py-2">
+                      <Buttons
                         onClick={toggleLogin}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition-all duration-200"
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
                       >
                         Sign Out
-                      </button>
+                      </Buttons>
                     </div>
                   </div>
                 )}
@@ -420,147 +431,6 @@ const Navbar1 = ({ onBecomeVendor }) => {
           </div>
         </div>
 
-        {/* Mobile Sidebar Overlay */}
-        {isMobileMenuOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden animate-fadeIn"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-        )}
-
-        {/* Mobile Sidebar */}
-        <div
-          className={`fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
-          <div className="flex flex-col h-full">
-            {/* Sidebar Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center transition-colors duration-200 hover:border-primary-500">
-                  <span className="text-orange-500 text-xs">🌍</span>
-                </div>
-                <span className="font-medium text-gray-900">USD</span>
-              </div>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-full transition-all duration-200"
-              >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* Sidebar Content */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-6 space-y-1">
-                <Link
-                  href="/car-rental"
-                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Car rental
-                </Link>
-                <Link
-                  href="/dining"
-                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Dining
-                </Link>
-                <Link
-                  href="/beach-resorts"
-                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Beach & Resorts
-                </Link>
-                <Link
-                  href="/laundry-service"
-                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Convenience Services
-                </Link>
-                {isLoggedIn && (
-                  <>
-                    <Link
-                      href="/write-review"
-                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Write a review
-                    </Link>
-                    <Link
-                      href="/dashboard"
-                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Bookings
-                    </Link>
-                    <Link
-                      href="/messages"
-                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Messages
-                    </Link>
-                    <Link
-                      href="/dashboard/"
-                      className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                    href={'/home/business'}
-                        className=" flex py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 w-full rounded-lg transition-all duration-200 border-b border-gray-100"
-                        onClick={() => {
-                          setShowMoreDropdown(false);
-                          if (typeof onBecomeVendor === "function") onBecomeVendor();
-                        }}
-                      >
-                        Become a vendor
-                      </Link>
-                  </>
-                )}
-                {!isLoggedIn ? (
-                  <button
-                    onClick={() => {
-                      toggleLogin();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full mt-6 bg-primary-500 text-white px-6 py-3 rounded-full hover:bg-primary-600 transition-colors font-medium duration-200"
-                  >
-                    Sign In
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      toggleLogin();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="block w-full text-left py-4 hover:px-9 text-gray-900 font-medium hover:text-red-600 transition-all duration-200 border-b border-gray-100"
-                  >
-                    Sign Out
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
       {/* Click outside to close dropdown */}
       {showProfileDropdown && (
@@ -579,6 +449,152 @@ const Navbar1 = ({ onBecomeVendor }) => {
         }
       `}</style>
     </nav>
+    {/* Mobile Sidebar Overlay (moved outside nav to avoid backdrop/stacking issues) */}
+    {isMobileMenuOpen && (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden animate-fadeIn"
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+    )}
+
+    {/* Mobile Sidebar (moved outside nav for proper fixed positioning) */}
+    <div
+      className={`fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
+      <div className="flex flex-col h-full">
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center transition-colors duration-200 hover:border-primary-500">
+              <span className="text-orange-500 text-xs">🌍</span>
+            </div>
+            <span className="font-medium text-gray-900">USD</span>
+          </div>
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded-full transition-all duration-200"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Sidebar Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-1">
+            <Link
+              href="/car-rental"
+              className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Car rental
+            </Link>
+            <Link
+              href="/dining"
+              className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Dining
+            </Link>
+            <Link
+              href="/beach-resorts"
+              className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Beach & Resorts
+            </Link>
+            <Link
+              href="/laundry-service"
+              className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Convenience Services
+            </Link>
+            {isLoggedIn && (
+              <>
+                <Link
+                  href="/write-review"
+                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Write a review
+                </Link>
+                <Link
+                  href="/dashboard/bookings"
+                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Bookings
+                </Link>
+                <Link
+                  href="/messages"
+                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Messages
+                </Link>
+                <Link
+                  href="/dashboard/"
+                  className="block py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                <Link
+                href={'/home/business'}
+                    className=" flex py-4 hover:px-9 text-gray-900 font-medium hover:bg-primary-50 hover:text-primary-600 w-full rounded-lg transition-all duration-200 border-b border-gray-100 animate-fadeIn"
+                    onClick={() => {
+                      setShowMoreDropdown(false);
+                      if (typeof onBecomeVendor === "function") onBecomeVendor();
+                    }}
+                  >
+                    Become a vendor
+                  </Link>
+              </>
+            )}
+            {!isLoggedIn ? (
+              <Buttons
+                onClick={() => {
+                  toggleLogin();
+                  setIsMobileMenuOpen(false);
+                }}
+                variant="filled"
+                size="md"
+                className="w-full mt-6 rounded-full"
+              >
+                Sign In
+              </Buttons>
+            ) : (
+              <Buttons
+                onClick={() => {
+                  toggleLogin();
+                  setIsMobileMenuOpen(false);
+                }}
+                variant="outline"
+                size="md"
+                className="w-full text-left border-red-200 text-red-600 hover:bg-red-50"
+              >
+                Sign Out
+              </Buttons>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+    </>
   );
 };
 
