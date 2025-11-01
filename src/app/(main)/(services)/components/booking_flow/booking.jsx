@@ -83,7 +83,7 @@ export default function BookingForm({
   serviceType = 'laundry',
   initialContactDetails,
   initialAddressDetails,
-  companyName = 'syncafrica',
+  companyName = 'Synkkafrica',
   onBookingComplete
 }) {
   const config = serviceConfigs[serviceType];

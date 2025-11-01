@@ -33,7 +33,7 @@ export default function VendorEmailValidationScreen() {
   const handleContinue = () => {
     if (!isValid) return;
     // After successful verification, take vendors to onboarding
-    router.push("/dashboard/business/onboarding");
+    router.push("/business/onboarding");
   };
 
   const handleResend = async () => {
