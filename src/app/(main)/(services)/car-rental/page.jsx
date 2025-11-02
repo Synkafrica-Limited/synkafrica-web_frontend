@@ -2,12 +2,10 @@
 
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Filter,
-  X,
-} from "lucide-react";
+import { Filter, X } from "lucide-react";
 
 import CarCard from "./components/CarCard";
+import CarRentalBooking from "./components/BookingInput";
 
 const CarRental = () => {
   const router = useRouter();
@@ -195,89 +193,77 @@ const CarRental = () => {
     return <CarDetailsPage car={selectedCar} onBack={handleBackToListing} />;
   }
 
+  const handleSearch = (data) => {
+    console.log("Search data:", data);
+    // Handle search logic
+  };
+
   return (
-    <div className="min-h-screen">
-      {/* Custom scrollbar styles */}
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
+    <div>
+      <div className="container mx-auto p-8">
+        <CarRentalBooking onSearch={handleSearch} />
+      </div>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar Filters - Desktop */}
-          <div className="hidden lg:block">
-            <FilterSidebar
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              selectedLocation={selectedLocation}
-              onLocationChange={setSelectedLocation}
-            />
-          </div>
+      <div className="min-h-screen">
+        {/* Custom scrollbar styles */}
+        <style jsx>{`
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
 
-          {/* Mobile Filter Overlay */}
-          {showFilters && (
-            <div
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 lg:hidden"
-              onClick={() => setShowFilters(false)}
-            >
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Sidebar Filters - Desktop */}
+            <div className="hidden lg:block">
+              <FilterSidebar
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                selectedLocation={selectedLocation}
+                onLocationChange={setSelectedLocation}
+              />
+            </div>
+
+            {/* Mobile Filter Overlay */}
+            {showFilters && (
               <div
-                className="absolute inset-y-0 left-0 w-80 bg-white/95 backdrop-blur-md shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 lg:hidden"
+                onClick={() => setShowFilters(false)}
               >
-                <div className="flex items-center justify-between p-4 border-b border-gray-200/50">
-                  <h2 className="text-lg font-semibold">Filters</h2>
-                  <button
-                    onClick={() => setShowFilters(false)}
-                    className="p-2 hover:bg-gray-100/50 rounded-lg transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
-                  <FilterSidebar
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                    selectedLocation={selectedLocation}
-                    onLocationChange={setSelectedLocation}
-                  />
+                <div
+                  className="absolute inset-y-0 left-0 w-80 bg-white/95 backdrop-blur-md shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between p-4 border-b border-gray-200/50">
+                    <h2 className="text-lg font-semibold">Filters</h2>
+                    <button
+                      onClick={() => setShowFilters(false)}
+                      className="p-2 hover:bg-gray-100/50 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+                    <FilterSidebar
+                      filters={filters}
+                      onFilterChange={handleFilterChange}
+                      selectedLocation={selectedLocation}
+                      onLocationChange={setSelectedLocation}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col">
-            {/* Header with Filter Button */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="hidden lg:block">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  {filteredCars.length} cars have been filtered specifically for
-                  you
-                </h1>
-                <p className="text-gray-600">Total include taxes</p>
-              </div>
-
-              {/* Mobile Filter Button */}
-              <button
-                onClick={() => setShowFilters(true)}
-                className="lg:hidden flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors ml-auto"
-              >
-                <Filter className="w-4 h-4" />
-                Filter
-              </button>
-            </div>
-
-            {/* Scrollable Car Grid */}
-            <div className="flex-1 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-hide">
-              <div className="grid gap-4 pr-2">
-                {/* Header that scrolls with content */}
-                <div className="mb-2 lg:hidden">
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col">
+              {/* Header with Filter Button */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="hidden lg:block">
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">
                     {filteredCars.length} cars have been filtered specifically
                     for you
@@ -285,13 +271,36 @@ const CarRental = () => {
                   <p className="text-gray-600">Total include taxes</p>
                 </div>
 
-                {filteredCars.map((car) => (
-                  <CarCard
-                    key={car.id}
-                    car={car}
-                    onClick={() => handleCarClick(car)}
-                  />
-                ))}
+                {/* Mobile Filter Button */}
+                <button
+                  onClick={() => setShowFilters(true)}
+                  className="lg:hidden flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors ml-auto"
+                >
+                  <Filter className="w-4 h-4" />
+                  Filter
+                </button>
+              </div>
+
+              {/* Scrollable Car Grid */}
+              <div className="flex-1 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-hide">
+                <div className="grid gap-4 pr-2">
+                  {/* Header that scrolls with content */}
+                  <div className="mb-2 lg:hidden">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                      {filteredCars.length} cars have been filtered specifically
+                      for you
+                    </h1>
+                    <p className="text-gray-600">Total include taxes</p>
+                  </div>
+
+                  {filteredCars.map((car) => (
+                    <CarCard
+                      key={car.id}
+                      car={car}
+                      onClick={() => handleCarClick(car)}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -413,6 +422,5 @@ const FilterSidebar = ({
     </div>
   );
 };
-
 
 export default CarRental;
