@@ -28,7 +28,7 @@ import {
 const ServiceDetails = ({ 
   service, 
   onReserve, 
-  platformName = "Syncafrica",
+  platformName = "Synkkafrica",
   platformTheme = {
     primary: "bg-primary-500",
     primaryHover: "bg-primary-600"

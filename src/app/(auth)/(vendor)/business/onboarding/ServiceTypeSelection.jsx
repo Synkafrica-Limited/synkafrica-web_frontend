@@ -18,7 +18,7 @@ export default function ServiceTypeSelection() {
 
   function goNext() {
     if (!selected) return;
-    router.push(`/dashboard/vendor/onboarding/services/${selected}`);
+    router.push(`/business/onboarding/services/${selected}`);
   }
 
   return (

@@ -26,11 +26,11 @@ export default function VendorOnboardingLayout({ children }) {
   const router = useRouter();
 
   const steps = [
-    "/dashboard/business/onboarding",
-    "/dashboard/business/onboarding/step2",
-    "/dashboard/business/onboarding/step3",
-    "/dashboard/business/onboarding/step4",
-    "/dashboard/business/onboarding/step5",
+    "/business/onboarding",
+    "/business/onboarding/step2",
+    "/business/onboarding/step3",
+    "/business/onboarding/step4",
+    "/business/onboarding/step5",
   ];
 
   const currentStep = steps.findIndex(

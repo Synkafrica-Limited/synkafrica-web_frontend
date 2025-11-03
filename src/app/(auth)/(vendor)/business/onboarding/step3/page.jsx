@@ -7,7 +7,7 @@ import NextDynamic from "next/dynamic";
 const ShareQualificationsStep = NextDynamic(
   () =>
     import(
-      "@/app/dashboard/business/onboarding/step3/components/ShareQualificationsStep"
+      "@/app/business/onboarding/step3/components/ShareQualificationsStep"
     ),
   { ssr: false }
 );

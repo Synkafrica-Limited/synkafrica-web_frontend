@@ -41,9 +41,9 @@ export default function VendorSignInScreen() {
 
   const handleSignIn = () => {
     if (!isValid) return;
-    // Handle vendor sign in
+    // Handle vendor sign in - existing users go directly to dashboard
     console.log("Vendor sign in:", { email, password, rememberMe });
-    router.push("/dashboard/business/onboarding");
+    router.push("/dashboard/business/home");
   };
 
   const handleGoogleSignIn = () => {

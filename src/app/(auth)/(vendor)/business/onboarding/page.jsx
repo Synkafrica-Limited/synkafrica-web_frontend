@@ -1,6 +1,6 @@
 // app/dashboard/vendor/page.jsx
 "use client";
-import ServiceTypeSelection from "@/app/dashboard/business/onboarding/ServiceTypeSelection";
+import ServiceTypeSelection from "./ServiceTypeSelection";
 
 export default function VendorIntroPage() {
   return (

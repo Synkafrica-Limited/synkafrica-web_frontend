@@ -1,5 +1,5 @@
 "use client";
-import VendorOnboardingIntro from "@/app/dashboard/business/onboarding/step2/VendorOnboardingIntro";
+import VendorOnboardingIntro from "./VendorOnboardingIntro";
 
 export default function Step2Page() {
   return (
