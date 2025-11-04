@@ -187,7 +187,7 @@ export default function HomePageHero() {
           </h1>
 
           {/* Features */}
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mt-[20px]">
             {content.features.map((feature, index) => (
               <div key={index} className="text-gray-600 text-sm sm:text-base">
                 {feature}
