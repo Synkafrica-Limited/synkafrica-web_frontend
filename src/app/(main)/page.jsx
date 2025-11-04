@@ -1,7 +1,9 @@
 import HomePageHero from "../customer_landingpage/components/HeroSection";
-import AboutService from "../customer_landingpage/components/AboutService";
-import OtherServicesLinks from "../customer_landingpage/components/OtherServicesLinks";
-import CarRentalService from "../customer_landingpage/components/CarRentalService";
+import AboutService from "../customer_landingpage/components/AboutServiceSection";
+import OtherServicesLinks from "../customer_landingpage/components/OtherServicesLinksSection";
+import CarRentalService from "../customer_landingpage/components/CarRentalServiceSection";
+import FAQComponent from "../customer_landingpage/components/FaqSection.jsx";
+import ExploreOtherServices from "../customer_landingpage/components/ExploreOtherServicesSection"
 
 export default function HomePage() {
   return (
@@ -11,6 +13,8 @@ export default function HomePage() {
         <AboutService service="car" />
         <CarRentalService />
         <OtherServicesLinks />
+        <ExploreOtherServices />
+        <FAQComponent />
         {/* <ExperiencesSection /> */}
         {/* <BecomeVendorSection /> */}
         {/* <ExploreCarsSection /> */}

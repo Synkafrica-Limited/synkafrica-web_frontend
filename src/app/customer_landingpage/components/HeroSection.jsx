@@ -160,7 +160,7 @@ export default function HomePageHero() {
   const content = serviceContent[activeService];
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 mt-[80px]">
+    <div className="p-4 sm:p-6 md:p-8 mt-[30px] sm:mt-[80px]">
       <div className="max-w-6xl mx-auto">
         {/* Service Navigation */}
         <div className="flex flex-wrap gap-1 sm:gap-2 mb-0 sm:mb-0">
@@ -187,15 +187,20 @@ export default function HomePageHero() {
           </h1>
 
           {/* Features */}
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mt-[20px]">
-            {content.features.map((feature, index) => (
-              <div key={index} className="text-gray-600 text-sm sm:text-base">
-                {feature}
-              </div>
-            ))}
-          </div>
+                <div className="relative mt-[20px]">
+                <div className="flex overflow-x-auto gap-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+                  {content.features.map((feature, index) => (
+                  <div
+                    key={index}
+                    className="text-gray-600 text-sm sm:text-base whitespace-nowrap flex-shrink-0"
+                  >
+                    {feature}
+                  </div>
+                  ))}
+                </div>
+                </div>
 
-          {/* Dynamic booking inputs */}
+                {/* Dynamic booking inputs */}
           {activeService === "car" && (
             <CarRentalBookingInputs onSearch={handleSearch} />
           )}
