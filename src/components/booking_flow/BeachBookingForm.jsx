@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { IoLocationOutline, IoCalendarOutline } from 'react-icons/io5';
-import Button from '@/components/ui/Buttons';
+import Buttons from '@/components/ui/Buttons';
 import CalendarCard from './CalendarCard';
 import PopularDestinationsCard from './PopularDestinationsCard';
 import { GuestSelectorDropdown } from './GuestSelectorDropdown';
@@ -108,7 +108,7 @@ export default function BeachBookingForm({
       </div>
       {/* Search */}
       <div>
-        <Button
+        <Buttons
           variant="filled"
           size="md"
           className="w-full h-[55px] flex items-center justify-center"
@@ -125,7 +125,7 @@ export default function BeachBookingForm({
           }
         >
           Search <span className="ml-2">→</span>
-        </Button>
+        </Buttons>
       </div>
     </div>
   );

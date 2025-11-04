@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import Button from "../ui/buttons";
+import Buttons from '@/components/ui/Buttons'
 //icon
 import { IoLogoTwitter, IoLogoFacebook, IoArrowForward, IoLogoInstagram } from "react-icons/io5";
 
@@ -77,7 +77,7 @@ const Footer = () => {
             </a>
             <a
               href="#"
-              className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity"
+              className="w-10 h-10 bg-linear-to-br from-purple-500 to-primary-500 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity"
             >
               <IoLogoInstagram className="w-5 h-5 text-white" />
             </a>
@@ -104,6 +104,14 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Beach & Resorts
+                </Link>
+              </li>
+              <li>
+                
+              </li>
+              <li>
                 <Link
                   href="/dining-reservations"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
@@ -119,22 +127,6 @@ const Footer = () => {
                   Car Rentals
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/services/flights"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Flights Bookings
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/services/vendor-listings"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Vendor listings
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -146,7 +138,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/vendor/list-cars"
+                  href="/home/business"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   List your cars
@@ -154,7 +146,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/vendor/showcase"
+                  href="/home/business"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Showcase your services
@@ -169,22 +161,22 @@ const Footer = () => {
               Contact
             </h3>
             <div className="space-y-3 text-gray-600">
-              <p>Victoria Island, Maryland</p>
-              <p>Expressway, Lagos State</p>
+              <p>3 Adamo Street, Lekki Phase 1</p>
+              <p>Lagos State</p>
               <p className="mt-4">
                 <a
-                  href="tel:+2340812323392"
+                  href="tel:+1 8573 032 9886"
                   className="hover:text-gray-900 transition-colors"
                 >
-                  +234 0812 323 392
+                  +1 8573 032 9886
                 </a>
               </p>
               <p>
                 <a
-                  href="tel:+2340812123392"
+                  href="tel:+1 8573 032 9886"
                   className="hover:text-gray-900 transition-colors"
                 >
-                  +234 0812 123 392
+                  +1 8573 032 9886
                 </a>
               </p>
               <p className="mt-4">
@@ -218,20 +210,21 @@ const Footer = () => {
                   Careers
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/partner"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Partner With Us
-                </Link>
-              </li>
+
               <li>
                 <Link
                   href="/explore"
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   Explore
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/careers"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Careers
                 </Link>
               </li>
               <li>
@@ -252,7 +245,7 @@ const Footer = () => {
             Copyright © 2025 synKKafrica | All Right Reserved
           </p>
           <Link href="/signup">
-          <Button
+          <Buttons
             variant="filled"
             icon={
               <IoArrowForward className="w-5 h-5" />
@@ -261,7 +254,7 @@ const Footer = () => {
             size="md"
           >
             Sign Up
-          </Button>
+          </Buttons>
           </Link>
           
         </div>
@@ -280,12 +273,6 @@ const Footer = () => {
               className="text-gray-600 hover:text-gray-900 transition-colors"
             >
               Careers
-            </Link>
-            <Link
-              href="/partner"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Partner With Us
             </Link>
             <Link
               href="/explore"

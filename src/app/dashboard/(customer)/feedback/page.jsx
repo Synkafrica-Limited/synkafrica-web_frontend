@@ -1,8 +1,7 @@
 // src/app/dashboard/reviews/page.jsx
 "use client";
 import { useState } from "react";
-import Button from "@/components/ui/buttons";
-import { HiOutlineEmojiHappy } from "react-icons/hi";
+import Buttons from "@/components/ui/Buttons";
 import FeedbackSuccess from "@/components/dashboard/customer/feedback/FeedbackSuccess";
 
 export default function ReviewsPage() {
@@ -82,7 +81,7 @@ export default function ReviewsPage() {
                 required
               />
             </div>
-            <Button
+            <Buttons
               variant="filled"
               size="md"
               type="submit"
@@ -94,24 +93,24 @@ export default function ReviewsPage() {
               }`}
             >
               {sending ? "Sending..." : "Send review"}
-            </Button>
+            </Buttons>
           </form>
         </div>
         {/* Right: Contact Us */}
-        <aside className="w-full md:w-72 flex-shrink-0">
+        <aside className="w-full md:w-72 shrink-0">
           <div className="bg-white border border-[#E26A3D]/30 rounded-xl p-6 flex flex-col items-start shadow-sm">
             <div className="font-semibold text-base mb-2">Need to get in touch?</div>
             <div className="text-gray-600 text-sm mb-4">
               If you do have a specific question, or need help resolving a problem, you can connect with our support team.
             </div>
-            <Button
+            <Buttons
               variant="outline"
               size="md"
               className="border border-[#E26A3D] text-[#E26A3D] rounded-md px-6 py-2 font-medium hover:bg-[#E26A3D]/10 transition"
               onClick={() => window.open("mailto:info@synkkafrica.com", "_blank")}
             >
               Contact us
-            </Button>
+            </Buttons>
           </div>
         </aside>
       </div>
