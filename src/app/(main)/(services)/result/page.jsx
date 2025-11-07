@@ -338,8 +338,13 @@ export default function ServiceResult() {
       const data = await response.json();
       setListings(data.listings || []);
     } catch (err) {
-      setError(err.message);
-      setListings([]);
+      setError(false);
+      //   TODO: use mocklist here for now
+      //   TODO: Change this
+      // setError(err.message);
+      //   setListings([]);
+      setLoading(false);
+      setListings(mockListings[service] || []);
     } finally {
       setLoading(false);
     }
@@ -615,11 +620,11 @@ export default function ServiceResult() {
               </div>
 
               {loading ? (
-                <div>Loading...</div> 
+                <div>Loading...</div>
               ) : error ? (
-                <div>Error occurred: {error.message}</div> 
+                <div>Error occurred: {error.message}</div>
               ) : listings.length === 0 ? (
-                <div>No listings found.</div> 
+                <div>No listings found.</div>
               ) : (
                 <div
                   className={`grid gap-6 ${
