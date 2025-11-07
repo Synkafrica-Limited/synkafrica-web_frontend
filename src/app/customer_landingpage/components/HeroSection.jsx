@@ -116,7 +116,7 @@ export default function HomePageHero() {
         date: data.bookingDate,
         time: data.bookingTime,
       }).toString();
-      window.location.href = `/water-recreation/listings?${queryParams}`;
+      window.location.href = `/result/?${queryParams}`;
       return;
     }
 
@@ -127,7 +127,7 @@ export default function HomePageHero() {
         date: data.pickupDate,
         time: data.pickupTime,
       }).toString();
-      window.location.href = `/car-rental/listings?${queryParams}`;
+      window.location.href = `/result/?${queryParams}`;
       return;
     }
 
@@ -138,7 +138,7 @@ export default function HomePageHero() {
         checkin: data.checkInDate,
         time: data.checkInTime,
       }).toString();
-      window.location.href = `/resort-house/listings?${queryParams}`;
+      window.location.href = `/result/?${queryParams}`;
       return;
     }
 
@@ -150,7 +150,7 @@ export default function HomePageHero() {
         time: data.bookingTime,
         guests: data.guests,
       }).toString();
-      window.location.href = `/dining/listings?${queryParams}`;
+      window.location.href = `/result/?${queryParams}`;
       return;
     }
 
@@ -160,7 +160,7 @@ export default function HomePageHero() {
   const content = serviceContent[activeService];
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 mt-[30px] sm:mt-[80px]">
+    <div className="p-4 sm:p-6 md:p-8 mt-[30px] sm:mt-[20px]">
       <div className="max-w-6xl mx-auto">
         {/* Service Navigation */}
         <div className="flex flex-wrap gap-1 sm:gap-2 mb-0 sm:mb-0">
@@ -170,7 +170,7 @@ export default function HomePageHero() {
               onClick={() => setActiveService(service.id)}
               className={`flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
                 activeService === service.id
-                  ? "bg-black text-white"
+                  ? "bg-[#1F2937] text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
               }`}
             >
@@ -182,25 +182,39 @@ export default function HomePageHero() {
 
         {/* Hero Content */}
         <div className="mb-0 sm:mb-0 mt-[40px]">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-0 sm:mb-0 leading-tight whitespace-pre-line">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-bold text-gray-900 mb-0 sm:mb-0 leading-tight whitespace-pre-line">
             {content.heading}
           </h1>
 
           {/* Features */}
-                <div className="relative mt-[20px]">
-                <div className="flex overflow-x-auto gap-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                  {content.features.map((feature, index) => (
-                  <div
-                    key={index}
-                    className="text-gray-600 text-sm sm:text-base whitespace-nowrap flex-shrink-0"
+          <div className="relative mt-[20px]">
+            <div className="flex overflow-x-auto gap-24 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+              {content.features.map((feature, index) => (
+                <div
+                  key={index}
+                  className="text-gray-600 text-[14px] whitespace-nowrap flex-shrink-0 flex items-center gap-2"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-green-600"
                   >
-                    {feature}
-                  </div>
-                  ))}
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  {feature}
                 </div>
-                </div>
+              ))}
+            </div>
+          </div>
 
-                {/* Dynamic booking inputs */}
+          {/* Dynamic booking inputs */}
           {activeService === "car" && (
             <CarRentalBookingInputs onSearch={handleSearch} />
           )}
@@ -218,7 +232,7 @@ export default function HomePageHero() {
           )}
 
           {/* Stats Component */}
-          <div className="mt-6 sm:mt-8 bg-[#FBFBFB] rounded-2xl border border-[#EAEAEA] p-4 sm:p-6">
+          <div className="mt-6 sm:mt-8 bg-[#FFF] rounded-2xl border border-[#EAEAEA] p-4 sm:p-6">
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
               {content.stats.map((stat, index) => (
                 <div key={index} className="text-center">

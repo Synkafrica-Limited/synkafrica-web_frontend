@@ -120,8 +120,8 @@ const ResortHouseBookingInputs = ({ onSearch }) => {
                 setShowSuggestions(true);
               }
             }}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
-              errors.destination ? 'border-red-500' : 'border-gray-300'
+            className={`px-4 py-3 rounded-lg focus:outline-none border-3 border-primary-500 ${
+              errors.destination ? 'border-red-500' : ''
             }`}
           />
           {showSuggestions && (
@@ -159,8 +159,8 @@ const ResortHouseBookingInputs = ({ onSearch }) => {
               }
             }}
             min={new Date().toISOString().split('T')[0]}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
-              errors.checkInDate ? 'border-red-500' : 'border-gray-300'
+            className={`px-4 py-3 rounded-lg focus:outline-none border-3 border-primary-500 ${
+              errors.checkInDate ? 'border-red-500' : ''
             }`}
           />
           {errors.checkInDate && (
@@ -178,8 +178,8 @@ const ResortHouseBookingInputs = ({ onSearch }) => {
                 setErrors({ ...errors, checkInTime: '' });
               }
             }}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
-              errors.checkInTime ? 'border-red-500' : 'border-gray-300'
+            className={`px-4 py-3 rounded-lg focus:outline-none border-3 border-primary-500 ${
+              errors.checkInTime ? 'border-red-500' : ''
             }`}
           />
           {errors.checkInTime && (

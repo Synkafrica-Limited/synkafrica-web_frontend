@@ -40,8 +40,8 @@ const OtherServicesBookingInputs = ({ onSearch }) => {
                 setErrors({ ...errors, query: '' });
               }
             }}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
-              errors.query ? 'border-red-500' : 'border-gray-300'
+            className={`px-4 py-3 border-3 border-primary-500 rounded-lg focus:outline-none ${
+              errors.query ? 'border-red-500' : 'border-primary-500'
             }`}
           />
           {errors.query && (
@@ -54,7 +54,7 @@ const OtherServicesBookingInputs = ({ onSearch }) => {
           disabled={!isFormValid}
           className={`px-6 py-3 text-white rounded-xl font-medium transition-colors ${
             isFormValid
-              ? 'bg-primary-500 hover:bg-primary-400 active:bg-primary-600 text-white py-4 rounded-xl cursor-pointer'
+              ? 'bg-primary-500 hover:bg-primary-400 text-white py-4 rounded-xl cursor-pointer'
               : 'bg-gray-300 cursor-not-allowed'
           }`}
         >

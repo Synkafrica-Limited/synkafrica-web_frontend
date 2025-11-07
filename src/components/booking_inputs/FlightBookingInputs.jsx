@@ -66,7 +66,7 @@ const FlightBookingInputs = ({ onSearch }) => {
                 setErrors({ ...errors, from: '' });
               }
             }}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
+            className={`px-4 py-3 border-3 border-primary-500 rounded-lg focus:outline-none ${
               errors.from ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -86,7 +86,7 @@ const FlightBookingInputs = ({ onSearch }) => {
                 setErrors({ ...errors, to: '' });
               }
             }}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
+            className={`px-4 py-3 border-3 border-primary-500 rounded-lg focus:outline-none ${
               errors.to ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -106,7 +106,7 @@ const FlightBookingInputs = ({ onSearch }) => {
               }
             }}
             min={new Date().toISOString().split('T')[0]}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
+            className={`px-4 py-3 border-3 border-primary-500 rounded-lg focus:outline-none ${
               errors.departureDate ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -125,7 +125,7 @@ const FlightBookingInputs = ({ onSearch }) => {
                 setErrors({ ...errors, departureTime: '' });
               }
             }}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
+            className={`px-4 py-3 border-3 border-primary-500 rounded-lg focus:outline-none ${
               errors.departureTime ? 'border-red-500' : 'border-gray-300'
             }`}
           />

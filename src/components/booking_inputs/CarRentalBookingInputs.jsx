@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-const CarRentalBookingInputs = ({ onSearch }) => {
+const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
   const [pickupLocation, setPickupLocation] = useState('');
   const [pickupDate, setPickupDate] = useState('');
   const [pickupTime, setPickupTime] = useState('');
@@ -109,7 +109,13 @@ const CarRentalBookingInputs = ({ onSearch }) => {
   const isFormValid = pickupLocation.trim() && pickupDate && pickupTime;
 
   return (
-    <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-white rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.1)]">
+    <div
+  className={`mt-4 sm:mt-6 p-3 sm:p-4 bg-white rounded-2xl relative ${
+    showBorder
+      ? 'shadow-[0_15px_35px_-10px_rgba(223,93,61,0.5),0_10px_25px_-8px_rgba(223,93,61,0.35),0_8px_18px_-5px_rgba(223,93,61,0.4)] border border-orange-100/50 before:absolute before:inset-x-0 before:-bottom-1 before:h-3 before:bg-gradient-to-t before:from-[#DF5D3D]/20 before:to-transparent before:blur-sm before:pointer-events-none'
+      : ''
+  }`}
+>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="flex flex-col relative" ref={dropdownRef}>
           <input
@@ -122,8 +128,8 @@ const CarRentalBookingInputs = ({ onSearch }) => {
                 setShowSuggestions(true);
               }
             }}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
-              errors.pickupLocation ? 'border-red-500' : 'border-gray-300'
+            className={`px-4 py-3 border md:border-3 border-gray-300 md:border-primary-500 rounded-lg focus:outline-none focus:ring-0 ${
+              errors.pickupLocation ? 'border-red-500' : ''
             }`}
           />
           {showSuggestions && (
@@ -150,7 +156,7 @@ const CarRentalBookingInputs = ({ onSearch }) => {
           )}
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">
           <input
             type="date"
             value={pickupDate}
@@ -161,16 +167,22 @@ const CarRentalBookingInputs = ({ onSearch }) => {
               }
             }}
             min={new Date().toISOString().split('T')[0]}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
-              errors.pickupDate ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full px-4 py-3 pr-3 border md:border-3 border-gray-300 md:border-primary-500 rounded-lg focus:outline-none focus:ring-0 ${
+              errors.pickupDate ? 'border-red-500' : ''
+            } ${pickupDate ? 'text-gray-900' : 'text-transparent'}`}
+            style={{ colorScheme: 'light' }}
           />
+          {!pickupDate && (
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              Pickup date
+            </span>
+          )}
           {errors.pickupDate && (
             <span className="text-red-500 text-xs mt-1">{errors.pickupDate}</span>
           )}
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">
           <input
             type="time"
             value={pickupTime}
@@ -180,10 +192,16 @@ const CarRentalBookingInputs = ({ onSearch }) => {
                 setErrors({ ...errors, pickupTime: '' });
               }
             }}
-            className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${
-              errors.pickupTime ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full px-4 py-3 pr-3 border md:border-3 border-gray-300 md:border-primary-500 rounded-lg focus:outline-none focus:ring-0 ${
+              errors.pickupTime ? 'border-red-500' : ''
+            } ${pickupTime ? 'text-gray-900' : 'text-transparent'}`}
+            style={{ colorScheme: 'light' }}
           />
+          {!pickupTime && (
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              Pickup time
+            </span>
+          )}
           {errors.pickupTime && (
             <span className="text-red-500 text-xs mt-1">{errors.pickupTime}</span>
           )}
