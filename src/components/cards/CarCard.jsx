@@ -31,7 +31,7 @@ const CarCard = ({
         </div>
 
         {/* Book Now Button */}
-        {buttonVariant === "filled" ? (
+        {/* {buttonVariant === "filled" ? (
           <button className="w-full bg-primary-500 hover:bg-primary-400 active:bg-primary-600 text-white py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
             <Phone size={18} />
             Book Now
@@ -41,7 +41,7 @@ const CarCard = ({
             <Phone size={18} />
             Book Now
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );

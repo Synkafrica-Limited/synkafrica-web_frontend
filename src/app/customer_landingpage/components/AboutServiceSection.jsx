@@ -123,14 +123,22 @@ export default function AboutService({ service = "car" }) {
 
         {/* Content Card */}
         <div className="relative z-10 h-full flex items-center p-6 sm:p-8 md:p-12">
-          <div className={`${content.ctaCard.bgColor} backdrop-blur-sm rounded-2xl p-6 sm:p-8 max-w-xs sm:max-w-sm`}>
+          <div
+            className="backdrop-blur-sm rounded-2xl p-6 sm:p-8 max-w-xs sm:max-w-sm"
+            style={{
+              backgroundImage: 'linear-gradient(90deg, #E05D3D 0%, #FFC0B1 100%)'
+            }}
+          >
             <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-3">
               {content.ctaCard.title}
             </h3>
             <p className="text-white/90 text-sm sm:text-base mb-4 sm:mb-6 whitespace-pre-line">
               {content.ctaCard.description}
             </p>
-            <button className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-6 rounded-xl transition-colors">
+            <button
+              style={{ backgroundColor: '#1F2937' }}
+              className="w-full hover:border-gray-400 text-white py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+            >
               {content.ctaCard.buttonText}
             </button>
           </div>
