@@ -1,5 +1,5 @@
 // src/app/dashboard/business/onboarding/step4/page.jsx
-import BusinessDetailsStep from "@/app/business/onboarding/step4/components/BusinessDetailsStep";
+import BusinessDetailsStep from "@/app/(auth)/(vendor)/business/onboarding/step4/components/BusinessDetailsStep";
 
 export default function Step4Page() {
   return (

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import CarCard from "@/components/cards/CarCard";
 
-export default function CarRentalPage() {
+function CarRentalContent() {
   const searchParams = useSearchParams();
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -368,5 +368,16 @@ export default function CarRentalPage() {
         </div>
       </div>
     </main>
+  );
+}
+export default function CarRentalPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <CarRentalContent />
+    </Suspense>
   );
 }
