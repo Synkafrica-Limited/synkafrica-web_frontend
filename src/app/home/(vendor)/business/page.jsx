@@ -10,7 +10,12 @@ import { useEffect, useRef, useState } from "react";
 export default function BecomeVendorPage() {
   // Partners slider (mobile)
   const partnersRef = useRef(null);
-  const partners = ["Boat Naija", "Living Lagos", "Gladiator.ng", "Villamonumentvi", "SLUSH"];
+  const partners = [
+    { name: "Kuttwje yard", image: "/images/vendor/partner-1.png", alt: "Kuttway yard" },
+    { name: "Boat Naija", image: "/images/vendor/partner-2.png", alt: "Boat Naija Lagos" },
+    { name: "Kingsway Bistro", image: "/images/vendor/partner-3.png", alt: "Kingsway Bistro" },
+    { name: "Gossy's Kitchen", image: "/images/vendor/partner-4.png", alt: "Gossy's Kitchen & Bar" },
+  ];
 
   // Autoplay (mobile only)
   const autoplayRef = useRef(null);
@@ -116,12 +121,18 @@ export default function BecomeVendorPage() {
                         onTouchStart={pauseAutoplay}
                         onTouchEnd={resumeAutoplay}
                       >
-                        {partners.map((name) => (
+                        {partners.map((partner) => (
                           <div
-                            key={name}
-                            className="snap-start shrink-0 min-w-44 px-4 py-3 rounded-2xl bg-white text-center text-lg font-black tracking-wider text-primary-800/80 border border-gray-100 shadow-sm"
+                            key={partner.name}
+                            className="snap-start shrink-0 min-w-44 px-4 py-6 rounded-2xl bg-white text-center border border-gray-100 shadow-sm flex items-center justify-center"
                           >
-                            {name}
+                            <Image
+                              src={partner.image}
+                              alt={partner.alt}
+                              width={120}
+                              height={60}
+                              className="object-contain max-h-16"
+                            />
                           </div>
                         ))}
                       </div>
@@ -129,14 +140,20 @@ export default function BecomeVendorPage() {
                                         {/* Nav buttons removed for a cleaner mobile auto-scroll experience */}
                     </div>
 
-                    {/* Desktop: 5-column grid */}
-                    <div className="mt-8 hidden sm:grid sm:grid-cols-5 sm:gap-10">
-                        {partners.map((name, idx) => (
+                    {/* Desktop: 4-column grid */}
+                    <div className="mt-8 hidden sm:grid sm:grid-cols-4 sm:gap-8">
+                        {partners.map((partner) => (
                             <div
-                                key={name}
-                                className={`text-xl font-black tracking-wider text-center opacity-80 ${idx >= 3 ? "hidden sm:block" : ""}`}
+                                key={partner.name}
+                                className="flex items-center justify-center p-4 rounded-xl bg-white border border-gray-100 shadow-sm"
                             >
-                                {name}
+                                <Image
+                                  src={partner.image}
+                                  alt={partner.alt}
+                                  width={140}
+                                  height={70}
+                                  className="object-contain max-h-20"
+                                />
                             </div>
                         ))}
                     </div>
