@@ -3,11 +3,11 @@
 import React, { useState } from "react";
 import { Car, Sailboat, Home, Utensils, MoreHorizontal } from "lucide-react";
 
-import CarRentalBookingInputs from "../../../components/booking_inputs/CarRentalBookingInputs";
-import ResortHouseBookingInputs from "../../../components/booking_inputs/ResortHouseBookingInputs";
-import DiningBookingInputs from "../../../components/booking_inputs/DiningBookingInputs";
-import OtherServicesBookingInputs from "../../../components/booking_inputs/OtherServicesBookingInputs";
-import WaterRecreationBookingInputs from "../../../components/booking_inputs/WaterRecreationBookingInputs";
+import CarRentalBookingInputs from "../../../../components/booking_inputs/CarRentalBookingInputs";
+import ResortHouseBookingInputs from "../../../../components/booking_inputs/ResortHouseBookingInputs";
+import DiningBookingInputs from "../../../../components/booking_inputs/DiningBookingInputs";
+import OtherServicesBookingInputs from "../../../../components/booking_inputs/OtherServicesBookingInputs";
+import WaterRecreationBookingInputs from "../../../../components/booking_inputs/WaterRecreationBookingInputs";
 
 // Service-specific content configuration
 const serviceContent = {

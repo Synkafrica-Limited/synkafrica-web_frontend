@@ -1,10 +1,10 @@
-import HomePageHero from "../customer_landingpage/components/HeroSection";
-import AboutService from "../customer_landingpage/components/AboutServiceSection";
-import OtherServicesLinks from "../customer_landingpage/components/OtherServicesLinksSection";
-import CarRentalService from "../customer_landingpage/components/CarRentalServiceSection";
-import FAQComponent from "../customer_landingpage/components/FaqSection.jsx";
-import ExploreOtherServices from "../customer_landingpage/components/ExploreOtherServicesSection"
-import VendorBanner from "../customer_landingpage/components/BecomeVendorSection";
+import HomePageHero from "../home/(customer)/components/HeroSection";
+import AboutService from "../home/(customer)/components/AboutServiceSection";
+import OtherServicesLinks from "../home/(customer)/components/OtherServicesLinksSection";
+import CarRentalService from "../home/(customer)/components/CarRentalServiceSection";
+import FAQComponent from "../home/(customer)/components/FaqSection.jsx";
+import ExploreOtherServices from "../home/(customer)/components/ExploreOtherServicesSection"
+import VendorBanner from "../home/(customer)/components/BecomeVendorSection";
 
 export default function HomePage() {
   return (
@@ -17,12 +17,6 @@ export default function HomePage() {
         <ExploreOtherServices />
         <VendorBanner />
         <FAQComponent />
-        {/* <ExperiencesSection /> */}
-        {/* <BecomeVendorSection /> */}
-        {/* <ExploreCarsSection /> */}
-        {/* <ExploreDiningSection /> */}
-        {/* <ExploreBeachSection /> */}
-        {/* <FaqSection /> */}
       </div>
     </main>
   );
