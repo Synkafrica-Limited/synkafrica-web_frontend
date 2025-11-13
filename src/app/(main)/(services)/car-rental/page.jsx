@@ -13,8 +13,7 @@ function CarRentalContent() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const observerTarget = useRef(null);
-
+  const observerTarget = useRef(null); 
   const CARS_PER_PAGE = 6;
 
   // Mock database of cars
