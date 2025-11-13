@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import LottiePlayer from "./LottiePlayer";
 
 /**
  * Reusable authentication layout component with split design
@@ -66,15 +69,14 @@ export default function AuthLayout({
         <div className="grid md:grid-cols-2 min-h-[600px]">
           {/* Left side - Illustration */}
           <div 
-            className={`hidden md:flex items-center justify-center p-12`}
+            className={`hidden md:flex items-center justify-center p-12 `}
           >
             <div className="w-full max-w-md">
-              <Image 
-                src={illustrationSrc}
-                alt={illustrationAlt}
-                width={400} 
-                height={400}
-                className="w-full h-auto drop-shadow-2xl"
+              <LottiePlayer
+                src="/animations/loading.lottie"
+                loop
+                autoplay
+                style={{ width: '100%', height: 'auto' }}
               />
             </div>
           </div>

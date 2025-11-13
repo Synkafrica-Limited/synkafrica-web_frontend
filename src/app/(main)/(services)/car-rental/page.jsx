@@ -1,418 +1,382 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Filter,
-  X,
-} from "lucide-react";
+import React, { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import CarCard from "@/components/cards/CarCard";
 
-import CarCard from "./components/CarCard";
+function CarRentalContent() {
+  const searchParams = useSearchParams();
+  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [carType, setCarType] = useState("");
+  const [displayedCars, setDisplayedCars] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const observerTarget = useRef(null); 
+  const CARS_PER_PAGE = 6;
 
-const CarRental = () => {
-  const router = useRouter();
-  const [filters, setFilters] = useState({
-    carType: "",
-    capacity: "",
-    priceRange: [0, 200],
-  });
-
-  const [selectedLocation, setSelectedLocation] = useState("Lagos Marina");
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedCar, setSelectedCar] = useState(null);
-  const [currentView, setCurrentView] = useState("listing");
-
-  // Sample car data
-  const cars = [
+  // Mock database of cars
+  const allCars = [
     {
       id: 1,
-      name: "Cadillac Escalade Platinum",
-      type: "SUV",
-      image:
-        "/images/cars/pngs/cadillac-2.png?w=400&h=250&fit=crop&crop=center",
-      rating: 4.8,
-      price: 45000,
-      originalPrice: 54000,
-      capacity: 8,
-      transmission: "Automatic",
-      fuel: "Petrol",
-      package: "Suv Package",
-      features: ["A/C", "Unlimited mileage"],
-      pickupLocation: "Lagos Marina",
-      dropoffLocation: "Ikeja Airport",
+      image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500&h=300&fit=crop",
+      name: "Lexus CT200H",
+      price: 120,
+      location: "Lagos",
+      type: "luxury",
+      buttonVariant: "filled",
     },
     {
       id: 2,
-      name: "Range Rover Sport",
-      type: "SUV",
-      image:
-        "/images/cars/pngs/range_rover_sport.png?w=400&h=250&fit=crop&crop=center",
-      rating: 4.9,
-      price: 45000,
-      originalPrice: 58500,
-      capacity: 5,
-      transmission: "Automatic",
-      fuel: "Petrol",
-      package: "Luxury Package",
-      features: ["A/C", "Unlimited mileage"],
-      pickupLocation: "Lagos Marina",
-      dropoffLocation: "Parkland Bus",
+      image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=500&h=300&fit=crop",
+      name: "Jaguar F-Pace",
+      price: 132,
+      location: "Lagos",
+      type: "suv",
+      buttonVariant: "outline",
     },
     {
       id: 3,
-      name: "Mercedes Benz GLE Coupe AMG",
-      type: "Luxury",
-      image:
-        "/images/cars/pngs/Mercedes-AMG_GLE.png?w=400&h=250&fit=crop&crop=center",
-      rating: 4.7,
-      price: 45000,
-      originalPrice: 63000,
-      capacity: 5,
-      transmission: "Automatic",
-      fuel: "Petrol",
-      package: "Luxury Package",
-      features: ["A/C", "Unlimited mileage"],
-      pickupLocation: "Lagos Marina",
-      dropoffLocation: "Ikeja Airport",
+      image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=500&h=300&fit=crop",
+      name: "Mercedes Benz",
+      price: 132,
+      location: "Lagos",
+      type: "luxury",
+      buttonVariant: "outline",
     },
     {
       id: 4,
-      name: "Mercedes Benz GLE 450",
-      type: "Luxury",
-      image:
-        "/images/cars/pngs/Mercedes-AMG_GLE.png?w=400&h=250&fit=crop&crop=center",
-      rating: 4.6,
-      price: 45000,
-      originalPrice: 56250,
-      capacity: 7,
-      transmission: "Automatic",
-      fuel: "Petrol",
-      package: "Luxury Package",
-      features: ["A/C", "Unlimited mileage"],
-      pickupLocation: "Lagos Marina",
-      dropoffLocation: "Parkland Bus",
+      image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=500&h=300&fit=crop",
+      name: "Tesla Model 3",
+      price: 150,
+      location: "Abuja",
+      type: "electric",
+      buttonVariant: "outline",
     },
     {
       id: 5,
-      name: "Infiniti JX 35",
-      type: "Economy",
-      image:
-        "/images/cars/pngs/infiniti_jx.png?w=400&h=250&fit=crop&crop=center",
-      rating: 4.3,
-      price: 22500,
-      originalPrice: 31500,
-      capacity: 5,
-      transmission: "Automatic",
-      fuel: "Petrol",
-      package: "Economy Package",
-      features: ["A/C", "Unlimited mileage"],
-      pickupLocation: "Lagos Marina",
-      dropoffLocation: "Ikeja Airport",
+      image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&h=300&fit=crop",
+      name: "BMW 3 Series",
+      price: 140,
+      location: "Lagos",
+      type: "sedan",
+      buttonVariant: "outline",
     },
     {
       id: 6,
-      name: "Toyota Venza",
-      type: "Economy",
-      image:
-        "/images/cars/pngs/toyota_venza.png?w=400&h=250&fit=crop&crop=center",
-      rating: 4.4,
-      price: 22500,
-      originalPrice: 33750,
-      capacity: 5,
-      transmission: "Automatic",
-      fuel: "Petrol",
-      package: "Economy Package",
-      features: ["A/C", "Unlimited mileage"],
-      pickupLocation: "Lagos Marina",
-      dropoffLocation: "Parkland Bus",
+      image: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=500&h=300&fit=crop",
+      name: "Audi Q5",
+      price: 145,
+      location: "Port Harcourt",
+      type: "suv",
+      buttonVariant: "outline",
     },
     {
       id: 7,
-      name: "Toyota Prado",
-      type: "SUV",
-      image:
-        "/images/cars/pngs/toyota_prado.png?w=400&h=250&fit=crop&crop=center",
-      rating: 4.5,
-      price: 40500,
-      originalPrice: 49500,
-      capacity: 7,
-      transmission: "Automatic",
-      fuel: "Petrol",
-      package: "Suv Package",
-      features: ["A/C", "Unlimited mileage"],
-      pickupLocation: "Lagos Marina",
-      dropoffLocation: "Ikeja Airport",
+      image: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=500&h=300&fit=crop",
+      name: "Toyota Camry",
+      price: 80,
+      location: "Lagos",
+      type: "sedan",
+      buttonVariant: "outline",
     },
     {
       id: 8,
-      name: "Lexus GX 460",
-      type: "Luxury",
-      image: "/images/cars/pngs/lexus_gx.png?w=400&h=250&fit=crop&crop=center",
-      rating: 4.8,
-      price: 40500,
-      originalPrice: 54000,
-      capacity: 8,
-      transmission: "Automatic",
-      fuel: "Petrol",
-      package: "Luxury Package",
-      features: ["A/C", "Unlimited mileage"],
-      pickupLocation: "Lagos Marina",
-      dropoffLocation: "Parkland Bus",
+      image: "https://images.unsplash.com/photo-1542362567-b07e54358753?w=500&h=300&fit=crop",
+      name: "Range Rover Sport",
+      price: 200,
+      location: "Abuja",
+      type: "luxury",
+      buttonVariant: "outline",
+    },
+    {
+      id: 9,
+      image: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=500&h=300&fit=crop",
+      name: "Honda Accord",
+      price: 75,
+      location: "Lagos",
+      type: "sedan",
+      buttonVariant: "outline",
+    },
+    {
+      id: 10,
+      image: "https://images.unsplash.com/photo-1614200187524-dc4b892acf16?w=500&h=300&fit=crop",
+      name: "Nissan Rogue",
+      price: 90,
+      location: "Port Harcourt",
+      type: "suv",
+      buttonVariant: "outline",
     },
   ];
 
-  const filteredCars = useMemo(() => {
-    return cars.filter((car) => {
-      if (filters.carType && car.type !== filters.carType) return false;
-      if (filters.capacity && car.capacity < parseInt(filters.capacity))
-        return false;
-      if (
-        car.price < filters.priceRange[0] * 450 ||
-        car.price > filters.priceRange[1] * 450
-      )
-        return false;
-      return true;
-    });
-  }, [filters]);
+  // Filter cars based on query params and filters
+  const getFilteredCars = useCallback(() => {
+    let filtered = [...allCars];
 
-  const handleFilterChange = (filterType, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [filterType]: value,
-    }));
-  };
+    // Check for query parameters
+    const queryLocation = searchParams.get("location");
+    const queryType = searchParams.get("type");
+    const queryMaxPrice = searchParams.get("maxPrice");
 
-  const handleCarClick = (car) => {
-    router.push(`/car-rental/car/${car.id}`);
-  };
+    // Apply URL query filters
+    if (queryLocation) {
+      filtered = filtered.filter(
+        (car) => car.location.toLowerCase() === queryLocation.toLowerCase()
+      );
+    }
 
-  const handleBackToListing = () => {
-    setCurrentView("listing");
-    setSelectedCar(null);
-  };
+    if (queryType) {
+      filtered = filtered.filter(
+        (car) => car.type.toLowerCase() === queryType.toLowerCase()
+      );
+    }
 
-  if (currentView === "details" && selectedCar) {
-    return <CarDetailsPage car={selectedCar} onBack={handleBackToListing} />;
-  }
+    if (queryMaxPrice) {
+      filtered = filtered.filter((car) => car.price <= parseInt(queryMaxPrice));
+    }
+
+    // Apply sidebar filters
+    if (selectedLocation) {
+      filtered = filtered.filter(
+        (car) => car.location.toLowerCase() === selectedLocation.toLowerCase()
+      );
+    }
+
+    if (carType) {
+      filtered = filtered.filter(
+        (car) => car.type.toLowerCase() === carType.toLowerCase()
+      );
+    }
+
+    filtered = filtered.filter((car) => car.price <= priceRange[1]);
+
+    return filtered;
+  }, [searchParams, selectedLocation, carType, priceRange]);
+
+  // Load more cars
+  const loadMoreCars = useCallback(() => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    
+    // Simulate API delay
+    setTimeout(() => {
+      const filtered = getFilteredCars();
+      const startIndex = (page - 1) * CARS_PER_PAGE;
+      const endIndex = startIndex + CARS_PER_PAGE;
+      const newCars = filtered.slice(startIndex, endIndex);
+
+      if (newCars.length > 0) {
+        setDisplayedCars((prev) => [...prev, ...newCars]);
+        setPage((prev) => prev + 1);
+        setHasMore(endIndex < filtered.length);
+      } else {
+        setHasMore(false);
+      }
+
+      setIsLoading(false);
+    }, 500);
+  }, [page, isLoading, getFilteredCars]);
+
+  // Initialize filters from URL params
+  useEffect(() => {
+    const queryLocation = searchParams.get("location");
+    const queryType = searchParams.get("type");
+    const queryMaxPrice = searchParams.get("maxPrice");
+
+    if (queryLocation) setSelectedLocation(queryLocation.toLowerCase());
+    if (queryType) setCarType(queryType.toLowerCase());
+    if (queryMaxPrice) setPriceRange([0, parseInt(queryMaxPrice)]);
+  }, [searchParams]);
+
+  // Reset and reload when filters change
+  useEffect(() => {
+    setDisplayedCars([]);
+    setPage(1);
+    setHasMore(true);
+    loadMoreCars();
+  }, [selectedLocation, carType, priceRange[1], searchParams]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          loadMoreCars();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, isLoading, loadMoreCars]);
+
+  const totalFilteredCars = getFilteredCars().length;
 
   return (
-    <div className="min-h-screen">
-      {/* Custom scrollbar styles */}
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
-
-      <div className="container mx-auto px-4 py-6">
+    <main className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar Filters - Desktop */}
-          <div className="hidden lg:block">
-            <FilterSidebar
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              selectedLocation={selectedLocation}
-              onLocationChange={setSelectedLocation}
-            />
-          </div>
+          {/* Left Sidebar - Filters */}
+          <aside className="lg:w-64 flex-shrink-0">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
+              <h2 className="text-xl font-bold mb-6">Filters</h2>
 
-          {/* Mobile Filter Overlay */}
-          {showFilters && (
-            <div
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 lg:hidden"
-              onClick={() => setShowFilters(false)}
-            >
-              <div
-                className="absolute inset-y-0 left-0 w-80 bg-white/95 backdrop-blur-md shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between p-4 border-b border-gray-200/50">
-                  <h2 className="text-lg font-semibold">Filters</h2>
-                  <button
-                    onClick={() => setShowFilters(false)}
-                    className="p-2 hover:bg-gray-100/50 rounded-lg transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
-                  <FilterSidebar
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                    selectedLocation={selectedLocation}
-                    onLocationChange={setSelectedLocation}
+              {/* Price Range Filter */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold mb-3">
+                  Price Range
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max="500"
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
+                    className="w-full"
                   />
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>${priceRange[0]}</span>
+                    <span>${priceRange[1]}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col">
-            {/* Header with Filter Button */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="hidden lg:block">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  {filteredCars.length} cars have been filtered specifically for
-                  you
-                </h1>
-                <p className="text-gray-600">Total include taxes</p>
+              {/* Location Filter */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold mb-3">
+                  Location
+                </label>
+                <select
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Locations</option>
+                  <option value="lagos">Lagos</option>
+                  <option value="abuja">Abuja</option>
+                  <option value="port harcourt">Port Harcourt</option>
+                </select>
               </div>
 
-              {/* Mobile Filter Button */}
+              {/* Car Type Filter */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold mb-3">
+                  Car Type
+                </label>
+                <div className="space-y-2">
+                  {["Sedan", "SUV", "Luxury", "Electric"].map((type) => (
+                    <label key={type} className="flex items-center">
+                      <input
+                        type="radio"
+                        name="carType"
+                        value={type.toLowerCase()}
+                        checked={carType === type.toLowerCase()}
+                        onChange={(e) => setCarType(e.target.value)}
+                        className="mr-2"
+                      />
+                      <span className="text-sm">{type}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reset Filters Button */}
               <button
-                onClick={() => setShowFilters(true)}
-                className="lg:hidden flex items-center gap-2 bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors ml-auto"
+                onClick={() => {
+                  setPriceRange([0, 500]);
+                  setSelectedLocation("");
+                  setCarType("");
+                }}
+                className="w-full px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               >
-                <Filter className="w-4 h-4" />
-                Filter
+                Reset Filters
               </button>
             </div>
+          </aside>
 
-            {/* Scrollable Car Grid */}
-            <div className="flex-1 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-hide">
-              <div className="grid gap-4 pr-2">
-                {/* Header that scrolls with content */}
-                <div className="mb-2 lg:hidden">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    {filteredCars.length} cars have been filtered specifically
-                    for you
-                  </h1>
-                  <p className="text-gray-600">Total include taxes</p>
-                </div>
-
-                {filteredCars.map((car) => (
-                  <CarCard
-                    key={car.id}
-                    car={car}
-                    onClick={() => handleCarClick(car)}
-                  />
-                ))}
-              </div>
+          {/* Right Content - Car Listings */}
+          <div className="flex-1">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold mb-2">Available Cars</h1>
+              <p className="text-gray-600">
+                Showing {displayedCars.length} of {totalFilteredCars} car
+                {totalFilteredCars !== 1 ? "s" : ""}
+              </p>
             </div>
+
+            {/* Car Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {displayedCars.map((car) => (
+                <CarCard
+                  key={car.id}
+                  image={car.image}
+                  name={car.name}
+                  price={car.price}
+                  location={car.location}
+                  buttonVariant={car.buttonVariant}
+                />
+              ))}
+            </div>
+
+            {/* Loading Indicator */}
+            {isLoading && (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            )}
+
+            {/* Intersection Observer Target */}
+            <div ref={observerTarget} className="h-10" />
+
+            {/* No More Results */}
+            {!hasMore && displayedCars.length > 0 && (
+              <p className="text-center text-gray-500 py-8">
+                No more cars to load
+              </p>
+            )}
+
+            {/* No Results Found */}
+            {displayedCars.length === 0 && !isLoading && (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No cars found matching your criteria</p>
+                <button
+                  onClick={() => {
+                    setPriceRange([0, 500]);
+                    setSelectedLocation("");
+                    setCarType("");
+                  }}
+                  className="mt-4 px-6 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
-};
-
-// Filter Sidebar Component
-const FilterSidebar = ({
-  filters,
-  onFilterChange,
-  selectedLocation,
-  onLocationChange,
-}) => {
+}
+export default function CarRentalPage() {
   return (
-    <div className="lg:w-80 bg-white rounded-lg p-6 shadow-sm h-fit">
-      {/* Location Map */}
-      <div className="mb-6">
-        <img
-          src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=400&h=200&fit=crop&crop=center"
-          alt="Lagos Marina Map"
-          className="w-full h-32 object-cover rounded-lg mb-4"
-        />
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-            <span>Pick up at Lagos Marina</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-            <span>Drop off at Parkland Bus</span>
-          </div>
-        </div>
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
-
-      {/* Car Type Filter */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-gray-900 mb-3">Car Type</h3>
-        <div className="space-y-2">
-          {["Economy", "SUV", "Luxury"].map((type) => (
-            <label key={type} className="flex items-center gap-3">
-              <input
-                type="radio"
-                name="carType"
-                value={type}
-                checked={filters.carType === type}
-                onChange={(e) => onFilterChange("carType", e.target.value)}
-                className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
-              />
-              <span className="text-gray-700">{type}</span>
-              <span className="ml-auto text-gray-500 text-sm">
-                ₦
-                {type === "Economy"
-                  ? "22,500"
-                  : type === "SUV"
-                  ? "40,500"
-                  : "45,000"}
-              </span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Capacity Filter */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-gray-900 mb-3">Capacity</h3>
-        <div className="space-y-2">
-          {["5", "7", "8"].map((capacity) => (
-            <label key={capacity} className="flex items-center gap-3">
-              <input
-                type="radio"
-                name="capacity"
-                value={capacity}
-                checked={filters.capacity === capacity}
-                onChange={(e) => onFilterChange("capacity", e.target.value)}
-                className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
-              />
-              <span className="text-gray-700">{capacity} passengers</span>
-              <span className="ml-auto text-gray-500 text-sm">₦40,500</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Price Range */}
-      <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Price Range</h3>
-        <div className="space-y-3">
-          <input
-            type="range"
-            min="0"
-            max="200"
-            value={filters.priceRange[1]}
-            onChange={(e) =>
-              onFilterChange("priceRange", [0, parseInt(e.target.value)])
-            }
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>₦0</span>
-            <span>₦{(filters.priceRange[1] * 450).toLocaleString()}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Clear Filters */}
-      <button
-        onClick={() =>
-          onFilterChange("carType", "") ||
-          onFilterChange("capacity", "") ||
-          onFilterChange("priceRange", [0, 200])
-        }
-        className="w-full mt-6 px-4 py-2 text-primary-500 border border-primary-500 rounded-lg hover:bg-orange-50 transition-colors"
-      >
-        Clear All Filters
-      </button>
-    </div>
+    }>
+      <CarRentalContent />
+    </Suspense>
   );
-};
-
-
-export default CarRental;
+}
