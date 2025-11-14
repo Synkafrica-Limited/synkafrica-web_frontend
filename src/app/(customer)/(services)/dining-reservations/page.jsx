@@ -2,7 +2,7 @@
 
 import React from "react";
 import BookingFlow from "@/components/booking_flow/Booking_flow";
-import DiningServicesGrid from "@/app/(main)/(services)/dining-reservations/components/DiningBrandsGrid";
+import DiningServicesGrid from "@/app/(customer)/(services)/dining-reservations/components/DiningBrandsGrid";
 
 const diningServices = [
   {

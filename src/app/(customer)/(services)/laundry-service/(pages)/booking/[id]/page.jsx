@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
 import React from "react";
-import BookingForm from "@/app/(main)/(services)/components/booking_flow/booking";
+import BookingForm from "@/app/(customer)/(services)/components/booking_flow/booking";
 
-const BookingResortForm = ({ resortId, serviceType = "beachResort" }) => {
+const LaundryBookingForm = ({ resortId, serviceType = "laundry" }) => {
   return (
     <div className="container mx-auto px-4 py-8">
       <BookingForm
@@ -17,4 +17,4 @@ const BookingResortForm = ({ resortId, serviceType = "beachResort" }) => {
   );
 };
 
-export default BookingResortForm;
+export default LaundryBookingForm;

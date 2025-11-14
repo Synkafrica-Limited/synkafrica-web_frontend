@@ -107,7 +107,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
           {/* Right Section - Become a vendor & Auth Buttons */}
           <div className="hidden md:flex items-center space-x-3">
             {/* Become a vendor button */}
-            <a href="/list-property">
+            <a href="../business">
               <button className="px-4 py-2 text-sm font-medium text-primary-500 hover:bg-primary-50 rounded-md transition-colors duration-200 whitespace-nowrap">
                 Become a vendor
               </button>
@@ -120,7 +120,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
                   className="px-4 py-2 text-sm font-medium text-primary-500 border border-primary-500 hover:bg-primary-50 rounded-md transition-colors duration-200" 
                   onClick={toggleLogin}
                 >
-                  Register
+                  Sign up
                 </button>
                 <button 
                   className="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-400 rounded-md transition-colors duration-200" 

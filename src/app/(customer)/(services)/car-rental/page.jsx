@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import CarCard from "@/components/cards/CarCard";
+import CarCard from "@/components/cards/ProductCard";
 
 export default function CarRentalPage() {
   const searchParams = useSearchParams();
@@ -21,7 +21,8 @@ export default function CarRentalPage() {
   const allCars = [
     {
       id: 1,
-      image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500&h=300&fit=crop",
       name: "Lexus CT200H",
       price: 120,
       location: "Lagos",
@@ -30,7 +31,8 @@ export default function CarRentalPage() {
     },
     {
       id: 2,
-      image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=500&h=300&fit=crop",
       name: "Jaguar F-Pace",
       price: 132,
       location: "Lagos",
@@ -39,7 +41,8 @@ export default function CarRentalPage() {
     },
     {
       id: 3,
-      image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=500&h=300&fit=crop",
       name: "Mercedes Benz",
       price: 132,
       location: "Lagos",
@@ -48,7 +51,8 @@ export default function CarRentalPage() {
     },
     {
       id: 4,
-      image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=500&h=300&fit=crop",
       name: "Tesla Model 3",
       price: 150,
       location: "Abuja",
@@ -57,7 +61,8 @@ export default function CarRentalPage() {
     },
     {
       id: 5,
-      image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500&h=300&fit=crop",
       name: "BMW 3 Series",
       price: 140,
       location: "Lagos",
@@ -66,7 +71,8 @@ export default function CarRentalPage() {
     },
     {
       id: 6,
-      image: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=500&h=300&fit=crop",
       name: "Audi Q5",
       price: 145,
       location: "Port Harcourt",
@@ -75,7 +81,8 @@ export default function CarRentalPage() {
     },
     {
       id: 7,
-      image: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=500&h=300&fit=crop",
       name: "Toyota Camry",
       price: 80,
       location: "Lagos",
@@ -84,7 +91,8 @@ export default function CarRentalPage() {
     },
     {
       id: 8,
-      image: "https://images.unsplash.com/photo-1542362567-b07e54358753?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1542362567-b07e54358753?w=500&h=300&fit=crop",
       name: "Range Rover Sport",
       price: 200,
       location: "Abuja",
@@ -93,7 +101,8 @@ export default function CarRentalPage() {
     },
     {
       id: 9,
-      image: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=500&h=300&fit=crop",
       name: "Honda Accord",
       price: 75,
       location: "Lagos",
@@ -102,7 +111,8 @@ export default function CarRentalPage() {
     },
     {
       id: 10,
-      image: "https://images.unsplash.com/photo-1614200187524-dc4b892acf16?w=500&h=300&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1614200187524-dc4b892acf16?w=500&h=300&fit=crop",
       name: "Nissan Rogue",
       price: 90,
       location: "Port Harcourt",
@@ -160,7 +170,7 @@ export default function CarRentalPage() {
     if (isLoading) return;
 
     setIsLoading(true);
-    
+
     // Simulate API delay
     setTimeout(() => {
       const filtered = getFilteredCars();
@@ -244,7 +254,9 @@ export default function CarRentalPage() {
                     min="0"
                     max="500"
                     value={priceRange[1]}
-                    onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
+                    onChange={(e) =>
+                      setPriceRange([0, parseInt(e.target.value)])
+                    }
                     className="w-full"
                   />
                   <div className="flex justify-between text-sm text-gray-600">
@@ -351,7 +363,9 @@ export default function CarRentalPage() {
             {/* No Results Found */}
             {displayedCars.length === 0 && !isLoading && (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No cars found matching your criteria</p>
+                <p className="text-gray-500 text-lg">
+                  No cars found matching your criteria
+                </p>
                 <button
                   onClick={() => {
                     setPriceRange([0, 500]);
