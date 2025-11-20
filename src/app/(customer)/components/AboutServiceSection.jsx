@@ -80,7 +80,8 @@ const serviceContent = {
     ],
     ctaCard: {
       title: "Dive in now",
-      description: "Experience luxury on water —\nfrom jetskis to private yachts.",
+      description:
+        "Experience luxury on water —\nfrom jetskis to private yachts.",
       buttonText: "Book now!",
       bgColor: "bg-sky-500/90",
       image:
@@ -111,39 +112,17 @@ export default function AboutService({ service = "car" }) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12">
-      {/* Heading */}
-      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-8 sm:mb-12 whitespace-pre-line">
-        {content.heading}
-      </h2>
-
-      {/* Use Cases */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
-        {content.useCases.map((useCase) => (
-          <div key={useCase.number} className="flex flex-col">
-            <span className="text-3xl sm:text-4xl font-bold text-gray-300 mb-2">
-              {useCase.number}
-            </span>
-            <span className="text-sm sm:text-base text-gray-700">
-              {useCase.title}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Image Card with CTA */}
-      <div className="relative rounded-3xl overflow-hidden h-[300px] sm:h-[400px] md:h-[450px]">
-        {/* Background Image */}
+      {/* Image Card with CTA — MOVED TO TOP */}
+      <div className="relative rounded-3xl overflow-hidden h-[300px] sm:h-[400px] md:h-[450px] mb-8 sm:mb-12">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${content.ctaCard.image}')`,
           }}
         >
-          {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent"></div>
         </div>
 
-        {/* Content Card */}
         <div className="relative z-10 h-full flex items-center p-6 sm:p-8 md:p-12">
           <div
             className="backdrop-blur-sm rounded-2xl p-6 sm:p-8 w-full sm:w-auto max-w-xs sm:max-w-sm flex flex-col justify-between min-h-[280px]"
@@ -169,6 +148,25 @@ export default function AboutService({ service = "car" }) {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Heading */}
+      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-8 sm:mb-12 whitespace-pre-line">
+        {content.heading}
+      </h2>
+
+      {/* Use Cases */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+        {content.useCases.map((useCase) => (
+          <div key={useCase.number} className="flex flex-col">
+            <span className="text-3xl sm:text-4xl font-bold text-gray-300 mb-2">
+              {useCase.number}
+            </span>
+            <span className="text-sm sm:text-base text-gray-700">
+              {useCase.title}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

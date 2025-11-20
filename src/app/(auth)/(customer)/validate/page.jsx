@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import AuthLayout from "@/components/layout/AuthLayout";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function EmailValidationScreen() {
   const [code, setCode] = useState("");
+  const [isCodeFocused, setIsCodeFocused] = useState(false);
   const [codeError, setCodeError] = useState("");
   const [isCodeTouched, setIsCodeTouched] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
@@ -34,6 +37,7 @@ export default function EmailValidationScreen() {
   };
 
   const handleCodeBlur = () => {
+    setIsCodeFocused(false);
     setIsCodeTouched(true);
 
     if (!code.trim()) {
@@ -67,91 +71,119 @@ export default function EmailValidationScreen() {
   };
 
   return (
-    <AuthLayout
-      title="Let's confirm your email"
-      subtitle={
-        <>
-          Enter the secure code we sent to{" "}
-          <span className="font-medium text-gray-900">{email}</span>.
-          <br />
-          Check junk mail if it's not in your inbox.
-        </>
-      }
-      bgGradient="bg-linear-to-br from-blue-400 via-blue-500 to-purple-800"
-      cancelHref="/login"
-    >
-      <div className="space-y-6">
-        {/* Code Input */}
-        <div className="space-y-3">
-          <div className="relative">
-            <input
-              type="text"
-              value={code}
-              onChange={handleCodeChange}
-              onBlur={handleCodeBlur}
-              placeholder="6-digit code"
-              maxLength={6}
-              className={`w-full px-5 py-4 border-2 rounded-xl focus:outline-none focus:ring-0 transition-colors text-gray-900 placeholder-gray-400 text-center text-lg tracking-wider ${
-                codeError
-                  ? "border-red-500 focus:border-red-500"
-                  : "border-gray-300 focus:border-gray-900"
-              }`}
-            />
-            {codeError && (
-              <p className="mt-2 text-sm text-red-600">{codeError}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Keep me signed in */}
-        <div className="flex items-start space-x-3">
-          <div className="flex items-center h-5">
-            <input
-              id="keep-signed-in"
-              type="checkbox"
-              checked={keepSignedIn}
-              onChange={(e) => setKeepSignedIn(e.target.checked)}
-              className="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
-            />
-          </div>
-          <div className="text-sm">
-            <label
-              htmlFor="keep-signed-in"
-              className="font-medium text-gray-900 cursor-pointer"
-            >
-              Keep me signed in
-            </label>
-            <p className="text-gray-600 text-xs mt-1">
-              This is for personal devices only. Don't check this on shared
-              devices to keep your account secure.
-            </p>
-          </div>
-        </div>
-
-        {/* Continue Button */}
-        <button
-          onClick={handleContinue}
-          disabled={!isCodeValid}
-          className={`w-full py-4 px-4 rounded-xl font-medium text-white transition-all duration-200 ${
-            isCodeValid
-              ? "bg-linear-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:to-primary-400 shadow-md"
-              : "bg-primary-200 cursor-not-allowed"
-          }`}
-        >
-          Continue
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 sm:p-6 bg-white">
+        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <Link href="/login">
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </Link>
         </button>
+        {/* Logo */}
+        <Image
+          src="/images/brand/synkafrica-logo-single.png"
+          alt="Synk Africa Logo"
+          width={80}
+          height={30}
+        />
+        <div className="w-10"></div>
+      </div>
 
-        {/* Resend Code */}
-        <div className="text-center">
-          <button
-            onClick={handleResendCode}
-            disabled={isResending}
-            className="text-gray-900 hover:text-gray-700 text-sm font-medium hover:underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isResending ? "Sending..." : "Resend Code"}
-          </button>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-8 max-w-md mx-auto w-full">
+        <div className="w-full space-y-8">
+          {/* Title and Description */}
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Let's confirm your email
+            </h1>
+            <div className="space-y-2">
+              <p className="text-gray-600 text-sm sm:text-base">
+                Enter the secure code we sent to{" "}
+                <span className="font-medium text-gray-900">{email}</span>.
+              </p>
+              <p className="text-gray-600 text-sm">
+                Check junk mail if it's not in your inbox.
+              </p>
+            </div>
+          </div>
+
+          {/* Verification Form */}
+          <div className="space-y-6">
+            {/* Code Input */}
+            <div className="space-y-3">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={code}
+                  onChange={handleCodeChange}
+                  onFocus={() => setIsCodeFocused(true)}
+                  onBlur={handleCodeBlur}
+                  placeholder="6-digit code"
+                  maxLength={6}
+                  className={`w-full px-4 py-3.5 border rounded-lg focus:ring-2 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-center text-lg tracking-wider ${
+                    codeError
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }`}
+                />
+                {codeError && (
+                  <p className="mt-2 text-sm text-red-600">{codeError}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Keep me signed in */}
+            <div className="flex items-start space-x-3">
+              <div className="flex items-center h-5">
+                <input
+                  id="keep-signed-in"
+                  type="checkbox"
+                  checked={keepSignedIn}
+                  onChange={(e) => setKeepSignedIn(e.target.checked)}
+                  className="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
+                />
+              </div>
+              <div className="text-sm">
+                <label
+                  htmlFor="keep-signed-in"
+                  className="font-medium text-gray-900 cursor-pointer"
+                >
+                  Keep me signed in
+                </label>
+                <p className="text-gray-600 text-xs mt-1">
+                  This is for personal devices only. Don't check this on shared
+                  devices to keep your account secure.
+                </p>
+              </div>
+            </div>
+
+            {/* Continue Button */}
+            <button
+              onClick={handleContinue}
+              disabled={!isCodeValid}
+              className={`w-full py-3.5 px-4 rounded-lg font-medium transition-all duration-200 ${
+                isCodeValid
+                  ? "bg-orange-500 hover:bg-orange-600 text-white shadow-sm"
+                  : "bg-orange-300 text-white cursor-not-allowed"
+              }`}
+            >
+              Continue
+            </button>
+
+            {/* Resend Code */}
+            <div className="text-center">
+              <button
+                onClick={handleResendCode}
+                disabled={isResending}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isResending ? "Sending..." : "Resend Code"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </AuthLayout>
+    </div>
   );
 }

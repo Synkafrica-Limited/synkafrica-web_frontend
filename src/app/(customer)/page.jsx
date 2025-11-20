@@ -218,7 +218,7 @@ export default function HomePage() {
 
             {/* Hero Content */}
             <div className="mb-0 sm:mb-0 mt-[40px]">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-bold text-gray-900 mb-0 sm:mb-0 leading-tight whitespace-pre-line">
+              <h1 className="text-[50px] font-bold text-gray-900 mb-0 leading-tight whitespace-pre-line">
                 {content.heading}
               </h1>
 
