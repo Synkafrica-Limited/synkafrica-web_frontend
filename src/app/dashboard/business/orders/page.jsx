@@ -18,96 +18,7 @@ import {
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/hooks/useNotifications";
-
-// Mock orders/bookings data
-const MOCK_ORDERS = [
-  {
-    id: "ORD-001",
-    customerName: "John Doe",
-    customerPhone: "+234 801 234 5678",
-    customerEmail: "john.doe@example.com",
-    serviceName: "Luxury SUV with Driver",
-    serviceType: "Car Rental",
-    bookingDate: "2024-12-20",
-    bookingTime: "10:00 AM",
-    duration: "Full Day",
-    guests: 4,
-    price: "₦25,000",
-    location: "Lagos, Victoria Island",
-    status: "pending",
-    createdAt: "2024-12-15 09:30 AM",
-    specialRequests: "Need child seats for 2 kids",
-  },
-  {
-    id: "ORD-002",
-    customerName: "Sarah Smith",
-    customerPhone: "+234 802 345 6789",
-    customerEmail: "sarah.smith@example.com",
-    serviceName: "Beach Resort Package",
-    serviceType: "Resort",
-    bookingDate: "2024-12-22",
-    bookingTime: "2:00 PM",
-    duration: "4 Hours",
-    guests: 10,
-    price: "₦50,000",
-    location: "Lekki Beach, Lagos",
-    status: "accepted",
-    createdAt: "2024-12-14 02:15 PM",
-    specialRequests: "Birthday celebration, need decoration",
-  },
-  {
-    id: "ORD-003",
-    customerName: "Michael Brown",
-    customerPhone: "+234 803 456 7890",
-    customerEmail: "michael.brown@example.com",
-    serviceName: "Private Chef Service",
-    serviceType: "Convenience",
-    bookingDate: "2024-12-18",
-    bookingTime: "6:00 PM",
-    duration: "3 Hours",
-    guests: 8,
-    price: "₦30,000",
-    location: "Ikoyi, Lagos",
-    status: "declined",
-    createdAt: "2024-12-13 11:45 AM",
-    specialRequests: "Vegetarian menu preferred",
-    declineReason: "Not available on requested date",
-  },
-  {
-    id: "ORD-004",
-    customerName: "Emily Johnson",
-    customerPhone: "+234 804 567 8901",
-    customerEmail: "emily.johnson@example.com",
-    serviceName: "Fine Dining Experience",
-    serviceType: "Fine Dining",
-    bookingDate: "2024-12-25",
-    bookingTime: "7:00 PM",
-    duration: "2 Hours",
-    guests: 6,
-    price: "₦45,000",
-    location: "Victoria Island, Lagos",
-    status: "completed",
-    createdAt: "2024-12-10 03:20 PM",
-    specialRequests: "Anniversary dinner, need private table",
-  },
-  {
-    id: "ORD-005",
-    customerName: "David Wilson",
-    customerPhone: "+234 805 678 9012",
-    customerEmail: "david.wilson@example.com",
-    serviceName: "Boat Cruise Package",
-    serviceType: "Resort",
-    bookingDate: "2024-12-21",
-    bookingTime: "12:00 PM",
-    duration: "6 Hours",
-    guests: 15,
-    price: "₦75,000",
-    location: "Lagos Marina",
-    status: "pending",
-    createdAt: "2024-12-15 10:00 AM",
-    specialRequests: "Corporate team building event",
-  },
-];
+import { useVendorBookings } from "@/hooks/business/useVendorBookings";
 
 const STATUS_CONFIG = {
   pending: {
@@ -115,13 +26,13 @@ const STATUS_CONFIG = {
     color: "bg-yellow-100 text-yellow-700",
     icon: Clock,
   },
-  accepted: {
-    label: "Accepted",
+  confirmed: {
+    label: "Confirmed",
     color: "bg-green-100 text-green-700",
     icon: CheckCircle,
   },
-  declined: {
-    label: "Declined",
+  cancelled: {
+    label: "Cancelled",
     color: "bg-red-100 text-red-700",
     icon: XCircle,
   },
@@ -133,7 +44,7 @@ const STATUS_CONFIG = {
 };
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState(MOCK_ORDERS);
+  const token = typeof window !== "undefined" ? localStorage.getItem("vendorToken") : null;
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -144,26 +55,34 @@ export default function OrdersPage() {
   const [declineReason, setDeclineReason] = useState("");
   const { toasts, addToast, removeToast } = useToast();
 
-  // Filter orders
-  const filteredOrders = orders.filter((order) => {
-    const matchesStatus =
-      selectedStatus === "all" || order.status === selectedStatus;
-    const matchesSearch =
-      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.serviceName.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
+  // Use the vendor bookings hook
+  const { 
+    bookings, 
+    loading, 
+    error, 
+    refetch 
+  } = useVendorBookings(token, {
+    status: selectedStatus !== "all" ? selectedStatus : undefined
   });
 
-  // Get status counts
+  // Filter bookings based on search query
+  const filteredBookings = bookings.filter((booking) => {
+    const matchesSearch =
+      booking.customer?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      booking.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      booking.listing?.title?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
+  // Get status counts from actual data
   const getStatusCount = (status) => {
-    if (status === "all") return orders.length;
-    return orders.filter((o) => o.status === status).length;
+    if (status === "all") return bookings.length;
+    return bookings.filter((b) => b.status === status).length;
   };
 
   // Handle accept booking
-  const handleAccept = (order) => {
-    setSelectedOrder(order);
+  const handleAccept = (booking) => {
+    setSelectedOrder(booking);
     setShowAcceptConfirm(true);
   };
 
@@ -171,18 +90,13 @@ export default function OrdersPage() {
     setIsProcessing(true);
 
     try {
-      // TODO: API call
+      // TODO: Implement actual API call to accept booking
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === selectedOrder.id ? { ...o, status: "accepted" } : o
-        )
-      );
 
       addToast(`Booking ${selectedOrder.id} accepted successfully!`, "success");
       setShowAcceptConfirm(false);
       setSelectedOrder(null);
+      refetch(); // Refresh the bookings list
     } catch {
       addToast("Failed to accept booking. Please try again.", "error");
     } finally {
@@ -191,8 +105,8 @@ export default function OrdersPage() {
   };
 
   // Handle decline booking
-  const handleDecline = (order) => {
-    setSelectedOrder(order);
+  const handleDecline = (booking) => {
+    setSelectedOrder(booking);
     setDeclineReason("");
     setShowDeclineConfirm(true);
   };
@@ -206,21 +120,14 @@ export default function OrdersPage() {
     setIsProcessing(true);
 
     try {
-      // TODO: API call
+      // TODO: Implement actual API call to decline booking
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === selectedOrder.id
-            ? { ...o, status: "declined", declineReason }
-            : o
-        )
-      );
 
       addToast(`Booking ${selectedOrder.id} declined`, "info");
       setShowDeclineConfirm(false);
       setSelectedOrder(null);
       setDeclineReason("");
+      refetch(); // Refresh the bookings list
     } catch {
       addToast("Failed to decline booking. Please try again.", "error");
     } finally {
@@ -228,11 +135,58 @@ export default function OrdersPage() {
     }
   };
 
-  // View order details
-  const viewDetails = (order) => {
-    setSelectedOrder(order);
+  // View booking details
+  const viewDetails = (booking) => {
+    setSelectedOrder(booking);
     setShowDetailsModal(true);
   };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  // Format currency for display
+  const formatCurrency = (amount) => {
+    if (!amount) return "₦0";
+    return `₦${amount.toLocaleString()}`;
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading bookings...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 text-4xl mb-4">⚠️</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Bookings</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={refetch}
+              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -254,7 +208,7 @@ export default function OrdersPage() {
         onClose={() => !isProcessing && setShowAcceptConfirm(false)}
         onConfirm={confirmAccept}
         title="Accept Booking"
-        message={`Are you sure you want to accept booking ${selectedOrder?.id} from ${selectedOrder?.customerName}?`}
+        message={`Are you sure you want to accept booking ${selectedOrder?.id} from ${selectedOrder?.customer?.name || 'customer'}?`}
         confirmText="Accept"
         cancelText="Cancel"
         type="info"
@@ -304,7 +258,7 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* Order Details Modal */}
+      {/* Booking Details Modal */}
       {showDetailsModal && selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -332,13 +286,13 @@ export default function OrdersPage() {
               <div className="flex items-center justify-between">
                 <span
                   className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    STATUS_CONFIG[selectedOrder.status].color
+                    STATUS_CONFIG[selectedOrder.status]?.color || 'bg-gray-100 text-gray-700'
                   }`}
                 >
-                  {STATUS_CONFIG[selectedOrder.status].label}
+                  {STATUS_CONFIG[selectedOrder.status]?.label || selectedOrder.status}
                 </span>
                 <span className="text-sm text-gray-500">
-                  Received: {selectedOrder.createdAt}
+                  Created: {formatDate(selectedOrder.createdAt)}
                 </span>
               </div>
 
@@ -352,19 +306,19 @@ export default function OrdersPage() {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Name:</span>
                     <span className="font-medium text-gray-900">
-                      {selectedOrder.customerName}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Phone:</span>
-                    <span className="font-medium text-gray-900">
-                      {selectedOrder.customerPhone}
+                      {selectedOrder.customer?.name || 'N/A'}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Email:</span>
                     <span className="font-medium text-gray-900">
-                      {selectedOrder.customerEmail}
+                      {selectedOrder.customer?.email || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Phone:</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.customer?.phone || 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -380,43 +334,31 @@ export default function OrdersPage() {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Service:</span>
                     <span className="font-medium text-gray-900">
-                      {selectedOrder.serviceName}
+                      {selectedOrder.listing?.title || 'N/A'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Category:</span>
+                    <span className="text-gray-600">Start Date:</span>
                     <span className="font-medium text-gray-900">
-                      {selectedOrder.serviceType}
+                      {formatDate(selectedOrder.startDate)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Date:</span>
+                    <span className="text-gray-600">End Date:</span>
                     <span className="font-medium text-gray-900">
-                      {selectedOrder.bookingDate}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Time:</span>
-                    <span className="font-medium text-gray-900">
-                      {selectedOrder.bookingTime}
+                      {formatDate(selectedOrder.endDate)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Duration:</span>
                     <span className="font-medium text-gray-900">
-                      {selectedOrder.duration}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Guests:</span>
-                    <span className="font-medium text-gray-900">
-                      {selectedOrder.guests} people
+                      {selectedOrder.duration || 'N/A'}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Location:</span>
                     <span className="font-medium text-gray-900">
-                      {selectedOrder.location}
+                      {selectedOrder.pickupLocation || selectedOrder.listing?.location || 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -430,7 +372,7 @@ export default function OrdersPage() {
                     Total Amount
                   </h4>
                   <span className="text-2xl font-bold text-primary-600">
-                    {selectedOrder.price}
+                    {formatCurrency(selectedOrder.totalAmount)}
                   </span>
                 </div>
               </div>
@@ -446,19 +388,6 @@ export default function OrdersPage() {
                   </p>
                 </div>
               )}
-
-              {/* Decline Reason */}
-              {selectedOrder.status === "declined" &&
-                selectedOrder.declineReason && (
-                  <div className="bg-red-50 rounded-xl p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      Decline Reason
-                    </h4>
-                    <p className="text-sm text-gray-700">
-                      {selectedOrder.declineReason}
-                    </p>
-                  </div>
-                )}
 
               {/* Actions */}
               {selectedOrder.status === "pending" && (
@@ -536,24 +465,24 @@ export default function OrdersPage() {
               Pending ({getStatusCount("pending")})
             </button>
             <button
-              onClick={() => setSelectedStatus("accepted")}
+              onClick={() => setSelectedStatus("confirmed")}
               className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "accepted"
+                selectedStatus === "confirmed"
                   ? "bg-green-500 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              Accepted ({getStatusCount("accepted")})
+              Confirmed ({getStatusCount("confirmed")})
             </button>
             <button
-              onClick={() => setSelectedStatus("declined")}
+              onClick={() => setSelectedStatus("cancelled")}
               className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "declined"
+                selectedStatus === "cancelled"
                   ? "bg-red-500 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              Declined ({getStatusCount("declined")})
+              Cancelled ({getStatusCount("cancelled")})
             </button>
             <button
               onClick={() => setSelectedStatus("completed")}
@@ -569,8 +498,8 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Orders List */}
-      {filteredOrders.length === 0 ? (
+      {/* Bookings List */}
+      {filteredBookings.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <Package className="w-16 h-16 mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -586,83 +515,83 @@ export default function OrdersPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredOrders.map((order) => {
-            const StatusIcon = STATUS_CONFIG[order.status].icon;
+          {filteredBookings.map((booking) => {
+            const StatusIcon = STATUS_CONFIG[booking.status]?.icon || Clock;
 
             return (
               <div
-                key={order.id}
+                key={booking.id}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                  {/* Order Info */}
+                  {/* Booking Info */}
                   <div className="flex-1 space-y-3">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <h3 className="font-semibold text-lg text-gray-900">
-                          {order.serviceName}
+                          {booking.listing?.title || 'Service'}
                         </h3>
                         <p className="text-sm text-gray-600 mt-1">
                           Order ID:{" "}
-                          <span className="font-medium">{order.id}</span>
+                          <span className="font-medium">{booking.id}</span>
                         </p>
                       </div>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
-                          STATUS_CONFIG[order.status].color
+                          STATUS_CONFIG[booking.status]?.color || 'bg-gray-100 text-gray-700'
                         }`}
                       >
                         <StatusIcon className="w-3 h-3" />
-                        {STATUS_CONFIG[order.status].label}
+                        {STATUS_CONFIG[booking.status]?.label || booking.status}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
                       <div className="flex items-center gap-2 text-gray-600">
                         <User className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{order.customerName}</span>
+                        <span className="truncate">{booking.customer?.name || 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600">
                         <Calendar className="w-4 h-4 shrink-0" />
-                        <span>{order.bookingDate}</span>
+                        <span>{formatDate(booking.startDate)}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600">
                         <Clock className="w-4 h-4 shrink-0" />
-                        <span>{order.bookingTime}</span>
+                        <span>{booking.duration || 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-2 text-primary-600 font-semibold">
                         <DollarSign className="w-4 h-4 shrink-0" />
-                        <span>{order.price}</span>
+                        <span>{formatCurrency(booking.totalAmount)}</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <Clock className="w-3 h-3" />
-                      Received: {order.createdAt}
+                      Created: {formatDate(booking.createdAt)}
                     </div>
                   </div>
 
                   {/* Actions */}
                   <div className="flex lg:flex-col gap-2">
                     <button
-                      onClick={() => viewDetails(order)}
+                      onClick={() => viewDetails(booking)}
                       className="flex-1 lg:flex-none px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm flex items-center justify-center gap-2"
                     >
                       <Eye className="w-4 h-4" />
                       View Details
                     </button>
 
-                    {order.status === "pending" && (
+                    {booking.status === "pending" && (
                       <>
                         <button
-                          onClick={() => handleAccept(order)}
+                          onClick={() => handleAccept(booking)}
                           className="flex-1 lg:flex-none px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors text-sm flex items-center justify-center gap-2"
                         >
                           <CheckCircle className="w-4 h-4" />
                           Accept
                         </button>
                         <button
-                          onClick={() => handleDecline(order)}
+                          onClick={() => handleDecline(booking)}
                           className="flex-1 lg:flex-none px-4 py-2 border border-red-300 text-red-700 rounded-lg font-medium hover:bg-red-50 transition-colors text-sm flex items-center justify-center gap-2"
                         >
                           <XCircle className="w-4 h-4" />
