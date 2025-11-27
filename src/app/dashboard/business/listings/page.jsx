@@ -1,81 +1,60 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit, Trash2, Eye, Car, Waves, UtensilsCrossed, Package } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Car,
+  Waves,
+  UtensilsCrossed,
+  Package,
+} from "lucide-react";
 import Link from "next/link";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/hooks/useNotifications";
+import { useVendorListings } from "@/hooks/business/useVendorListings";
 
 // Service categories matching your requirements
 const SERVICE_CATEGORIES = [
-  { 
-    label: "Car Rental", 
-    icon: Car, 
+  {
+    label: "Car Rental",
+    icon: Car,
     value: "car-rental",
     description: "Chauffeur services and vehicle rentals",
-    color: "bg-blue-500"
+    color: "bg-blue-500",
   },
-  { 
-    label: "Resorts", 
-    icon: Waves, 
+  {
+    label: "Resorts",
+    icon: Waves,
     value: "resorts",
     description: "Beach party, jet ski, boat cruises",
-    color: "bg-cyan-500"
+    color: "bg-cyan-500",
   },
-  { 
-    label: "Fine Dining", 
-    icon: UtensilsCrossed, 
+  {
+    label: "Fine Dining",
+    icon: UtensilsCrossed,
     value: "fine-dining",
     description: "Restaurant and dining experiences",
-    color: "bg-orange-500"
+    color: "bg-orange-500",
   },
-  { 
-    label: "Convenience Services", 
-    icon: Package, 
+  {
+    label: "Convenience Services",
+    icon: Package,
     value: "convenience",
     description: "Delivery, Rent a chef, etc",
-    color: "bg-purple-500"
-  },
-];
-
-// Mock listings data - replace with actual data from API
-const MOCK_LISTINGS = [
-  {
-    id: 1,
-    title: "Luxury SUV with Driver",
-    category: "car-rental",
-    price: "₦25,000/day",
-    status: "active",
-    views: 145,
-    bookings: 8,
-    image: "/images/cars/pngs/car1.png"
-  },
-  {
-    id: 2,
-    title: "Beach Resort Package",
-    category: "resorts",
-    price: "₦50,000/person",
-    status: "active",
-    views: 289,
-    bookings: 15,
-    image: null
-  },
-  {
-    id: 3,
-    title: "Private Chef Service",
-    category: "convenience",
-    price: "₦30,000/event",
-    status: "inactive",
-    views: 67,
-    bookings: 3,
-    image: null
+    color: "bg-purple-500",
   },
 ];
 
 export default function ListingsPage() {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("vendorToken") : null;
+  const { listings, loading, error, refetch } = useVendorListings(token);
+
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [listings, setListings] = useState(MOCK_LISTINGS);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [listingToDelete, setListingToDelete] = useState(null);
@@ -83,13 +62,14 @@ export default function ListingsPage() {
   const { toasts, addToast, removeToast } = useToast();
 
   // Filter listings by category
-  const filteredListings = selectedCategory === "all" 
-    ? listings 
-    : listings.filter(listing => listing.category === selectedCategory);
+  const filteredListings =
+    selectedCategory === "all"
+      ? listings
+      : listings.filter((listing) => listing.category === selectedCategory);
 
   // Get counts by category
   const getCategoryCount = (categoryValue) => {
-    return listings.filter(l => l.category === categoryValue).length;
+    return listings.filter((l) => l.category === categoryValue).length;
   };
 
   const handleDeleteListing = (listing) => {
@@ -99,52 +79,62 @@ export default function ListingsPage() {
 
   const confirmDelete = async () => {
     setIsDeleting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Remove from listings
-    setListings((prev) => prev.filter((l) => l.id !== listingToDelete.id));
-    
-    setIsDeleting(false);
-    setShowDeleteConfirm(false);
-    
-    // Show success toast
-    addToast(`"${listingToDelete.title}" has been deleted successfully`, "success");
-    
-    setListingToDelete(null);
+
+    try {
+      // TODO: Replace with real API delete call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Remove listing from local state
+      setListingToDelete(null);
+      addToast(
+        `"${listingToDelete.title}" has been deleted successfully`,
+        "success"
+      );
+      refetch(); // Refresh listings
+    } catch {
+      addToast("Failed to delete listing", "error");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   const handleToggleStatus = async (listing) => {
     const newStatus = listing.status === "active" ? "inactive" : "active";
-    
+
     // Optimistically update UI
-    setListings((prev) =>
-      prev.map((l) =>
-        l.id === listing.id ? { ...l, status: newStatus } : l
-      )
+    const updatedListings = listings.map((l) =>
+      l.id === listing.id ? { ...l, status: newStatus } : l
     );
 
     try {
       // TODO: Submit to API
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Show success toast
+      await new Promise((resolve) => setTimeout(resolve, 500));
       addToast(
-        `Listing ${newStatus === "active" ? "activated" : "deactivated"} successfully`,
+        `Listing ${
+          newStatus === "active" ? "activated" : "deactivated"
+        } successfully`,
         "success"
       );
+      refetch(); // Refresh listings
     } catch {
-      // Revert on error
-      setListings((prev) =>
-        prev.map((l) =>
-          l.id === listing.id ? { ...l, status: listing.status } : l
-        )
-      );
       addToast("Failed to update listing status", "error");
     }
   };
+
+  if (loading)
+    return (
+      <div className="p-6 text-center text-gray-600">
+        Loading your listings...
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="p-6 text-center text-red-600">
+        Error fetching listings: {error}
+      </div>
+    );
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -230,12 +220,13 @@ export default function ListingsPage() {
           <div className="text-gray-400 mb-4">
             <Package className="w-16 h-16 mx-auto" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No listings found</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            No listings found
+          </h3>
           <p className="text-gray-600 mb-6">
-            {selectedCategory === "all" 
+            {selectedCategory === "all"
               ? "Get started by creating your first listing"
-              : "No listings in this category yet"
-            }
+              : "No listings in this category yet"}
           </p>
           <button
             onClick={() => setShowCategoryModal(true)}
@@ -248,9 +239,11 @@ export default function ListingsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredListings.map((listing) => {
-            const category = SERVICE_CATEGORIES.find(c => c.category === listing.category);
+            const category = SERVICE_CATEGORIES.find(
+              (c) => c.value === listing.category
+            );
             const Icon = category?.icon || Package;
-            
+
             return (
               <div
                 key={listing.id}
@@ -278,7 +271,9 @@ export default function ListingsPage() {
                           ? "bg-green-100 text-green-700 hover:bg-green-200"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
-                      title={`Click to ${listing.status === "active" ? "deactivate" : "activate"}`}
+                      title={`Click to ${
+                        listing.status === "active" ? "deactivate" : "activate"
+                      }`}
                     >
                       {listing.status === "active" ? "Active" : "Inactive"}
                     </button>
@@ -336,7 +331,9 @@ export default function ListingsPage() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-6 sm:p-8 animate-fadeIn">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Select Service Category</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Select Service Category
+                </h2>
                 <p className="text-gray-600 text-sm mt-1">
                   Choose the type of service you want to list
                 </p>
@@ -345,8 +342,18 @@ export default function ListingsPage() {
                 onClick={() => setShowCategoryModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -361,7 +368,9 @@ export default function ListingsPage() {
                     className="group relative bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer"
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`${category.color} p-3 rounded-lg text-white`}>
+                      <div
+                        className={`${category.color} p-3 rounded-lg text-white`}
+                      >
                         <Icon className="w-6 h-6" />
                       </div>
                       <div className="flex-1">

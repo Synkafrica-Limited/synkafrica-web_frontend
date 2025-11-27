@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { DotLottiePlayer } from "@dotlottie/react-player";
-import "@dotlottie/react-player/dist/index.css";
+// import { ArrowLeft } from "lucide-react";
+// import { DotLottiePlayer } from "@dotlottie/react-player";
+// import "@dotlottie/react-player/dist/index.css";
 
 /**
  * Reusable authentication layout component with split design
@@ -61,7 +61,7 @@ export default function AuthLayout({
             className="absolute top-6 left-6 z-10 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group"
           >
             <div className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-              <ArrowLeft className="w-5 h-5" />
+              {/* <ArrowLeft className="w-5 h-5" /> */}
             </div>
             <span className="text-sm font-medium hidden sm:inline">{cancelLabel}</span>
           </Link>
@@ -73,12 +73,12 @@ export default function AuthLayout({
             className={`hidden md:flex items-center justify-center p-12 `}
           >
             <div className="w-full max-w-md">
-              <DotLottiePlayer
+              {/* <DotLottiePlayer
                 src="/animations/loading.lottie"
                 loop
                 autoplay
                 className="w-full h-auto"
-              />
+              /> */}
             </div>
           </div>
 

@@ -1,7 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Search, DollarSign, Clock, CheckCircle, Calendar, Eye, Send, AlertCircle, Filter } from "lucide-react";
+import {
+  Download,
+  Search,
+  DollarSign,
+  Clock,
+  CheckCircle,
+  Calendar,
+  Eye,
+  Send,
+  AlertCircle,
+  Filter,
+} from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/hooks/useNotifications";
@@ -120,28 +131,31 @@ export default function TransactionsPage() {
   // Calculate summary stats
   const stats = {
     totalEarnings: transactions
-      .filter(t => t.status === "completed")
+      .filter((t) => t.status === "completed")
       .reduce((sum, t) => sum + t.netAmount, 0),
     pendingPayouts: transactions
-      .filter(t => t.payoutStatus === "pending" || t.payoutStatus === "requested")
+      .filter(
+        (t) => t.payoutStatus === "pending" || t.payoutStatus === "requested"
+      )
       .reduce((sum, t) => sum + t.netAmount, 0),
     paidOut: transactions
-      .filter(t => t.payoutStatus === "paid")
+      .filter((t) => t.payoutStatus === "paid")
       .reduce((sum, t) => sum + t.netAmount, 0),
     availableForPayout: transactions
-      .filter(t => t.payoutStatus === "pending")
+      .filter((t) => t.payoutStatus === "pending")
       .reduce((sum, t) => sum + t.netAmount, 0),
   };
 
   // Filter transactions
-  const filteredTransactions = transactions.filter(txn => {
-    const matchesStatus = selectedStatus === "all" || txn.payoutStatus === selectedStatus;
-    const matchesSearch = 
+  const filteredTransactions = transactions.filter((txn) => {
+    const matchesStatus =
+      selectedStatus === "all" || txn.payoutStatus === selectedStatus;
+    const matchesSearch =
       txn.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       txn.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       txn.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       txn.serviceName.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     // Time filter
     let matchesTime = true;
     if (timeFilter === "week") {
@@ -153,14 +167,14 @@ export default function TransactionsPage() {
       monthAgo.setMonth(monthAgo.getMonth() - 1);
       matchesTime = new Date(txn.date) >= monthAgo;
     }
-    
+
     return matchesStatus && matchesSearch && matchesTime;
   });
 
   // Get status counts
   const getStatusCount = (status) => {
     if (status === "all") return transactions.length;
-    return transactions.filter(t => t.payoutStatus === status).length;
+    return transactions.filter((t) => t.payoutStatus === status).length;
   };
 
   // Handle single payout request
@@ -174,18 +188,24 @@ export default function TransactionsPage() {
 
     try {
       // TODO: API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      setTransactions(prev =>
-        prev.map(t =>
+      setTransactions((prev) =>
+        prev.map((t) =>
           t.id === selectedTransaction.id
-            ? { ...t, payoutStatus: "requested", payoutRequestDate: new Date().toLocaleString() }
+            ? {
+                ...t,
+                payoutStatus: "requested",
+                payoutRequestDate: new Date().toLocaleString(),
+              }
             : t
         )
       );
 
       addToast(
-        `Payout request submitted for ${selectedTransaction.id} (₦${selectedTransaction.netAmount.toLocaleString()})`,
+        `Payout request submitted for ${
+          selectedTransaction.id
+        } (₦${selectedTransaction.netAmount.toLocaleString()})`,
         "success"
       );
       setShowPayoutModal(false);
@@ -199,7 +219,9 @@ export default function TransactionsPage() {
 
   // Handle bulk payout request
   const handleBulkPayoutRequest = () => {
-    const eligibleTransactions = transactions.filter(t => t.payoutStatus === "pending");
+    const eligibleTransactions = transactions.filter(
+      (t) => t.payoutStatus === "pending"
+    );
     if (eligibleTransactions.length === 0) {
       addToast("No transactions available for payout", "warning");
       return;
@@ -212,31 +234,40 @@ export default function TransactionsPage() {
 
     try {
       // TODO: API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       const eligibleIds = transactions
-        .filter(t => t.payoutStatus === "pending")
-        .map(t => t.id);
+        .filter((t) => t.payoutStatus === "pending")
+        .map((t) => t.id);
 
-      setTransactions(prev =>
-        prev.map(t =>
+      setTransactions((prev) =>
+        prev.map((t) =>
           eligibleIds.includes(t.id)
-            ? { ...t, payoutStatus: "requested", payoutRequestDate: new Date().toLocaleString() }
+            ? {
+                ...t,
+                payoutStatus: "requested",
+                payoutRequestDate: new Date().toLocaleString(),
+              }
             : t
         )
       );
 
       const totalAmount = transactions
-        .filter(t => eligibleIds.includes(t.id))
+        .filter((t) => eligibleIds.includes(t.id))
         .reduce((sum, t) => sum + t.netAmount, 0);
 
       addToast(
-        `Bulk payout request submitted for ${eligibleIds.length} transactions (₦${totalAmount.toLocaleString()})`,
+        `Bulk payout request submitted for ${
+          eligibleIds.length
+        } transactions (₦${totalAmount.toLocaleString()})`,
         "success"
       );
       setShowBulkPayoutModal(false);
     } catch {
-      addToast("Failed to submit bulk payout request. Please try again.", "error");
+      addToast(
+        "Failed to submit bulk payout request. Please try again.",
+        "error"
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -253,10 +284,10 @@ export default function TransactionsPage() {
 
     try {
       // TODO: API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      setTransactions(prev =>
-        prev.map(t =>
+      setTransactions((prev) =>
+        prev.map((t) =>
           t.id === selectedTransaction.id
             ? { ...t, lastReminderDate: new Date().toLocaleString() }
             : t
@@ -299,7 +330,11 @@ export default function TransactionsPage() {
         onClose={() => !isProcessing && setShowPayoutModal(false)}
         onConfirm={confirmPayoutRequest}
         title="Request Payout"
-        message={`Submit payout request for ${selectedTransaction?.id}? You will receive ${formatCurrency(selectedTransaction?.netAmount || 0)} after processing.`}
+        message={`Submit payout request for ${
+          selectedTransaction?.id
+        }? You will receive ${formatCurrency(
+          selectedTransaction?.netAmount || 0
+        )} after processing.`}
         confirmText="Request Payout"
         cancelText="Cancel"
         type="info"
@@ -317,12 +352,15 @@ export default function TransactionsPage() {
               <p className="text-sm text-gray-600 mb-4">
                 Submit payout request for all pending transactions?
               </p>
-              
+
               <div className="bg-blue-50 rounded-lg p-4 mb-4">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-gray-600">Transactions:</span>
                   <span className="font-semibold text-gray-900">
-                    {transactions.filter(t => t.payoutStatus === "pending").length}
+                    {
+                      transactions.filter((t) => t.payoutStatus === "pending")
+                        .length
+                    }
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -370,7 +408,9 @@ export default function TransactionsPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
-        <p className="text-gray-600 mt-1">Manage your earnings and payout requests</p>
+        <p className="text-gray-600 mt-1">
+          Manage your earnings and payout requests
+        </p>
       </div>
 
       {/* Stats Cards */}
@@ -521,7 +561,9 @@ export default function TransactionsPage() {
       {filteredTransactions.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <DollarSign className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No transactions found</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            No transactions found
+          </h3>
           <p className="text-gray-600">
             {searchQuery
               ? "No transactions match your search criteria"
@@ -564,16 +606,26 @@ export default function TransactionsPage() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredTransactions.map((txn) => {
-                  const StatusIcon = PAYOUT_STATUS_CONFIG[txn.payoutStatus].icon;
-                  
+                  const StatusIcon =
+                    PAYOUT_STATUS_CONFIG[txn.payoutStatus].icon;
+
                   return (
-                    <tr key={txn.id} className="hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={txn.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
                       <td className="px-4 py-4">
-                        <div className="text-sm font-medium text-gray-900">{txn.id}</div>
-                        <div className="text-xs text-gray-500">Order: {txn.orderId}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {txn.id}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Order: {txn.orderId}
+                        </div>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="text-sm text-gray-900">{txn.customerName}</div>
+                        <div className="text-sm text-gray-900">
+                          {txn.customerName}
+                        </div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm text-gray-900 max-w-xs truncate">
@@ -607,7 +659,11 @@ export default function TransactionsPage() {
                         )}
                       </td>
                       <td className="px-4 py-4">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${PAYOUT_STATUS_CONFIG[txn.payoutStatus].color}`}>
+                        <span
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
+                            PAYOUT_STATUS_CONFIG[txn.payoutStatus].color
+                          }`}
+                        >
                           <StatusIcon className="w-3 h-3" />
                           {PAYOUT_STATUS_CONFIG[txn.payoutStatus].label}
                         </span>
@@ -663,7 +719,9 @@ export default function TransactionsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-sm opacity-90">Filtered Transactions</p>
-              <p className="text-2xl font-bold">{filteredTransactions.length}</p>
+              <p className="text-2xl font-bold">
+                {filteredTransactions.length}
+              </p>
             </div>
             <div>
               <p className="text-sm opacity-90">Total Net Amount</p>

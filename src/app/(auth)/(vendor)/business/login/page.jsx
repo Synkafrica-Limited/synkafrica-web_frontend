@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/layout/AuthLayout";
 import Buttons from "@/components/ui/Buttons";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 export default function VendorSignInScreen() {
   const router = useRouter();
@@ -15,14 +16,42 @@ export default function VendorSignInScreen() {
   const [rememberMe, setRememberMe] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
 
+  const { redirectLoading } = useAuthRedirect();
+
   const validateEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  // Redirect logged-in users or handle Google redirect token
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get("accessToken");
+    const refreshToken = urlParams.get("refreshToken");
+
+    if (accessToken) {
+      localStorage.setItem("vendorToken", accessToken);
+      if (refreshToken)
+        localStorage.setItem("vendorRefreshToken", refreshToken);
+      router.replace("/dashboard/business/home");
+    } else {
+      const token = localStorage.getItem("vendorToken");
+      if (token) router.replace("/dashboard/business/home");
+    }
+  }, [router]);
 
   const onEmailChange = (e) => {
     const v = e.target.value;
     setEmail(v);
-    if (touched.email) setEmailError(!v.trim() ? "Email is required" : !validateEmail(v) ? "Enter a valid email" : "");
+    if (touched.email)
+      setEmailError(
+        !v.trim()
+          ? "Email is required"
+          : !validateEmail(v)
+          ? "Enter a valid email"
+          : ""
+      );
   };
 
   const onPasswordChange = (e) => {
@@ -33,36 +62,90 @@ export default function VendorSignInScreen() {
 
   const handleBlur = (field) => {
     setTouched((s) => ({ ...s, [field]: true }));
-    if (field === "email") setEmailError(!email.trim() ? "Email is required" : !validateEmail(email) ? "Enter a valid email" : "");
-    if (field === "password") setPasswordError(!password ? "Password is required" : "");
+    if (field === "email")
+      setEmailError(
+        !email.trim()
+          ? "Email is required"
+          : !validateEmail(email)
+          ? "Enter a valid email"
+          : ""
+      );
+    if (field === "password")
+      setPasswordError(!password ? "Password is required" : "");
   };
 
-  const isValid = email && validateEmail(email) && password && !emailError && !passwordError;
+  const isValid =
+    email && validateEmail(email) && password && !emailError && !passwordError;
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!isValid) return;
-    // Handle vendor sign in - existing users go directly to dashboard
-    console.log("Vendor sign in:", { email, password, rememberMe });
-    router.push("/dashboard/business/home");
+    setLoading(true);
+    setServerError("");
+
+    try {
+      const response = await fetch(
+        "https://synkkafrica-backend-core.onrender.com/api/auth/signin",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim(), password }),
+        }
+      );
+
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
+      if (!response.ok) {
+        setServerError(
+          (data && data.message) ||
+            `Error ${response.status}: ${response.statusText}`
+        );
+        return;
+      }
+
+      const accessToken = data?.accessToken;
+      const refreshToken = data?.refreshToken;
+
+      if (accessToken) {
+        localStorage.setItem("vendorToken", accessToken);
+        if (refreshToken)
+          localStorage.setItem("vendorRefreshToken", refreshToken);
+        if (rememberMe) localStorage.setItem("rememberMe", "true");
+
+        router.push("/dashboard/business/home");
+      } else setServerError("Unexpected server response. No token received.");
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setServerError(
+        "Unable to reach server. Check network or server availability."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Redirect to backend Google login
   const handleGoogleSignIn = () => {
-    // Handle Google sign in
-    console.log("Google sign in clicked");
+    window.location.href =
+      "https://synkkafrica-backend-core.onrender.com/api/auth/google/login";
   };
 
-  const handleAppleSignIn = () => {
-    // Handle Apple sign in
-    console.log("Apple sign in clicked");
-  };
+  const handleAppleSignIn = () => console.log("Apple sign in clicked");
+
+  if (redirectLoading) return <p>Loading...</p>;
 
   return (
     <AuthLayout
       title="Sign in"
       subtitle="Welcome back! Please enter your details."
     >
-      {/* Form */}
       <div className="space-y-5">
+        {serverError && <p className="text-sm text-red-600">{serverError}</p>}
+
         {/* Email */}
         <div>
           <input
@@ -72,10 +155,14 @@ export default function VendorSignInScreen() {
             onBlur={() => handleBlur("email")}
             placeholder="Email"
             className={`w-full px-5 py-4 border-2 rounded-xl focus:outline-none focus:ring-0 transition-colors text-gray-900 placeholder-gray-400 ${
-              emailError ? "border-red-500" : "border-gray-300 focus:border-gray-900"
+              emailError
+                ? "border-red-500"
+                : "border-gray-300 focus:border-gray-900"
             }`}
           />
-          {emailError && <p className="mt-2 text-sm text-red-600">{emailError}</p>}
+          {emailError && (
+            <p className="mt-2 text-sm text-red-600">{emailError}</p>
+          )}
         </div>
 
         {/* Password */}
@@ -88,32 +175,38 @@ export default function VendorSignInScreen() {
               onBlur={() => handleBlur("password")}
               placeholder="Password"
               className={`w-full px-5 py-4 pr-12 border-2 rounded-xl focus:outline-none focus:ring-0 transition-colors text-gray-900 placeholder-gray-400 ${
-                passwordError ? "border-red-500" : "border-gray-300 focus:border-gray-900"
+                passwordError
+                  ? "border-red-500"
+                  : "border-gray-300 focus:border-gray-900"
               }`}
             />
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
               className="absolute inset-y-0 right-4 my-auto h-8 w-8 grid place-items-center text-gray-400 hover:text-gray-600"
-              aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
             </button>
           </div>
-          {passwordError && <p className="mt-2 text-sm text-red-600">{passwordError}</p>}
+          {passwordError && (
+            <p className="mt-2 text-sm text-red-600">{passwordError}</p>
+          )}
         </div>
 
-        {/* Log In Button */}
         <Buttons
           onClick={handleSignIn}
-          disabled={!isValid}
+          disabled={!isValid || loading}
           className={`w-full py-4 px-4 rounded-xl font-medium text-white transition-all duration-200 ${
-            isValid 
-              ? "bg-linear-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:to-primary-400 shadow-md" 
+            isValid
+              ? "bg-linear-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:to-primary-400 shadow-md"
               : "bg-primary-200 cursor-not-allowed"
           }`}
         >
-          Log in
+          {loading ? "Signing in..." : "Log in"}
         </Buttons>
 
         {/* Remember me & Forgot password */}
@@ -125,11 +218,15 @@ export default function VendorSignInScreen() {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="w-5 h-5 border-2 border-primary-400 rounded cursor-pointer accent-primary-400"
             />
-            <span className="text-gray-700 group-hover:text-gray-900">Remember me</span>
+            <span className="text-gray-700 group-hover:text-gray-900">
+              Remember me
+            </span>
           </label>
-          <Link href="/business/forgot-password" className="text-gray-500 hover:text-gray-700 flex items-center gap-1">
-            <span className="text-lg">🔒</span>
-            Forgot password?
+          <Link
+            href="/business/forgot-password"
+            className="text-gray-500 hover:text-gray-700 flex items-center gap-1"
+          >
+            <span className="text-lg">🔒</span> Forgot password?
           </Link>
         </div>
 
@@ -143,9 +240,8 @@ export default function VendorSignInScreen() {
           </div>
         </div>
 
-        {/* Social Sign In Options */}
+        {/* Social Sign In */}
         <div className="space-y-3">
-          {/* Google Sign In */}
           <button
             onClick={handleGoogleSignIn}
             className="w-full bg-white hover:bg-gray-50 border-2 border-gray-300 text-gray-700 font-medium py-4 px-4 rounded-xl flex items-center justify-center space-x-3 transition-colors"
@@ -170,8 +266,6 @@ export default function VendorSignInScreen() {
             </svg>
             <span>Sign in with Google</span>
           </button>
-
-          {/* Apple Sign In */}
           <button
             onClick={handleAppleSignIn}
             className="w-full bg-black hover:bg-gray-800 text-white font-medium py-4 px-4 rounded-xl flex items-center justify-center space-x-3 transition-colors"
@@ -183,10 +277,14 @@ export default function VendorSignInScreen() {
           </button>
         </div>
 
-        {/* Switch to sign up */}
         <p className="text-sm text-gray-600 text-center pt-4">
           Don't have a business account?{" "}
-          <Link href="/business/signup" className="text-gray-900 hover:underline font-medium">Create one</Link>
+          <Link
+            href="/business/signup"
+            className="text-gray-900 hover:underline font-medium"
+          >
+            Create one
+          </Link>
         </p>
       </div>
     </AuthLayout>

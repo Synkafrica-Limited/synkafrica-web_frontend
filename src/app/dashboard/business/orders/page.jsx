@@ -1,7 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter, Clock, CheckCircle, XCircle, Eye, Calendar, User, Package, Phone, MapPin, DollarSign } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Eye,
+  Calendar,
+  User,
+  Package,
+  Phone,
+  MapPin,
+  DollarSign,
+} from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/hooks/useNotifications";
@@ -132,9 +145,10 @@ export default function OrdersPage() {
   const { toasts, addToast, removeToast } = useToast();
 
   // Filter orders
-  const filteredOrders = orders.filter(order => {
-    const matchesStatus = selectedStatus === "all" || order.status === selectedStatus;
-    const matchesSearch = 
+  const filteredOrders = orders.filter((order) => {
+    const matchesStatus =
+      selectedStatus === "all" || order.status === selectedStatus;
+    const matchesSearch =
       order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.serviceName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -144,7 +158,7 @@ export default function OrdersPage() {
   // Get status counts
   const getStatusCount = (status) => {
     if (status === "all") return orders.length;
-    return orders.filter(o => o.status === status).length;
+    return orders.filter((o) => o.status === status).length;
   };
 
   // Handle accept booking
@@ -158,10 +172,10 @@ export default function OrdersPage() {
 
     try {
       // TODO: API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      setOrders(prev =>
-        prev.map(o =>
+      setOrders((prev) =>
+        prev.map((o) =>
           o.id === selectedOrder.id ? { ...o, status: "accepted" } : o
         )
       );
@@ -193,10 +207,10 @@ export default function OrdersPage() {
 
     try {
       // TODO: API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      setOrders(prev =>
-        prev.map(o =>
+      setOrders((prev) =>
+        prev.map((o) =>
           o.id === selectedOrder.id
             ? { ...o, status: "declined", declineReason }
             : o
@@ -256,9 +270,10 @@ export default function OrdersPage() {
                 Decline Booking
               </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Please provide a reason for declining booking {selectedOrder?.id}
+                Please provide a reason for declining booking{" "}
+                {selectedOrder?.id}
               </p>
-              
+
               <textarea
                 value={declineReason}
                 onChange={(e) => setDeclineReason(e.target.value)}
@@ -296,8 +311,12 @@ export default function OrdersPage() {
             {/* Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-bold text-gray-900">Booking Details</h3>
-                <p className="text-sm text-gray-600 mt-1">Order ID: {selectedOrder.id}</p>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Booking Details
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Order ID: {selectedOrder.id}
+                </p>
               </div>
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -311,7 +330,11 @@ export default function OrdersPage() {
             <div className="p-6 space-y-6">
               {/* Status Badge */}
               <div className="flex items-center justify-between">
-                <span className={`px-4 py-2 rounded-full text-sm font-medium ${STATUS_CONFIG[selectedOrder.status].color}`}>
+                <span
+                  className={`px-4 py-2 rounded-full text-sm font-medium ${
+                    STATUS_CONFIG[selectedOrder.status].color
+                  }`}
+                >
                   {STATUS_CONFIG[selectedOrder.status].label}
                 </span>
                 <span className="text-sm text-gray-500">
@@ -328,15 +351,21 @@ export default function OrdersPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Name:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.customerName}</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.customerName}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Phone:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.customerPhone}</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.customerPhone}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Email:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.customerEmail}</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.customerEmail}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -350,31 +379,45 @@ export default function OrdersPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Service:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.serviceName}</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.serviceName}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Category:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.serviceType}</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.serviceType}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Date:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.bookingDate}</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.bookingDate}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Time:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.bookingTime}</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.bookingTime}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Duration:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.duration}</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.duration}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Guests:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.guests} people</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.guests} people
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Location:</span>
-                    <span className="font-medium text-gray-900">{selectedOrder.location}</span>
+                    <span className="font-medium text-gray-900">
+                      {selectedOrder.location}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -395,18 +438,27 @@ export default function OrdersPage() {
               {/* Special Requests */}
               {selectedOrder.specialRequests && (
                 <div className="bg-blue-50 rounded-xl p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Special Requests</h4>
-                  <p className="text-sm text-gray-700">{selectedOrder.specialRequests}</p>
+                  <h4 className="font-semibold text-gray-900 mb-2">
+                    Special Requests
+                  </h4>
+                  <p className="text-sm text-gray-700">
+                    {selectedOrder.specialRequests}
+                  </p>
                 </div>
               )}
 
               {/* Decline Reason */}
-              {selectedOrder.status === "declined" && selectedOrder.declineReason && (
-                <div className="bg-red-50 rounded-xl p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Decline Reason</h4>
-                  <p className="text-sm text-gray-700">{selectedOrder.declineReason}</p>
-                </div>
-              )}
+              {selectedOrder.status === "declined" &&
+                selectedOrder.declineReason && (
+                  <div className="bg-red-50 rounded-xl p-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Decline Reason
+                    </h4>
+                    <p className="text-sm text-gray-700">
+                      {selectedOrder.declineReason}
+                    </p>
+                  </div>
+                )}
 
               {/* Actions */}
               {selectedOrder.status === "pending" && (
@@ -439,7 +491,9 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Manage Bookings</h1>
-        <p className="text-gray-600 mt-1">View and manage all incoming booking requests</p>
+        <p className="text-gray-600 mt-1">
+          View and manage all incoming booking requests
+        </p>
       </div>
 
       {/* Filters and Search */}
@@ -519,7 +573,9 @@ export default function OrdersPage() {
       {filteredOrders.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <Package className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No bookings found</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            No bookings found
+          </h3>
           <p className="text-gray-600">
             {searchQuery
               ? "No bookings match your search criteria"
@@ -532,7 +588,7 @@ export default function OrdersPage() {
         <div className="space-y-4">
           {filteredOrders.map((order) => {
             const StatusIcon = STATUS_CONFIG[order.status].icon;
-            
+
             return (
               <div
                 key={order.id}
@@ -547,10 +603,15 @@ export default function OrdersPage() {
                           {order.serviceName}
                         </h3>
                         <p className="text-sm text-gray-600 mt-1">
-                          Order ID: <span className="font-medium">{order.id}</span>
+                          Order ID:{" "}
+                          <span className="font-medium">{order.id}</span>
                         </p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${STATUS_CONFIG[order.status].color}`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
+                          STATUS_CONFIG[order.status].color
+                        }`}
+                      >
                         <StatusIcon className="w-3 h-3" />
                         {STATUS_CONFIG[order.status].label}
                       </span>

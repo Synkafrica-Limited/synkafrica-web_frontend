@@ -1,6 +1,6 @@
 /**
  * Micro-Interactions Usage Examples
- * 
+ *
  * This file demonstrates how to use the notification components
  * throughout the application.
  */
@@ -9,26 +9,26 @@
 // 1. TOAST NOTIFICATIONS
 // ============================================
 
-import { useToast } from '@/hooks/useNotifications';
-import { Toast } from '@/components/ui/Toast';
+import { useToast } from "@/hooks/useNotifications";
+import { Toast } from "@/components/ui/Toast";
 
 function ExampleComponent() {
   const { toasts, addToast, removeToast } = useToast();
 
   const handleSuccess = () => {
-    addToast('Operation completed successfully!', 'success', 3000);
+    addToast("Operation completed successfully!", "success", 3000);
   };
 
   const handleError = () => {
-    addToast('Something went wrong. Please try again.', 'error', 5000);
+    addToast("Something went wrong. Please try again.", "error", 5000);
   };
 
   const handleWarning = () => {
-    addToast('This action requires your attention.', 'warning', 4000);
+    addToast("This action requires your attention.", "warning", 4000);
   };
 
   const handleInfo = () => {
-    addToast('New feature available!', 'info', 3000);
+    addToast("New feature available!", "info", 3000);
   };
 
   return (
@@ -58,8 +58,8 @@ function ExampleComponent() {
 // 2. CONFIRMATION DIALOG
 // ============================================
 
-import { useState } from 'react';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import { useState } from "react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 function DeleteExample() {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -67,10 +67,10 @@ function DeleteExample() {
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    
+
     // Perform delete operation
-    await fetch('/api/delete', { method: 'DELETE' });
-    
+    await fetch("/api/delete", { method: "DELETE" });
+
     setIsDeleting(false);
     setShowConfirm(false);
   };
@@ -89,9 +89,7 @@ function DeleteExample() {
         isLoading={isDeleting}
       />
 
-      <button onClick={() => setShowConfirm(true)}>
-        Delete Item
-      </button>
+      <button onClick={() => setShowConfirm(true)}>Delete Item</button>
     </>
   );
 }
@@ -100,9 +98,9 @@ function DeleteExample() {
 // 3. BOOKING NOTIFICATION
 // ============================================
 
-import { useState } from 'react';
-import { BookingNotification } from '@/components/ui/Notifications';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { BookingNotification } from "@/components/ui/Notifications";
+import { useRouter } from "next/navigation";
 
 function BookingExample() {
   const [showBooking, setShowBooking] = useState(false);
@@ -117,7 +115,7 @@ function BookingExample() {
     customerName: "John Doe",
     serviceName: "Luxury SUV with Driver",
     price: "₦25,000",
-    date: "Dec 15, 2024"
+    date: "Dec 15, 2024",
   };
 
   return (
@@ -128,14 +126,12 @@ function BookingExample() {
           onClose={() => setShowBooking(false)}
           onView={() => {
             setShowBooking(false);
-            router.push('/dashboard/business/orders');
+            router.push("/dashboard/business/orders");
           }}
         />
       )}
 
-      <button onClick={handleNewBooking}>
-        Simulate New Booking
-      </button>
+      <button onClick={handleNewBooking}>Simulate New Booking</button>
     </>
   );
 }
@@ -144,20 +140,24 @@ function BookingExample() {
 // 4. NOTIFICATION BADGE & POPUP
 // ============================================
 
-import { useState } from 'react';
-import { useNotifications } from '@/hooks/useNotifications';
-import { NotificationBadge, NotificationPopup } from '@/components/ui/Notifications';
+import { useState } from "react";
+import { useNotifications } from "@/hooks/useNotifications";
+import {
+  NotificationBadge,
+  NotificationPopup,
+} from "@/components/ui/Notifications";
 
 function HeaderExample() {
   const [showNotifications, setShowNotifications] = useState(false);
-  const { notifications, unreadCount, addNotification, markAsRead } = useNotifications();
+  const { notifications, unreadCount, addNotification, markAsRead } =
+    useNotifications();
 
   // Example: Add notification when booking is received
   const handleNewBooking = () => {
     addNotification({
-      type: 'booking',
-      title: 'New Booking Order',
-      message: 'John Doe booked your Luxury SUV service',
+      type: "booking",
+      title: "New Booking Order",
+      message: "John Doe booked your Luxury SUV service",
     });
   };
 
@@ -177,9 +177,7 @@ function HeaderExample() {
       )}
 
       {/* Simulate new booking */}
-      <button onClick={handleNewBooking}>
-        Test Notification
-      </button>
+      <button onClick={handleNewBooking}>Test Notification</button>
     </header>
   );
 }
@@ -201,18 +199,20 @@ function CompleteListingsExample() {
 
   const confirmDelete = async () => {
     setIsDeleting(true);
-    
+
     try {
-      await fetch(`/api/listings/${listingToDelete.id}`, { method: 'DELETE' });
-      
+      await fetch(`/api/listings/${listingToDelete.id}`, { method: "DELETE" });
+
       // Show success toast
-      addToast(`"${listingToDelete.title}" has been deleted successfully`, "success");
-      
+      addToast(
+        `"${listingToDelete.title}" has been deleted successfully`,
+        "success"
+      );
+
       // Refresh listings
       // ... refresh logic
-      
     } catch {
-      addToast('Failed to delete listing. Please try again.', 'error');
+      addToast("Failed to delete listing. Please try again.", "error");
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -248,7 +248,9 @@ function CompleteListingsExample() {
       />
 
       {/* Your listings content */}
-      <button onClick={() => handleDeleteListing({ id: 1, title: 'Test Listing' })}>
+      <button
+        onClick={() => handleDeleteListing({ id: 1, title: "Test Listing" })}
+      >
         Delete Listing
       </button>
     </div>
@@ -259,7 +261,7 @@ function CompleteListingsExample() {
 // 6. WEBSOCKET INTEGRATION EXAMPLE
 // ============================================
 
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 function WebSocketBookingNotifications() {
   const [showBooking, setShowBooking] = useState(false);
@@ -268,12 +270,12 @@ function WebSocketBookingNotifications() {
 
   useEffect(() => {
     // Connect to WebSocket
-    const ws = new WebSocket('wss://your-api.com/notifications');
+    const ws = new WebSocket("wss://your-api.com/notifications");
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      if (data.type === 'new_booking') {
+      if (data.type === "new_booking") {
         // Show booking notification popup
         setBookingData({
           customerName: data.customer_name,
@@ -285,8 +287,8 @@ function WebSocketBookingNotifications() {
 
         // Also add to notification list
         addNotification({
-          type: 'booking',
-          title: 'New Booking Order',
+          type: "booking",
+          title: "New Booking Order",
           message: `${data.customer_name} booked ${data.service_name}`,
         });
       }
