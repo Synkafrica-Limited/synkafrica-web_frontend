@@ -134,8 +134,8 @@ export default function HomePage() {
   const services = [
     { id: "car", label: "Car rental", icon: Car },
     { id: "dining", label: "Dining", icon: Utensils },
-    { id: "resort", label: "Resort house", icon: Home },
-    { id: "water", label: "Water recreation", icon: Sailboat },
+    { id: "resort", label: "Resorts", icon: Home },
+    { id: "water", label: "Recreation", icon: Sailboat },
     { id: "other", label: "Other services", icon: MoreHorizontal },
   ];
 
