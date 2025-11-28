@@ -4,17 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  List, 
-  ShoppingCart, 
-  CreditCard, 
+import {
+  LayoutDashboard,
+  List,
+  ShoppingCart,
+  CreditCard,
   AlertCircle,
   LogOut,
   X,
   Menu,
-  User
+  User,
 } from "lucide-react";
+
+import { useSignOut } from "@/hooks/business/useSignOut";
 
 /**
  * Business Dashboard Sidebar Component
@@ -23,6 +25,8 @@ import {
 export default function BusinessSidebar() {
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const { signOut, loading } = useSignOut();
 
   const menuItems = [
     {
@@ -84,13 +88,17 @@ export default function BusinessSidebar() {
       )}
 
       {/* Sidebar */}
-      <aside 
+      <aside
         className={`
           fixed lg:sticky top-0 h-screen
           bg-white border-r border-gray-200 
           transition-all duration-300 flex flex-col
           w-64 z-50
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${
+            isMobileOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+          }
         `}
       >
         {/* Mobile Close Button */}
@@ -103,7 +111,11 @@ export default function BusinessSidebar() {
 
         {/* Logo Section */}
         <div className="p-6 border-b border-gray-200">
-          <Link href="/dashboard/business/home" className="flex items-center gap-3" onClick={closeMobile}>
+          <Link
+            href="/dashboard/business/home"
+            className="flex items-center gap-3"
+            onClick={closeMobile}
+          >
             <div className="relative w-8 h-8 flex-shrink-0">
               <Image
                 src="/images/brand/synkafrica-logo-single.png"
@@ -133,9 +145,11 @@ export default function BusinessSidebar() {
                         : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                     }`}
                   >
-                    <Icon 
+                    <Icon
                       className={`w-5 h-5 flex-shrink-0 ${
-                        item.active ? "text-primary-600" : "text-gray-500 group-hover:text-gray-900"
+                        item.active
+                          ? "text-primary-600"
+                          : "text-gray-500 group-hover:text-gray-900"
                       }`}
                     />
                     <span className="font-medium text-sm">{item.label}</span>
@@ -149,10 +163,14 @@ export default function BusinessSidebar() {
         {/* Logout Section */}
         <div className="p-3 border-t border-gray-200">
           <button
+            onClick={signOut}
+            disabled={loading}
             className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-colors w-full group"
           >
             <LogOut className="w-5 h-5 flex-shrink-0 text-gray-500 group-hover:text-red-600" />
-            <span className="font-medium text-sm">Log Out</span>
+            <span className="font-medium text-sm">
+              {loading ? "Logging out..." : "Log out"}
+            </span>
           </button>
         </div>
       </aside>

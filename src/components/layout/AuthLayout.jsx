@@ -60,7 +60,7 @@ export default function AuthLayout({
             className="absolute top-6 left-6 z-10 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group"
           >
             <div className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-              <ArrowLeft className="w-5 h-5" />
+              {/* <ArrowLeft className="w-5 h-5" /> */}
             </div>
             <span className="text-sm font-medium hidden sm:inline">{cancelLabel}</span>
           </Link>

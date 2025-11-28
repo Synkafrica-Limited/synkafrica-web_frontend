@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useToast, useNotifications } from "@/hooks/useNotifications";
 import { Toast } from "@/components/ui/Toast";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-import { NotificationBadge, NotificationPopup, BookingNotification } from "@/components/ui/Notifications";
+import {
+  NotificationBadge,
+  NotificationPopup,
+  BookingNotification,
+} from "@/components/ui/Notifications";
 import { useRouter } from "next/navigation";
 
 /**
@@ -14,7 +18,8 @@ import { useRouter } from "next/navigation";
 export default function MicroInteractionsDemo() {
   const router = useRouter();
   const { toasts, addToast, removeToast } = useToast();
-  const { notifications, unreadCount, addNotification, markAsRead } = useNotifications();
+  const { notifications, unreadCount, addNotification, markAsRead } =
+    useNotifications();
 
   // Confirm Dialog State
   const [showConfirm, setShowConfirm] = useState(false);
@@ -31,13 +36,13 @@ export default function MicroInteractionsDemo() {
     customerName: "John Doe",
     serviceName: "Luxury SUV with Driver",
     price: "₦25,000",
-    date: "Dec 15, 2024"
+    date: "Dec 15, 2024",
   };
 
   // Handlers
   const handleDelete = async () => {
     setIsDeleting(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     setIsDeleting(false);
     setShowConfirm(false);
     addToast("Item deleted successfully!", "success");
@@ -45,9 +50,9 @@ export default function MicroInteractionsDemo() {
 
   const handleAddNotification = () => {
     addNotification({
-      type: 'booking',
-      title: 'New Booking Order',
-      message: 'Sarah Smith booked your Beach Resort Package for 5 guests',
+      type: "booking",
+      title: "New Booking Order",
+      message: "Sarah Smith booked your Beach Resort Package for 5 guests",
     });
   };
 
@@ -94,7 +99,7 @@ export default function MicroInteractionsDemo() {
           onClose={() => setShowBooking(false)}
           onView={() => {
             setShowBooking(false);
-            router.push('/dashboard/business/orders');
+            router.push("/dashboard/business/orders");
           }}
         />
       )}
@@ -104,8 +109,12 @@ export default function MicroInteractionsDemo() {
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Micro-Interactions Demo</h1>
-              <p className="text-gray-600 mt-2">Test all notification and dialog components</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Micro-Interactions Demo
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Test all notification and dialog components
+              </p>
             </div>
             <NotificationBadge
               count={unreadCount}
@@ -115,28 +124,38 @@ export default function MicroInteractionsDemo() {
 
           {/* Toast Demonstrations */}
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Toast Notifications</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Toast Notifications
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <button
-                onClick={() => addToast("Operation completed successfully!", "success")}
+                onClick={() =>
+                  addToast("Operation completed successfully!", "success")
+                }
                 className="px-4 py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors"
               >
                 Success Toast
               </button>
               <button
-                onClick={() => addToast("Something went wrong. Please try again.", "error")}
+                onClick={() =>
+                  addToast("Something went wrong. Please try again.", "error")
+                }
                 className="px-4 py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
               >
                 Error Toast
               </button>
               <button
-                onClick={() => addToast("This action requires your attention.", "warning")}
+                onClick={() =>
+                  addToast("This action requires your attention.", "warning")
+                }
                 className="px-4 py-3 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition-colors"
               >
                 Warning Toast
               </button>
               <button
-                onClick={() => addToast("New feature available! Check it out.", "info")}
+                onClick={() =>
+                  addToast("New feature available! Check it out.", "info")
+                }
                 className="px-4 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
               >
                 Info Toast
@@ -146,7 +165,9 @@ export default function MicroInteractionsDemo() {
 
           {/* Confirmation Dialog */}
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Confirmation Dialog</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Confirmation Dialog
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <button
                 onClick={() => setShowConfirm(true)}
@@ -176,7 +197,9 @@ export default function MicroInteractionsDemo() {
 
           {/* Notifications */}
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Notification System</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Notification System
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={handleAddNotification}
@@ -195,7 +218,9 @@ export default function MicroInteractionsDemo() {
 
           {/* Booking Notification */}
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Booking Notification</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Booking Notification
+            </h2>
             <button
               onClick={() => setShowBooking(true)}
               className="px-6 py-3 bg-linear-to-r from-primary-500 to-primary-600 text-white rounded-lg font-medium hover:from-primary-600 hover:to-primary-700 transition-all shadow-lg"
@@ -207,13 +232,17 @@ export default function MicroInteractionsDemo() {
 
         {/* Code Examples */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Usage Examples</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Usage Examples
+          </h2>
           <div className="space-y-6">
             {/* Toast Example */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Toast Notification</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Toast Notification
+              </h3>
               <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
-{`const { toasts, addToast, removeToast } = useToast();
+                {`const { toasts, addToast, removeToast } = useToast();
 
 addToast('Success message!', 'success', 3000);`}
               </pre>
@@ -221,9 +250,11 @@ addToast('Success message!', 'success', 3000);`}
 
             {/* Confirm Dialog Example */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Confirmation Dialog</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Confirmation Dialog
+              </h3>
               <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
-{`<ConfirmDialog
+                {`<ConfirmDialog
   isOpen={showConfirm}
   onClose={() => setShowConfirm(false)}
   onConfirm={handleDelete}
@@ -237,9 +268,11 @@ addToast('Success message!', 'success', 3000);`}
 
             {/* Notification Example */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Add Notification</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Add Notification
+              </h3>
               <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
-{`addNotification({
+                {`addNotification({
   type: 'booking',
   title: 'New Booking Order',
   message: 'Customer booked your service',
@@ -249,9 +282,11 @@ addToast('Success message!', 'success', 3000);`}
 
             {/* Booking Notification Example */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Booking Notification</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Booking Notification
+              </h3>
               <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
-{`<BookingNotification
+                {`<BookingNotification
   booking={{
     customerName: "John Doe",
     serviceName: "Service Name",

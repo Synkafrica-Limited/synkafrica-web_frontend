@@ -3,15 +3,29 @@
 import { Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useUserProfile } from "@/hooks/business/useUserProfileVendor";
+import { useState, useEffect } from "react";
 
-/**
- * Business Dashboard Header Component
- * Simple header with page title, search bar, and profile avatar
- */
-export default function BusinessDashboardHeader({ title = "Dashboard", user = null }) {
-  // Get user initials if no profile image
-  const initials = user?.name 
-    ? user.name.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
+// Skeleton Loader
+const Skeleton = ({ className }) => (
+  <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
+);
+
+export default function BusinessDashboardHeader({ title = "Dashboard" }) {
+  const [token, setToken] = useState(null);
+
+  // Load token after client mount
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) setToken(storedToken);
+  }, []);
+
+  // Only use hook if token exists
+  const { user, loading, error } = useUserProfile(token);
+
+  // Compute initials
+  const initials = user?.firstName
+    ? `${user.firstName[0]}${user.lastName?.[0] || ""}`.toUpperCase()
     : "SA";
 
   return (
@@ -19,7 +33,7 @@ export default function BusinessDashboardHeader({ title = "Dashboard", user = nu
       <div className="flex items-center justify-between gap-4">
         {/* Page Title */}
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-          {title}
+          {loading ? <Skeleton className="w-32 h-6" /> : title}
         </h1>
 
         {/* Right: Search & Profile */}
@@ -40,14 +54,20 @@ export default function BusinessDashboardHeader({ title = "Dashboard", user = nu
           </button>
 
           {/* User Profile Avatar */}
-          <Link 
+          <Link
             href="/dashboard/business/profile"
             className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-primary-500 transition-colors shrink-0 group"
           >
-            {user?.profileImage ? (
+            {!token || loading ? (
+              <Skeleton className="w-full h-full" />
+            ) : error ? (
+              <div className="w-full h-full bg-red-500 flex items-center justify-center text-white text-sm font-semibold">
+                !
+              </div>
+            ) : user?.avatar ? (
               <Image
-                src={user.profileImage}
-                alt={user.name || "User Profile"}
+                src={user.avatar}
+                alt={`${user.firstName} ${user.lastName}`}
                 width={40}
                 height={40}
                 className="w-full h-full object-cover"

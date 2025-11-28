@@ -33,17 +33,17 @@ export default function NewFineDiningListing() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.map(file => ({
+    const newImages = files.map((file) => ({
       file,
-      preview: URL.createObjectURL(file)
+      preview: URL.createObjectURL(file),
     }));
     setImages([...images, ...newImages]);
   };
@@ -64,7 +64,7 @@ export default function NewFineDiningListing() {
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       console.log("Fine dining listing:", form, images, menuPDF);
       addToast("Fine dining listing created successfully!", "success");
       setTimeout(() => router.push("/dashboard/business/listings"), 1000);
@@ -75,12 +75,31 @@ export default function NewFineDiningListing() {
   };
 
   const cuisineTypes = [
-    "Nigerian", "Continental", "Asian", "Italian", "French", 
-    "Mediterranean", "Seafood", "Steakhouse", "Fusion", "Vegan/Vegetarian"
+    "Nigerian",
+    "Continental",
+    "Asian",
+    "Italian",
+    "French",
+    "Mediterranean",
+    "Seafood",
+    "Steakhouse",
+    "Fusion",
+    "Vegan/Vegetarian",
   ];
 
-  const diningTypes = ["Fine Dining", "Casual Dining", "Bistro", "Cafe", "Lounge"];
-  const priceRanges = ["₦₦₦₦ (Luxury)", "₦₦₦ (Upscale)", "₦₦ (Moderate)", "₦ (Budget-Friendly)"];
+  const diningTypes = [
+    "Fine Dining",
+    "Casual Dining",
+    "Bistro",
+    "Cafe",
+    "Lounge",
+  ];
+  const priceRanges = [
+    "₦₦₦₦ (Luxury)",
+    "₦₦₦ (Upscale)",
+    "₦₦ (Moderate)",
+    "₦ (Budget-Friendly)",
+  ];
 
   const specialtyOptions = [
     "Chef's Tasting Menu",
@@ -90,7 +109,7 @@ export default function NewFineDiningListing() {
     "Live Music",
     "Sunday Brunch",
     "Cocktail Bar",
-    "Dessert Bar"
+    "Dessert Bar",
   ];
 
   const amenityOptions = [
@@ -101,7 +120,7 @@ export default function NewFineDiningListing() {
     "Private Events",
     "Takeout Available",
     "Delivery Service",
-    "Bar/Lounge"
+    "Bar/Lounge",
   ];
 
   return (
@@ -126,15 +145,21 @@ export default function NewFineDiningListing() {
           <ArrowLeft className="w-4 h-4" />
           Back to Listings
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Add Fine Dining Listing</h1>
-        <p className="text-gray-600 mt-1">Create a new restaurant or dining experience</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          Add Fine Dining Listing
+        </h1>
+        <p className="text-gray-600 mt-1">
+          Create a new restaurant or dining experience
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Images */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Restaurant Images</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Restaurant Images
+          </h2>
+
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
             {images.map((image, index) => (
               <div key={index} className="relative group">
@@ -152,7 +177,7 @@ export default function NewFineDiningListing() {
                 </button>
               </div>
             ))}
-            
+
             <label className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 transition-colors">
               <Upload className="w-8 h-8 text-gray-400 mb-2" />
               <span className="text-sm text-gray-600">Upload Image</span>
@@ -169,8 +194,10 @@ export default function NewFineDiningListing() {
 
         {/* Basic Information */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Restaurant Information</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Restaurant Information
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -199,8 +226,10 @@ export default function NewFineDiningListing() {
                 required
               >
                 <option value="">Select type</option>
-                {diningTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                {diningTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -248,8 +277,10 @@ export default function NewFineDiningListing() {
                 required
               >
                 <option value="">Select price range</option>
-                {priceRanges.map(range => (
-                  <option key={range} value={range}>{range}</option>
+                {priceRanges.map((range) => (
+                  <option key={range} value={range}>
+                    {range}
+                  </option>
                 ))}
               </select>
             </div>
@@ -259,21 +290,23 @@ export default function NewFineDiningListing() {
                 Cuisine Types *
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {cuisineTypes.map(cuisine => (
+                {cuisineTypes.map((cuisine) => (
                   <label key={cuisine} className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={form.cuisineType.includes(cuisine)}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setForm(prev => ({
+                          setForm((prev) => ({
                             ...prev,
-                            cuisineType: [...prev.cuisineType, cuisine]
+                            cuisineType: [...prev.cuisineType, cuisine],
                           }));
                         } else {
-                          setForm(prev => ({
+                          setForm((prev) => ({
                             ...prev,
-                            cuisineType: prev.cuisineType.filter(c => c !== cuisine)
+                            cuisineType: prev.cuisineType.filter(
+                              (c) => c !== cuisine
+                            ),
                           }));
                         }
                       }}
@@ -289,8 +322,10 @@ export default function NewFineDiningListing() {
 
         {/* Menu */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Menu & Specialties</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Menu & Specialties
+          </h2>
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -328,24 +363,28 @@ export default function NewFineDiningListing() {
 
         {/* Specialties & Amenities */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Specialties</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Specialties
+          </h2>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-            {specialtyOptions.map(specialty => (
+            {specialtyOptions.map((specialty) => (
               <label key={specialty} className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={form.specialties.includes(specialty)}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setForm(prev => ({
+                      setForm((prev) => ({
                         ...prev,
-                        specialties: [...prev.specialties, specialty]
+                        specialties: [...prev.specialties, specialty],
                       }));
                     } else {
-                      setForm(prev => ({
+                      setForm((prev) => ({
                         ...prev,
-                        specialties: prev.specialties.filter(s => s !== specialty)
+                        specialties: prev.specialties.filter(
+                          (s) => s !== specialty
+                        ),
                       }));
                     }
                   }}
@@ -356,23 +395,25 @@ export default function NewFineDiningListing() {
             ))}
           </div>
 
-          <h3 className="text-md font-semibold text-gray-900 mb-3 mt-6">Amenities</h3>
+          <h3 className="text-md font-semibold text-gray-900 mb-3 mt-6">
+            Amenities
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {amenityOptions.map(amenity => (
+            {amenityOptions.map((amenity) => (
               <label key={amenity} className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={form.amenities.includes(amenity)}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setForm(prev => ({
+                      setForm((prev) => ({
                         ...prev,
-                        amenities: [...prev.amenities, amenity]
+                        amenities: [...prev.amenities, amenity],
                       }));
                     } else {
-                      setForm(prev => ({
+                      setForm((prev) => ({
                         ...prev,
-                        amenities: prev.amenities.filter(a => a !== amenity)
+                        amenities: prev.amenities.filter((a) => a !== amenity),
                       }));
                     }
                   }}
@@ -386,8 +427,10 @@ export default function NewFineDiningListing() {
 
         {/* Additional Details */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Additional Details</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Additional Details
+          </h2>
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -467,8 +510,20 @@ export default function NewFineDiningListing() {
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 Creating...
               </span>

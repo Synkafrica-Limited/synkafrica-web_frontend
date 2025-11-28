@@ -32,17 +32,17 @@ export default function NewConvenienceListing() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.map(file => ({
+    const newImages = files.map((file) => ({
       file,
-      preview: URL.createObjectURL(file)
+      preview: URL.createObjectURL(file),
     }));
     setImages([...images, ...newImages]);
   };
@@ -56,7 +56,7 @@ export default function NewConvenienceListing() {
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       console.log("Convenience service listing:", form, images);
       addToast("Convenience service listing created successfully!", "success");
       setTimeout(() => router.push("/dashboard/business/listings"), 1000);
@@ -76,7 +76,7 @@ export default function NewConvenienceListing() {
     "Babysitting",
     "Home Maintenance",
     "Event Planning",
-    "Other"
+    "Other",
   ];
 
   const featureOptions = [
@@ -87,12 +87,17 @@ export default function NewConvenienceListing() {
     "Insurance Coverage",
     "Flexible Scheduling",
     "Contactless Service",
-    "Eco-Friendly Options"
+    "Eco-Friendly Options",
   ];
 
   const availabilityOptions = [
-    "Monday", "Tuesday", "Wednesday", "Thursday", 
-    "Friday", "Saturday", "Sunday"
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
   ];
 
   return (
@@ -117,15 +122,21 @@ export default function NewConvenienceListing() {
           <ArrowLeft className="w-4 h-4" />
           Back to Listings
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Add Convenience Service</h1>
-        <p className="text-gray-600 mt-1">Create a new convenience service listing</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          Add Convenience Service
+        </h1>
+        <p className="text-gray-600 mt-1">
+          Create a new convenience service listing
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Images */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Service Images</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Service Images
+          </h2>
+
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
             {images.map((image, index) => (
               <div key={index} className="relative group">
@@ -143,7 +154,7 @@ export default function NewConvenienceListing() {
                 </button>
               </div>
             ))}
-            
+
             <label className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 transition-colors">
               <Upload className="w-8 h-8 text-gray-400 mb-2" />
               <span className="text-sm text-gray-600">Upload Image</span>
@@ -160,8 +171,10 @@ export default function NewConvenienceListing() {
 
         {/* Basic Information */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Service Information</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Service Information
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -190,8 +203,10 @@ export default function NewConvenienceListing() {
                 required
               >
                 <option value="">Select service type</option>
-                {serviceTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                {serviceTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -216,7 +231,7 @@ export default function NewConvenienceListing() {
         {/* Pricing */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Pricing</h2>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -314,24 +329,26 @@ export default function NewConvenienceListing() {
 
         {/* Features */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Service Features</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Service Features
+          </h2>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {featureOptions.map(feature => (
+            {featureOptions.map((feature) => (
               <label key={feature} className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={form.features.includes(feature)}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setForm(prev => ({
+                      setForm((prev) => ({
                         ...prev,
-                        features: [...prev.features, feature]
+                        features: [...prev.features, feature],
                       }));
                     } else {
-                      setForm(prev => ({
+                      setForm((prev) => ({
                         ...prev,
-                        features: prev.features.filter(f => f !== feature)
+                        features: prev.features.filter((f) => f !== feature),
                       }));
                     }
                   }}
@@ -345,35 +362,41 @@ export default function NewConvenienceListing() {
 
         {/* Availability */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Availability</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Availability
+          </h2>
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Available Days
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
-                {availabilityOptions.map(day => (
+                {availabilityOptions.map((day) => (
                   <label key={day} className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={form.availability.includes(day)}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setForm(prev => ({
+                          setForm((prev) => ({
                             ...prev,
-                            availability: [...prev.availability, day]
+                            availability: [...prev.availability, day],
                           }));
                         } else {
-                          setForm(prev => ({
+                          setForm((prev) => ({
                             ...prev,
-                            availability: prev.availability.filter(d => d !== day)
+                            availability: prev.availability.filter(
+                              (d) => d !== day
+                            ),
                           }));
                         }
                       }}
                       className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                     />
-                    <span className="text-sm text-gray-700">{day.slice(0, 3)}</span>
+                    <span className="text-sm text-gray-700">
+                      {day.slice(0, 3)}
+                    </span>
                   </label>
                 ))}
               </div>
@@ -417,8 +440,10 @@ export default function NewConvenienceListing() {
 
         {/* Additional Details */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Service Description</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Service Description
+          </h2>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Description *
@@ -451,8 +476,20 @@ export default function NewConvenienceListing() {
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 Creating...
               </span>

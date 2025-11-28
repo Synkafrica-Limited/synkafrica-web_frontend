@@ -42,7 +42,7 @@ export default function EditListingPage() {
     // Mock loading listing data - replace with actual API call
     const loadListing = async () => {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Mock data based on listing ID
       const mockData = {
@@ -75,17 +75,17 @@ export default function EditListingPage() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.map(file => ({
+    const newImages = files.map((file) => ({
       file,
-      preview: URL.createObjectURL(file)
+      preview: URL.createObjectURL(file),
     }));
     setImages([...images, ...newImages]);
   };
@@ -100,12 +100,12 @@ export default function EditListingPage() {
 
     try {
       // TODO: Submit to API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       console.log("Updated listing:", form, images);
-      
+
       addToast("Listing updated successfully!", "success");
-      
+
       setTimeout(() => {
         router.push("/dashboard/business/listings");
       }, 1000);
@@ -119,8 +119,14 @@ export default function EditListingPage() {
   const transmissionTypes = ["Automatic", "Manual"];
   const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid"];
   const featureOptions = [
-    "Air Conditioning", "GPS", "Bluetooth", "Backup Camera", 
-    "Sunroof", "Leather Seats", "USB Charging", "Child Seat Available"
+    "Air Conditioning",
+    "GPS",
+    "Bluetooth",
+    "Backup Camera",
+    "Sunroof",
+    "Leather Seats",
+    "USB Charging",
+    "Child Seat Available",
   ];
 
   if (isLoading) {
@@ -156,7 +162,9 @@ export default function EditListingPage() {
           <ArrowLeft className="w-4 h-4" />
           Back to Listings
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Edit Listing</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          Edit Listing
+        </h1>
         <p className="text-gray-600 mt-1">Update your listing information</p>
       </div>
 
@@ -165,33 +173,50 @@ export default function EditListingPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">Listing Availability</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">
+                Listing Availability
+              </h2>
               <p className="text-sm text-gray-600">
                 Control whether this listing is visible to customers
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <span className={`text-sm font-medium ${form.availability === "available" ? "text-green-600" : "text-gray-600"}`}>
+              <span
+                className={`text-sm font-medium ${
+                  form.availability === "available"
+                    ? "text-green-600"
+                    : "text-gray-600"
+                }`}
+              >
                 {form.availability === "available" ? "Active" : "Inactive"}
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  const newStatus = form.availability === "available" ? "unavailable" : "available";
-                  setForm(prev => ({ ...prev, availability: newStatus }));
+                  const newStatus =
+                    form.availability === "available"
+                      ? "unavailable"
+                      : "available";
+                  setForm((prev) => ({ ...prev, availability: newStatus }));
                   addToast(
-                    `Listing ${newStatus === "available" ? "activated" : "deactivated"}`,
+                    `Listing ${
+                      newStatus === "available" ? "activated" : "deactivated"
+                    }`,
                     "info",
                     2000
                   );
                 }}
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                  form.availability === "available" ? "bg-green-500" : "bg-gray-300"
+                  form.availability === "available"
+                    ? "bg-green-500"
+                    : "bg-gray-300"
                 }`}
               >
                 <span
                   className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                    form.availability === "available" ? "translate-x-7" : "translate-x-1"
+                    form.availability === "available"
+                      ? "translate-x-7"
+                      : "translate-x-1"
                   }`}
                 />
               </button>
@@ -201,8 +226,10 @@ export default function EditListingPage() {
 
         {/* Images Upload */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Vehicle Images</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Vehicle Images
+          </h2>
+
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
             {images.map((image, index) => (
               <div key={index} className="relative group">
@@ -220,7 +247,7 @@ export default function EditListingPage() {
                 </button>
               </div>
             ))}
-            
+
             <label className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 transition-colors">
               <Upload className="w-8 h-8 text-gray-400 mb-2" />
               <span className="text-sm text-gray-600">Upload Image</span>
@@ -237,8 +264,10 @@ export default function EditListingPage() {
 
         {/* Vehicle Information */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Vehicle Information</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Vehicle Information
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -267,8 +296,10 @@ export default function EditListingPage() {
                 required
               >
                 <option value="">Select type</option>
-                {vehicleTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                {vehicleTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -349,8 +380,10 @@ export default function EditListingPage() {
                 required
               >
                 <option value="">Select transmission</option>
-                {transmissionTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                {transmissionTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -367,8 +400,10 @@ export default function EditListingPage() {
                 required
               >
                 <option value="">Select fuel type</option>
-                {fuelTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                {fuelTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -378,7 +413,7 @@ export default function EditListingPage() {
         {/* Pricing */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Pricing</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -444,24 +479,26 @@ export default function EditListingPage() {
 
         {/* Features */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Features & Amenities</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Features & Amenities
+          </h2>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {featureOptions.map(feature => (
+            {featureOptions.map((feature) => (
               <label key={feature} className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={form.features.includes(feature)}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setForm(prev => ({
+                      setForm((prev) => ({
                         ...prev,
-                        features: [...prev.features, feature]
+                        features: [...prev.features, feature],
                       }));
                     } else {
-                      setForm(prev => ({
+                      setForm((prev) => ({
                         ...prev,
-                        features: prev.features.filter(f => f !== feature)
+                        features: prev.features.filter((f) => f !== feature),
                       }));
                     }
                   }}
@@ -475,8 +512,10 @@ export default function EditListingPage() {
 
         {/* Additional Details */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Additional Details</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Additional Details
+          </h2>
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -526,8 +565,20 @@ export default function EditListingPage() {
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 Updating...
               </span>
