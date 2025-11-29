@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/layout/AuthLayout";
 import Buttons from "@/components/ui/Buttons";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import authService from '@/services/authService';
 
 export default function VendorSignInScreen() {
   const router = useRouter();
@@ -31,12 +32,26 @@ export default function VendorSignInScreen() {
     const refreshToken = urlParams.get("refreshToken");
 
     if (accessToken) {
-      localStorage.setItem("vendorToken", accessToken);
-      if (refreshToken)
-        localStorage.setItem("vendorRefreshToken", refreshToken);
+      // OAuth redirect: persist tokens according to the remember-me flag set before redirect
+      const rememberFromLocal = localStorage.getItem("oauthRemember");
+      const rememberFromSession = sessionStorage.getItem("oauthRemember");
+
+      // If the user clicked with remember checked we stored a marker in localStorage.
+      // If they clicked without remember we stored a marker in sessionStorage.
+      const finalRemember = !!rememberFromLocal;
+
+      authService.setTokens({ accessToken, refreshToken }, finalRemember);
+
+      // cleanup temporary markers
+      try {
+        localStorage.removeItem("oauthRemember");
+      } catch {}
+      try {
+        sessionStorage.removeItem("oauthRemember");
+      } catch {}
       router.replace("/dashboard/business/home");
     } else {
-      const token = localStorage.getItem("vendorToken");
+      const token = authService.getAccessToken();
       if (token) router.replace("/dashboard/business/home");
     }
   }, [router]);
@@ -83,46 +98,16 @@ export default function VendorSignInScreen() {
     setServerError("");
 
     try {
-      const response = await fetch(
-        "https://synkkafrica-backend-core.onrender.com/api/auth/signin",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email.trim(), password }),
-        }
-      );
-
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        data = null;
-      }
-
-      if (!response.ok) {
-        setServerError(
-          (data && data.message) ||
-            `Error ${response.status}: ${response.statusText}`
-        );
-        return;
-      }
-
-      const accessToken = data?.accessToken;
-      const refreshToken = data?.refreshToken;
-
-      if (accessToken) {
-        localStorage.setItem("vendorToken", accessToken);
-        if (refreshToken)
-          localStorage.setItem("vendorRefreshToken", refreshToken);
-        if (rememberMe) localStorage.setItem("rememberMe", "true");
-
+      const data = await authService.signIn(email.trim(), password, rememberMe);
+      if (data?.accessToken) {
+        // signIn already persisted tokens according to rememberMe
         router.push("/dashboard/business/home");
-      } else setServerError("Unexpected server response. No token received.");
+      } else {
+        setServerError("Unexpected server response. No token received.");
+      }
     } catch (err) {
-      console.error("Fetch error:", err);
-      setServerError(
-        "Unable to reach server. Check network or server availability."
-      );
+      console.error("Sign in failed:", err);
+      setServerError(err?.message || "Unable to reach server.");
     } finally {
       setLoading(false);
     }
@@ -130,6 +115,17 @@ export default function VendorSignInScreen() {
 
   // Redirect to backend Google login
   const handleGoogleSignIn = () => {
+    // Persist the user's remember choice across the external OAuth redirect.
+    try {
+      if (rememberMe) {
+        localStorage.setItem("oauthRemember", "true");
+      } else {
+        sessionStorage.setItem("oauthRemember", "true");
+      }
+    } catch (e) {
+      // ignore storage errors
+    }
+
     window.location.href =
       "https://synkkafrica-backend-core.onrender.com/api/auth/google/login";
   };

@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
+import authService from '@/services/authService';
 
 const REFRESH_URL = "https://synkkafrica-backend-core.onrender.com/api/auth/refresh";
 
@@ -14,7 +15,9 @@ export function useSession() {
 
   // Refresh token function
   const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem("vendorRefreshToken");
+    const refreshToken = typeof window !== 'undefined'
+      ? (localStorage.getItem("vendorRefreshToken") || sessionStorage.getItem("vendorRefreshToken"))
+      : null;
     if (!refreshToken) return null;
 
     try {
@@ -28,11 +31,11 @@ export function useSession() {
 
       const data = await response.json();
 
-      localStorage.setItem("vendorToken", data.accessToken);
-      localStorage.setItem("vendorRefreshToken", data.refreshToken);
+      const remember = typeof window !== 'undefined' && localStorage.getItem('rememberMe') === 'true';
+      authService.setTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken }, !!remember);
 
       return data.accessToken;
-    } catch (err) {
+    } catch {
       return null;
     }
   };
@@ -43,9 +46,10 @@ export function useSession() {
       // Ensure we are on client
       if (typeof window === "undefined") return;
 
-      let token = localStorage.getItem("vendorToken");
+      let token = authService.getAccessToken();
 
       if (!token) {
+        authService.clearTokens();
         router.replace("/business/login");
         return;
       }
@@ -59,8 +63,7 @@ export function useSession() {
           const newToken = await refreshAccessToken();
 
           if (!newToken) {
-            localStorage.removeItem("vendorToken");
-            localStorage.removeItem("vendorRefreshToken");
+            authService.clearTokens();
             router.replace("/business/login");
             return;
           }
@@ -71,8 +74,7 @@ export function useSession() {
         setIsLoggedIn(true);
       } catch (err) {
         console.error("Invalid token:", err);
-        localStorage.removeItem("vendorToken");
-        localStorage.removeItem("vendorRefreshToken");
+        authService.clearTokens();
         router.replace("/business/login");
       } finally {
         setLoading(false);

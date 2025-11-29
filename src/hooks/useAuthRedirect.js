@@ -1,19 +1,20 @@
-// hooks/useAuthRedirect.js
+// hooks/useAuthRedirect.js - Simplified for use with PageWrapper
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import authService from '@/services/authService';
 
 /**
- * useAuthRedirect
+ * useAuthRedirect - Simple authentication redirect hook
  * @param {Object} options
  *  - redirectIfAuthenticated: boolean (true: go to dashboard if logged in)
- *  - redirectPath: string (where to redirect if authenticated, default: "/dashboard/business/home")
+ *  - redirectPath: string (where to redirect if authenticated, default: "/dashboard/business")
  */
-export function useAuthRedirect({ redirectIfAuthenticated = true, redirectPath = "/dashboard/business/home" } = {}) {
+export function useAuthRedirect({ redirectIfAuthenticated = true, redirectPath = "/dashboard/business" } = {}) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("vendorToken");
+    const token = authService.getAccessToken();
 
     if (redirectIfAuthenticated && token) {
       router.replace(redirectPath);
@@ -22,5 +23,5 @@ export function useAuthRedirect({ redirectIfAuthenticated = true, redirectPath =
     setLoading(false);
   }, [router, redirectIfAuthenticated, redirectPath]);
 
-  return { loading, isAuthenticated: !!localStorage.getItem("vendorToken") };
+  return { loading, isAuthenticated: !!authService.getAccessToken() };
 }

@@ -21,6 +21,7 @@ import {
   Users,
   Search,
 } from "lucide-react";
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 
 const mockListings = {
   car: [
@@ -433,6 +434,7 @@ export default function ServiceResult() {
 
       setListings(filteredListings);
     } catch (err) {
+      console.error("Failed to load listings:", err);
       setError("Failed to load listings");
       setListings(mockListings[service] || []);
     } finally {
@@ -472,12 +474,12 @@ export default function ServiceResult() {
 
   const handleCardClick = (listingId) => {
     if (!isClient) return;
-    
-    // Find the clicked listing
-    const clickedListing = listings.find(listing => listing.id === listingId);
-    
+    // Find the clicked listing (support id or _id)
+    const clickedListing = listings.find(
+      (listing) => listing.id === listingId || listing._id === listingId
+    );
+
     if (clickedListing) {
-      // Navigate to service details page with service type and listing data
       router.push(`/service/${activeService}/${listingId}`);
     }
   };
@@ -932,10 +934,7 @@ export default function ServiceResult() {
               </div>
 
               {loading ? (
-                <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-[#DF5D3D]"></div>
-                  <p className="mt-3 text-gray-600 font-medium">Loading listings...</p>
-                </div>
+                <PageLoadingScreen message="Loading listings..." />
               ) : error ? (
                 <div className="text-center py-12 text-red-500">
                   <p className="font-medium">{error}</p>
@@ -960,132 +959,135 @@ export default function ServiceResult() {
                 </div>
               ) : (
                 <div className={`grid gap-6 ${gridClass}`}>
-                  {listings.map((listing) => (
-                    <div
-                      key={listing.id}
-                      onClick={() => handleCardClick(listing.id)}
-                      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100 cursor-pointer group"
-                    >
-                      <div className={layoutClass}>
-                        <div
-                          className={`relative ${imageContainerClass} h-64 bg-gray-100 overflow-hidden`}
-                        >
-                          <img
-                            src={listing.image}
-                            alt={listing.name}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                          {isClient && (
-                            <button
-                              onClick={(e) => toggleFavorite(listing.id, e)}
-                              className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg hover:scale-110 hover:bg-white transition-all z-10"
-                            >
-                              <Heart
-                                size={20}
-                                className={
-                                  favorites.includes(listing.id)
-                                    ? "fill-red-500 text-red-500"
-                                    : "text-gray-600"
-                                }
-                              />
-                            </button>
-                          )}
-                          {listing.available && (
-                            <div className="absolute bottom-4 left-4 bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md">
-                              Available Now
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="p-6 flex-1">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1 pr-4">
-                              <h3 className="font-bold text-xl mb-2 text-gray-900 line-clamp-1 group-hover:text-[#DF5D3D] transition-colors">
-                                {listing.name}
-                              </h3>
-                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                <MapPin
-                                  size={16}
-                                  className="text-gray-400 flex-shrink-0"
+                  {listings.map((listing) => {
+                    const listingId = listing.id || listing._id;
+                    return (
+                      <div
+                        key={listingId}
+                        onClick={() => handleCardClick(listingId)}
+                        className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100 cursor-pointer group"
+                      >
+                        <div className={layoutClass}>
+                          <div
+                            className={`relative ${imageContainerClass} h-64 bg-gray-100 overflow-hidden`}
+                          >
+                            <img
+                              src={listing.image || '/images/vendor/vendor-profile.jpg'}
+                              alt={listing.name}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            {isClient && (
+                              <button
+                                onClick={(e) => toggleFavorite(listingId, e)}
+                                className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg hover:scale-110 hover:bg-white transition-all z-10"
+                              >
+                                <Heart
+                                  size={20}
+                                  className={
+                                    favorites.includes(listingId)
+                                      ? "fill-red-500 text-red-500"
+                                      : "text-gray-600"
+                                  }
                                 />
-                                <span className="line-clamp-1">
-                                  {listing.location}
-                                </span>
+                              </button>
+                            )}
+                            {listing.available && (
+                              <div className="absolute bottom-4 left-4 bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-md">
+                                Available Now
                               </div>
-                            </div>
-                            <div className="text-right flex-shrink-0">
-                              <div className="flex items-center gap-1.5 mb-1 bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100">
-                                <Star
-                                  size={16}
-                                  className="fill-yellow-400 text-yellow-400"
-                                />
-                                <span className="font-bold text-gray-900">
-                                  {listing.rating}
-                                </span>
-                              </div>
-                              <div className="text-xs text-gray-500 font-medium">
-                                {listing.reviews} reviews
-                              </div>
-                            </div>
+                            )}
                           </div>
 
-                          {(listing.roomType ||
-                            listing.capacity ||
-                            listing.cuisine) && (
-                            <div className="text-sm font-semibold text-gray-800 mb-4 bg-gray-50 inline-block px-3 py-2 rounded-lg border border-gray-200">
-                              {listing.roomType ||
-                                listing.capacity ||
-                                listing.cuisine}
-                            </div>
-                          )}
-
-                          <div className="flex flex-wrap gap-2 mb-5">
-                            {listing.features
-                              ?.slice(0, 4)
-                              .map((feature, idx) => (
-                                <span
-                                  key={idx}
-                                  className="text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-full font-medium border border-green-100 shadow-sm"
-                                >
-                                  ✓ {feature}
-                                </span>
-                              ))}
-                          </div>
-
-                          <div className="flex items-end justify-between pt-5 border-t border-gray-100">
-                            <div>
-                              <div className="text-xs text-gray-500 mb-1 font-medium uppercase tracking-wide">
-                                Starting from
+                          <div className="p-6 flex-1">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex-1 pr-4">
+                                <h3 className="font-bold text-xl mb-2 text-gray-900 line-clamp-1 group-hover:text-[#DF5D3D] transition-colors">
+                                  {listing.name}
+                                </h3>
+                                <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                  <MapPin
+                                    size={16}
+                                    className="text-gray-400 shrink-0"
+                                  />
+                                  <span className="line-clamp-1">
+                                    {listing.location}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="text-2xl font-bold text-gray-900">
-                                ₦{listing.price?.toLocaleString() || "0"}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-0.5">
-                                Includes taxes and fees
+                              <div className="text-right shrink-0">
+                                <div className="flex items-center gap-1.5 mb-1 bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100">
+                                  <Star
+                                    size={16}
+                                    className="fill-yellow-400 text-yellow-400"
+                                  />
+                                  <span className="font-bold text-gray-900">
+                                    {listing.rating}
+                                  </span>
+                                </div>
+                                <div className="text-xs text-gray-500 font-medium">
+                                  {listing.reviews} reviews
+                                </div>
                               </div>
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCardClick(listing.id);
-                              }}
-                              className="flex items-center gap-2 text-white font-semibold py-3 px-6 h-11 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group-hover:gap-3"
-                              style={{ 
-                                backgroundColor: "#DF5D3D",
-                                boxShadow: "0 4px 12px rgba(223, 93, 61, 0.3)"
-                              }}
-                            >
-                              <span>View Details</span>
-                              <ArrowRight
-                                size={18}
-                                className="transition-transform group-hover:translate-x-0.5"
-                              />
-                            </button>
+
+                            {(listing.roomType ||
+                              listing.capacity ||
+                              listing.cuisine) && (
+                              <div className="text-sm font-semibold text-gray-800 mb-4 bg-gray-50 inline-block px-3 py-2 rounded-lg border border-gray-200">
+                                {listing.roomType ||
+                                  listing.capacity ||
+                                  listing.cuisine}
+                              </div>
+                            )}
+
+                            <div className="flex flex-wrap gap-2 mb-5">
+                              {listing.features
+                                ?.slice(0, 4)
+                                .map((feature, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-full font-medium border border-green-100 shadow-sm"
+                                  >
+                                    ✓ {feature}
+                                  </span>
+                                ))}
+                            </div>
+
+                            <div className="flex items-end justify-between pt-5 border-t border-gray-100">
+                              <div>
+                                <div className="text-xs text-gray-500 mb-1 font-medium uppercase tracking-wide">
+                                  Starting from
+                                </div>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  ₦{listing.price?.toLocaleString() || "0"}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-0.5">
+                                  Includes taxes and fees
+                                </div>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCardClick(listingId);
+                                }}
+                                className="flex items-center gap-2 text-white font-semibold py-3 px-6 h-11 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group-hover:gap-3"
+                                style={{ 
+                                  backgroundColor: "#DF5D3D",
+                                  boxShadow: "0 4px 12px rgba(223, 93, 61, 0.3)"
+                                }}
+                              >
+                                <span>View Details</span>
+                                <ArrowRight
+                                  size={18}
+                                  className="transition-transform group-hover:translate-x-0.5"
+                                />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

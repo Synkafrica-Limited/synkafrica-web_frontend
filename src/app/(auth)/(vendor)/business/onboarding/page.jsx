@@ -4,37 +4,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, ChevronLeft, Check, MapPin, Building2, Phone, Globe } from 'lucide-react';
+import { useOnboardVendor } from '@/hooks/business/useOnboardVendor';
 
-const GOOGLE_MAPS_API_KEY = 'YOUR_API_KEY_HERE';
-
-// ----- Custom Hook -----
-const useOnboarding = () => {
-  const router = useRouter();
-
-  const submitOnboarding = async (data) => {
-    try {
-      // Example: replace with your real API endpoint
-      const response = await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) throw new Error('Failed to submit onboarding');
-
-      const result = await response.json();
-      console.log('Onboarding submitted successfully:', result);
-
-      // Redirect to dashboard after successful onboarding
-      router.push('/dashboard');
-    } catch (error) {
-      console.error(error);
-      alert('Something went wrong during onboarding. Please try again.');
-    }
-  };
-
-  return { submitOnboarding };
-};
+// Use an environment variable for the API key so it can be configured per-environment
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
 // ----- Main Component -----
 const OnboardingFlow = () => {
@@ -59,20 +32,31 @@ const OnboardingFlow = () => {
   const [map, setMap] = useState(null);
   const [marker, setMarker] = useState(null);
   const [searchBox, setSearchBox] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const totalSteps = 4;
   const brandColor = '#DF5D3D';
 
-  const { submitOnboarding } = useOnboarding();
+  // Use the centralized onboarding hook
+  const onboardHook = useOnboardVendor();
+  const { submitOnboarding, loading: onboardLoading, error: onboardError } = onboardHook;
 
   // Load Google Maps Script
   useEffect(() => {
     if (step === 3 && !mapLoaded) {
+      if (!GOOGLE_MAPS_API_KEY) {
+        console.warn('[Onboarding] Google Maps API key not set. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in your .env.local to enable the map.');
+        return;
+      }
+
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
       script.async = true;
       script.defer = true;
       script.onload = () => setMapLoaded(true);
+      script.onerror = (e) => {
+        console.error('[Onboarding] Failed to load Google Maps script', e);
+      };
       document.head.appendChild(script);
     }
   }, [step, mapLoaded]);
@@ -94,9 +78,29 @@ const OnboardingFlow = () => {
         position: { lat: 6.5244, lng: 3.3792 }
       });
 
-      markerInstance.addListener('dragend', (e) => {
-        updateFormData('latitude', e.latLng.lat());
-        updateFormData('longitude', e.latLng.lng());
+      markerInstance.addListener('dragend', async (e) => {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        updateFormData('latitude', lat);
+        updateFormData('longitude', lng);
+
+        // Reverse geocode to populate address fields
+        try {
+          const geocoder = new google.maps.Geocoder();
+          const res = await geocoder.geocode({ location: { lat, lng } });
+          if (res && res[0]) {
+            const place = res[0];
+            const parsed = parseAddressComponents(place);
+            updateFormData('address', parsed.address || place.formatted_address || '');
+            if (parsed.city) updateFormData('city', parsed.city);
+            if (parsed.state) updateFormData('state', parsed.state);
+            if (parsed.country) updateFormData('country', parsed.country);
+            if (parsed.postalCode) updateFormData('postalCode', parsed.postalCode);
+            setSearchQuery(place.formatted_address || parsed.address || '');
+          }
+        } catch (err) {
+          console.warn('Reverse geocode failed', err);
+        }
       });
 
       const input = document.getElementById('location-search');
@@ -105,6 +109,7 @@ const OnboardingFlow = () => {
       mapInstance.addListener('bounds_changed', () => {
         searchBoxInstance.setBounds(mapInstance.getBounds());
       });
+
 
       searchBoxInstance.addListener('places_changed', () => {
         const places = searchBoxInstance.getPlaces();
@@ -116,8 +121,19 @@ const OnboardingFlow = () => {
         mapInstance.setZoom(15);
         markerInstance.setPosition(place.geometry.location);
 
-        updateFormData('latitude', place.geometry.location.lat());
-        updateFormData('longitude', place.geometry.location.lng());
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        updateFormData('latitude', lat);
+        updateFormData('longitude', lng);
+
+        // populate address fields from place details
+        const parsed = parseAddressComponents(place);
+        updateFormData('address', parsed.address || place.formatted_address || '');
+        if (parsed.city) updateFormData('city', parsed.city);
+        if (parsed.state) updateFormData('state', parsed.state);
+        if (parsed.country) updateFormData('country', parsed.country);
+        if (parsed.postalCode) updateFormData('postalCode', parsed.postalCode);
+        setSearchQuery(place.formatted_address || '');
       });
 
       setMap(mapInstance);
@@ -125,6 +141,90 @@ const OnboardingFlow = () => {
       setSearchBox(searchBoxInstance);
     }
   }, [mapLoaded, step, map]);
+
+  // Helper to parse address components from a place or geocoder result
+  function parseAddressComponents(place) {
+    const components = (place.address_components || []);
+    const formatted = place.formatted_address || '';
+    const result = { address: '', city: '', state: '', country: '', postalCode: '' };
+
+    // Helper to get component by possible types in order
+    const getByTypes = (types) => {
+      for (const t of types) {
+        const found = components.find(c => c.types.includes(t));
+        if (found) return found.long_name;
+      }
+      return undefined;
+    };
+
+    // Build street/address from the most specific available pieces
+    const streetNumber = getByTypes(['street_number']);
+    const route = getByTypes(['route', 'street_address']);
+    const premise = getByTypes(['premise', 'subpremise']);
+    const sublocality = getByTypes(['sublocality', 'sublocality_level_1', 'neighborhood']);
+
+    if (streetNumber || route) {
+      result.address = [streetNumber, route].filter(Boolean).join(' ').trim();
+      if (premise) result.address = `${premise}, ${result.address}`;
+    } else if (premise) {
+      result.address = premise;
+      if (sublocality) result.address = `${result.address}, ${sublocality}`;
+    } else if (sublocality) {
+      result.address = sublocality;
+    }
+
+    // If still empty, try sensible fallback from formatted address (take first 1-2 parts)
+    if (!result.address && formatted) {
+      const parts = formatted.split(',').map(p => p.trim()).filter(Boolean);
+      if (parts.length >= 2) {
+        // use first two parts as the street if available (e.g. "188 Egbe Rd, Orioke St")
+        result.address = parts.slice(0, Math.min(2, parts.length - 1)).join(', ');
+      } else {
+        result.address = formatted;
+      }
+    }
+
+    // city / locality
+    result.city = getByTypes(['locality', 'postal_town', 'administrative_area_level_2']) || '';
+
+    // state / administrative area level 1
+    result.state = getByTypes(['administrative_area_level_1']) || '';
+
+    // country and postal code
+    result.country = getByTypes(['country']) || '';
+    result.postalCode = getByTypes(['postal_code']) || '';
+
+    return result;
+  }
+
+  // Geocode an address string and move the map/marker
+  async function geocodeAddressAndMove(addr) {
+    if (!map) return null;
+    try {
+      const geocoder = new google.maps.Geocoder();
+      const res = await geocoder.geocode({ address: addr });
+      if (res && res[0] && res[0].geometry && res[0].geometry.location) {
+        const loc = res[0].geometry.location;
+        map.setCenter(loc);
+        map.setZoom(15);
+        marker.setPosition(loc);
+        const lat = loc.lat();
+        const lng = loc.lng();
+        updateFormData('latitude', lat);
+        updateFormData('longitude', lng);
+        const parsed = parseAddressComponents(res[0]);
+        updateFormData('address', parsed.address || res[0].formatted_address || '');
+        if (parsed.city) updateFormData('city', parsed.city);
+        if (parsed.state) updateFormData('state', parsed.state);
+        if (parsed.country) updateFormData('country', parsed.country);
+        if (parsed.postalCode) updateFormData('postalCode', parsed.postalCode);
+        return res[0];
+      }
+    } catch (err) {
+      console.error('Geocode failed', err);
+    }
+    return null;
+  }
 
   const updateFormData = (key, value) => {
     setFormData(prev => ({ ...prev, [key]: value }));
@@ -158,7 +258,7 @@ const OnboardingFlow = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
         {/* Progress Bar */}
         <div className="bg-gray-100 h-2">
@@ -280,12 +380,27 @@ const OnboardingFlow = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Search Location</label>
-                <input
-                  id="location-search"
-                  type="text"
-                  placeholder="Search for your business location..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                />
+                <div className="flex gap-2">
+                  <input
+                    id="location-search"
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search for your business location..."
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const q = searchQuery || document.getElementById('location-search')?.value || '';
+                      if (!q) return;
+                      await geocodeAddressAndMove(q);
+                    }}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg"
+                  >
+                    Find on map
+                  </button>
+                </div>
               </div>
 
               <div id="map" className="w-full h-64 rounded-lg border border-gray-300" />
@@ -410,12 +525,22 @@ const OnboardingFlow = () => {
               </button>
             ) : (
               <button
-                onClick={handleSubmit}
-                className="flex items-center px-6 py-3 text-white rounded-lg hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: brandColor }}
-              >
-                Complete Setup <Check size={20} className="ml-2" />
-              </button>
+                  onClick={handleSubmit}
+                  disabled={onboardLoading}
+                  className="flex items-center px-6 py-3 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: brandColor }}
+                >
+                  {onboardLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      Complete Setup <Check size={20} className="ml-2" />
+                    </>
+                  )}
+                </button>
             )}
           </div>
         </div>

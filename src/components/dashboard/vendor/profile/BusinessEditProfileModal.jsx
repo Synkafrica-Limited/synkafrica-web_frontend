@@ -2,26 +2,43 @@
 
 import { useState, useRef } from "react";
 import { FiCamera } from "react-icons/fi";
-import Buttons from "@/components/ui/Buttons";
+import Button from "@/components/ui/Buttons";
 
-export function BusinessEditProfileModal({ business, onClose, onSave }) {
+export function BusinessEditProfileModal({ business, user, onClose, onSave, loading = false }) {
   const [form, setForm] = useState({
-    businessName: business.businessName || "",
-    businessLocation: business.businessLocation || "",
-    businessDescription: business.businessDescription || "",
-    phoneNumber: business.phoneNumber || "",
-    phoneNumber2: business.phoneNumber2 || "",
-    businessURL: business.businessURL || "",
-    email: business.email || "",
-    bankName: business.bankName || "",
-    accountName: business.accountName || "",
-    accountNumber: business.accountNumber || "",
-    availability: business.availability || "",
+    // User profile fields
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phoneNumber: user?.phoneNumber || "",
+    
+    nationality: user?.nationality || "",
+    gender: user?.gender || "",
+    dateOfBirth: user?.dateOfBirth || user?.dob || "",
+      // Business (only backend-recognized fields)
+      id: business?.id || business?._id || business?.businessId || "",
+      businessName: business?.businessName || business?.name || "",
+      businessLocation: business?.businessLocation || business?.location || "",
+      businessDescription: business?.businessDescription || business?.description || "",
+      businessURL: business?.businessURL || business?.url || "",
+    bankName: business?.bankName || "",
+    accountName: business?.accountName || "",
+    accountNumber: business?.accountNumber || "",
+    availability: business?.availability || "",
+    businessEmail: business?.email || business?.businessEmail || "",
+    businessPhone: business?.phoneNumber || business?.businessPhone || "",
   });
 
-  const [profileImage, setProfileImage] = useState(business.profileImage || null);
-  const [faqsFile, setFaqsFile] = useState(business.faqs || null);
-  const [licenseFile, setLicenseFile] = useState(business.serviceLicense || null);
+  // Debug: log incoming business prop to help diagnose population issues
+  if (typeof window !== 'undefined') {
+    // eslint-disable-next-line no-console
+    console.debug('BusinessEditProfileModal: business prop =', business);
+  }
+
+  const [profileImage, setProfileImage] = useState(business?.profileImage || null);
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [faqsFile, setFaqsFile] = useState(business?.faqs || null);
+  const [licenseFile, setLicenseFile] = useState(business?.serviceLicense || null);
   
   const fileInputRef = useRef(null);
   const faqsInputRef = useRef(null);
@@ -37,6 +54,7 @@ export function BusinessEditProfileModal({ business, onClose, onSave }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setProfileImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setProfileImage(reader.result);
       reader.readAsDataURL(file);
@@ -62,19 +80,40 @@ export function BusinessEditProfileModal({ business, onClose, onSave }) {
   // Save and close
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ 
-      ...form, 
-      profileImage, 
+    
+    // Separate user and business data
+    const userData = {
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      phoneNumber: form.phoneNumber,
+    };
+    
+    const businessData = {
+        id: form.id,
+        businessName: form.businessName,
+        businessLocation: form.businessLocation,
+        businessDescription: form.businessDescription,
+        businessURL: form.businessURL,
+      bankName: form.bankName,
+      accountName: form.accountName,
+      accountNumber: form.accountNumber,
+      availability: form.availability,
+      profileImage: profileImageFile,
       faqs: faqsFile,
-      serviceLicense: licenseFile 
-    });
+      serviceLicense: licenseFile,
+      businessEmail: form.businessEmail,
+      businessPhone: form.businessPhone,
+    };
+    
+    onSave({ userData, businessData });
     onClose();
   };
 
   // Get initials for avatar
   const initials =
     (form.businessName?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() || 
-    business.businessName?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() || 
+    business?.businessName?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() || 
     "SA");
 
   const banks = [
@@ -150,16 +189,119 @@ export function BusinessEditProfileModal({ business, onClose, onSave }) {
           {/* Right: Form Section */}
           <div className="flex-1 px-4 sm:px-6 md:px-12 py-6 md:py-10 max-h-[80vh] overflow-y-auto">
             <div className="font-bold text-lg sm:text-xl md:text-2xl mb-2">
-              Complete Profile Information
+              Edit Profile Information
             </div>
             <div className="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6 md:mb-8">
-              This informations will be used for all bookings within synkkafrica. Please ensure your informations and your license are government approved.
+              Update your personal and business information. All fields marked with * are required.
             </div>
             
             <form
               onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-6 gap-y-3 md:gap-y-4"
+              className="space-y-6"
             >
+              {/* Personal Information Section */}
+              <div className="border-b border-gray-200 pb-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-4">Personal Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-6 gap-y-3 md:gap-y-4">
+                  {/* First Name */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">First Name *</label>
+                    <input
+                      name="firstName"
+                      value={form.firstName}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="John"
+                      required
+                    />
+                  </div>
+
+                  {/* Last Name */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Last Name *</label>
+                    <input
+                      name="lastName"
+                      value={form.lastName}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="Doe"
+                      required
+                    />
+                  </div>
+
+                  {/* Personal Email */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Email Address *</label>
+                    <input
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="john.doe@example.com"
+                      required
+                    />
+                  </div>
+
+                  {/* Personal Phone */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Phone Number *</label>
+                    <input
+                      name="phoneNumber"
+                      value={form.phoneNumber}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="+2348012345678"
+                      required
+                    />
+                  </div>
+                  
+                  {/* Nationality */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Nationality</label>
+                    <input
+                      name="nationality"
+                      value={form.nationality}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="Nigeria"
+                    />
+                  </div>
+
+                  {/* Gender */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Gender</label>
+                    <select
+                      name="gender"
+                      value={form.gender}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                    >
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  {/* Date of Birth */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Date of Birth</label>
+                    <input
+                      name="dateOfBirth"
+                      type="date"
+                      value={form.dateOfBirth}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Business Information Section */}
+              <div>
+                <h3 className="text-base font-semibold text-gray-900 mb-4">Business Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-6 gap-y-3 md:gap-y-4">
               {/* Business Name */}
               <div>
                 <label className="block text-xs font-semibold mb-1">Business Name</label>
@@ -199,28 +341,6 @@ export function BusinessEditProfileModal({ business, onClose, onSave }) {
                 />
               </div>
 
-              {/* Business Phone numbers */}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold mb-1">Business Phone numbers</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
-                    name="phoneNumber"
-                    value={form.phoneNumber}
-                    onChange={handleChange}
-                    className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                    placeholder="08065017856"
-                    required
-                  />
-                  <input
-                    name="phoneNumber2"
-                    value={form.phoneNumber2}
-                    onChange={handleChange}
-                    className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                    placeholder="08065017856"
-                  />
-                </div>
-              </div>
-
               {/* Business's URL */}
               <div>
                 <label className="block text-xs font-semibold mb-1">Business's URL</label>
@@ -234,17 +354,28 @@ export function BusinessEditProfileModal({ business, onClose, onSave }) {
                 />
               </div>
 
-              {/* Business email */}
+              {/* Business Contact: Email */}
               <div>
-                <label className="block text-xs font-semibold mb-1">Business email</label>
+                <label className="block text-xs font-semibold mb-1">Business Email</label>
                 <input
-                  name="email"
+                  name="businessEmail"
                   type="email"
-                  value={form.email}
+                  value={form.businessEmail}
                   onChange={handleChange}
                   className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                  placeholder="eodeyale@synkkafrica.com"
-                  required
+                  placeholder="vendor@example.com"
+                />
+              </div>
+
+              {/* Business Contact: Phone */}
+              <div>
+                <label className="block text-xs font-semibold mb-1">Business Phone</label>
+                <input
+                  name="businessPhone"
+                  value={form.businessPhone}
+                  onChange={handleChange}
+                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                  placeholder="+2348012345678"
                 />
               </div>
 
@@ -344,15 +475,25 @@ export function BusinessEditProfileModal({ business, onClose, onSave }) {
                   <option value="custom">Custom Hours</option>
                 </select>
               </div>
+                </div>
+              </div>
 
               {/* Submit Button */}
-              <div className="md:col-span-2 mt-4 md:mt-6 flex justify-end">
-                <Buttons
+              <div className="flex justify-end pt-4 border-t border-gray-200">
+                <Button
                   type="submit"
-                  className="w-full md:w-auto bg-primary-500 text-white rounded-md px-8 py-3 font-semibold text-base hover:bg-primary-600 transition disabled:opacity-50"
+                  disabled={loading}
+                  className="w-full md:w-auto bg-primary-500 text-white rounded-md px-6 py-2 font-semibold text-sm hover:bg-primary-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Save Information
-                </Buttons>
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    'Save All Information'
+                  )}
+                </Button>
               </div>
             </form>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import authService from '@/services/authService';
 
 export function useSignOut(redirectPath = "/business/login") {
   const router = useRouter();
@@ -13,35 +14,11 @@ export function useSignOut(redirectPath = "/business/login") {
     setError(null);
 
     try {
-      // Read token safely
-      const token = typeof window !== "undefined"
-        ? localStorage.getItem("vendorToken")
-        : null;
-
-      const res = await fetch(
-        "https://synkkafrica-backend-core.onrender.com/api/auth/signout",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-          body: JSON.stringify({}), // <-- IMPORTANT FIX
-        }
-      );
-
-      // Remove tokens ALWAYS (even if backend fails)
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("vendorToken");
-        localStorage.removeItem("vendorRefreshToken");
-      }
-
-      // Redirect to login
+      await authService.signOut();
       router.push(redirectPath);
-
     } catch (err) {
       console.error("Logout error:", err);
-      setError(err.message);
+      setError(err.message || "Failed to sign out");
     } finally {
       setLoading(false);
     }

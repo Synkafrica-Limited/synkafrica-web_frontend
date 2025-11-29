@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useToast } from '@/components/ui/ToastProvider';
 
 const Navbar1 = ({ onBecomeVendor }) => {
   const router = useRouter();
@@ -16,6 +17,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
   const [isLoading, setIsLoading] = useState(true);
   const moreRef = useRef(null);
   const hoverCloseTimeout = useRef(null);
+  const toast = useToast();
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -116,8 +118,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      // You can replace this with a toast notification
-      alert(error.message || 'Login failed. Please try again.');
+      toast?.danger?.(error.message || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -173,7 +174,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      alert(error.message || 'Registration failed. Please try again.');
+      toast?.danger?.(error.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

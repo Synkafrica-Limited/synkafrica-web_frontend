@@ -24,6 +24,7 @@ import {
   BadgeCheck,
   TrendingUp,
 } from "lucide-react";
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 
 // Mock data for each service type
 const serviceDetailsData = {
@@ -579,14 +580,7 @@ const ServiceDetailPage = () => {
   }, [serviceType]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[#DF5D3D]"></div>
-          <p className="mt-4 text-gray-600 font-semibold text-lg">Loading luxury experience...</p>
-        </div>
-      </div>
-    );
+    return <PageLoadingScreen message="Loading luxury experience..." />;
   }
 
   if (!service) {

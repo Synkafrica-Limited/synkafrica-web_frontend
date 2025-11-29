@@ -2,17 +2,22 @@
 
 import { Search, Bell } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useToast } from "@/components/ui/ToastProvider";
+import { usePathname } from 'next/navigation';
 
 /**
  * Dashboard Header Component
  * Contains page title, time filter, search, and user profile
  */
 export default function DashboardHeader({ title = "Overview" }) {
+  const { addToast } = useToast();
+  const pathname = usePathname?.() || '';
   return (
     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sticky top-0 z-30">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         {/* Left: Title */}
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 pl-12 lg:pl-0">{title}</h1>
+        <h2 className="text-md sm:text-md font-bold text-gray-900 pl-12 lg:pl-0">{title}</h2>
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
@@ -32,7 +37,17 @@ export default function DashboardHeader({ title = "Overview" }) {
           </div>
 
           {/* Refresh Button */}
-          <button className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary-500 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-primary-600 transition-colors">
+          <button
+            onClick={() => {
+              // simple UX: show feedback via toast
+              try {
+                addToast({ message: "Data refreshed", type: "success" });
+              } catch {
+                // fallback
+              }
+            }}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary-500 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-primary-600 transition-colors"
+          >
             <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
@@ -55,13 +70,17 @@ export default function DashboardHeader({ title = "Overview" }) {
           </button>
 
           {/* Notifications - Mobile/Tablet */}
-          <button className="lg:hidden p-2 hover:bg-gray-100 rounded-lg relative">
+          <Link href="/dashboard/notifications" className="lg:hidden p-2 hover:bg-gray-100 rounded-lg relative">
             <Bell className="w-5 h-5 text-gray-600" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
+          </Link>
 
           {/* User Profile */}
-          <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-primary-500 transition-colors flex-shrink-0">
+          {/* Quick verify CTA */}
+          <Link href="/dashboard/business/verification" className="hidden lg:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-primary-500 text-primary-600 hover:bg-primary-50 transition-colors text-sm">
+            Verify business
+          </Link>
+          <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-primary-500 transition-colors shrink-0">
             <Image
               src="/images/brand/synkafrica-logo-single.png"
               alt="User Profile"

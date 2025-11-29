@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import authService from '@/services/authService';
 import {
   Download,
   Search,
@@ -16,81 +17,10 @@ import {
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/hooks/useNotifications";
-
-// Mock transactions data
-const MOCK_TRANSACTIONS = [
-  {
-    id: "TXN-001",
-    orderId: "ORD-001",
-    customerName: "John Doe",
-    serviceName: "Luxury SUV with Driver",
-    amount: 25000,
-    commission: 2500, // 10% platform fee
-    netAmount: 22500,
-    date: "2024-12-15",
-    status: "completed",
-    payoutStatus: "pending",
-    payoutRequestDate: null,
-    lastReminderDate: null,
-  },
-  {
-    id: "TXN-002",
-    orderId: "ORD-002",
-    customerName: "Sarah Smith",
-    serviceName: "Beach Resort Package",
-    amount: 50000,
-    commission: 5000,
-    netAmount: 45000,
-    date: "2024-12-14",
-    status: "completed",
-    payoutStatus: "requested",
-    payoutRequestDate: "2024-12-16 10:30 AM",
-    lastReminderDate: null,
-  },
-  {
-    id: "TXN-003",
-    orderId: "ORD-003",
-    customerName: "Emily Johnson",
-    serviceName: "Fine Dining Experience",
-    amount: 45000,
-    commission: 4500,
-    netAmount: 40500,
-    date: "2024-12-10",
-    status: "completed",
-    payoutStatus: "paid",
-    payoutRequestDate: "2024-12-11 09:00 AM",
-    payoutDate: "2024-12-13 02:45 PM",
-    lastReminderDate: null,
-  },
-  {
-    id: "TXN-004",
-    orderId: "ORD-004",
-    customerName: "David Wilson",
-    serviceName: "Boat Cruise Package",
-    amount: 75000,
-    commission: 7500,
-    netAmount: 67500,
-    date: "2024-12-12",
-    status: "completed",
-    payoutStatus: "pending",
-    payoutRequestDate: null,
-    lastReminderDate: null,
-  },
-  {
-    id: "TXN-005",
-    orderId: "ORD-005",
-    customerName: "Michael Brown",
-    serviceName: "Private Chef Service",
-    amount: 30000,
-    commission: 3000,
-    netAmount: 27000,
-    date: "2024-12-13",
-    status: "pending",
-    payoutStatus: "unavailable",
-    payoutRequestDate: null,
-    lastReminderDate: null,
-  },
-];
+import FilterBar from "@/components/ui/FilterBar";
+import { useVendorTransactions } from "@/hooks/business/useVendorTransactions";
+import { requestPayout, requestPayoutForTransactions } from "@/services/transactions.service";
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 
 const PAYOUT_STATUS_CONFIG = {
   pending: {
@@ -116,7 +46,7 @@ const PAYOUT_STATUS_CONFIG = {
 };
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState(MOCK_TRANSACTIONS);
+  const token = typeof window !== "undefined" ? authService.getAccessToken() : null;
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTransactions, setSelectedTransactions] = useState([]);
@@ -128,23 +58,17 @@ export default function TransactionsPage() {
   const [timeFilter, setTimeFilter] = useState("all"); // all, week, month
   const { toasts, addToast, removeToast } = useToast();
 
-  // Calculate summary stats
-  const stats = {
-    totalEarnings: transactions
-      .filter((t) => t.status === "completed")
-      .reduce((sum, t) => sum + t.netAmount, 0),
-    pendingPayouts: transactions
-      .filter(
-        (t) => t.payoutStatus === "pending" || t.payoutStatus === "requested"
-      )
-      .reduce((sum, t) => sum + t.netAmount, 0),
-    paidOut: transactions
-      .filter((t) => t.payoutStatus === "paid")
-      .reduce((sum, t) => sum + t.netAmount, 0),
-    availableForPayout: transactions
-      .filter((t) => t.payoutStatus === "pending")
-      .reduce((sum, t) => sum + t.netAmount, 0),
-  };
+  // Use the vendor transactions hook
+  const { 
+    transactions, 
+    stats, 
+    loading, 
+    error, 
+    refetch 
+  } = useVendorTransactions(token, {
+    status: selectedStatus !== "all" ? selectedStatus : undefined,
+    dateRange: timeFilter !== "all" ? timeFilter : undefined
+  });
 
   // Filter transactions
   const filteredTransactions = transactions.filter((txn) => {
@@ -187,20 +111,7 @@ export default function TransactionsPage() {
     setIsProcessing(true);
 
     try {
-      // TODO: API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      setTransactions((prev) =>
-        prev.map((t) =>
-          t.id === selectedTransaction.id
-            ? {
-                ...t,
-                payoutStatus: "requested",
-                payoutRequestDate: new Date().toLocaleString(),
-              }
-            : t
-        )
-      );
+      await requestPayout({ transactionId: selectedTransaction.id });
 
       addToast(
         `Payout request submitted for ${
@@ -210,7 +121,8 @@ export default function TransactionsPage() {
       );
       setShowPayoutModal(false);
       setSelectedTransaction(null);
-    } catch {
+      refetch(); // Refresh the transactions list
+    } catch (err) {
       addToast("Failed to submit payout request. Please try again.", "error");
     } finally {
       setIsProcessing(false);
@@ -233,37 +145,24 @@ export default function TransactionsPage() {
     setIsProcessing(true);
 
     try {
-      // TODO: API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      const eligibleIds = transactions
-        .filter((t) => t.payoutStatus === "pending")
-        .map((t) => t.id);
-
-      setTransactions((prev) =>
-        prev.map((t) =>
-          eligibleIds.includes(t.id)
-            ? {
-                ...t,
-                payoutStatus: "requested",
-                payoutRequestDate: new Date().toLocaleString(),
-              }
-            : t
-        )
+      const eligibleTransactions = transactions.filter(
+        (t) => t.payoutStatus === "pending"
       );
+      const transactionIds = eligibleTransactions.map((t) => t.id);
 
-      const totalAmount = transactions
-        .filter((t) => eligibleIds.includes(t.id))
-        .reduce((sum, t) => sum + t.netAmount, 0);
+      await requestPayoutForTransactions({ transactionIds });
+
+      const totalAmount = eligibleTransactions.reduce((sum, t) => sum + (t.netAmount || 0), 0);
 
       addToast(
         `Bulk payout request submitted for ${
-          eligibleIds.length
+          transactionIds.length
         } transactions (₦${totalAmount.toLocaleString()})`,
         "success"
       );
       setShowBulkPayoutModal(false);
-    } catch {
+      refetch(); // Refresh the transactions list
+    } catch (err) {
       addToast(
         "Failed to submit bulk payout request. Please try again.",
         "error"
@@ -309,6 +208,32 @@ export default function TransactionsPage() {
 
   // Format currency
   const formatCurrency = (amount) => `₦${amount.toLocaleString()}`;
+
+  // Show loading state
+  if (loading) {
+    return <PageLoadingScreen message="Loading your transactions..." />;
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 text-4xl mb-4">⚠️</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Transactions</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={refetch}
+              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -366,7 +291,7 @@ export default function TransactionsPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Total Amount:</span>
                   <span className="font-bold text-primary-600 text-lg">
-                    {formatCurrency(stats.availableForPayout)}
+                    {formatCurrency(displayStats.availableForPayout)}
                   </span>
                 </div>
               </div>
@@ -421,7 +346,7 @@ export default function TransactionsPage() {
             <DollarSign className="w-5 h-5 text-green-600" />
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(stats.totalEarnings)}
+            {formatCurrency(displayStats.totalEarnings)}
           </p>
           <p className="text-xs text-gray-500 mt-1">From completed orders</p>
         </div>
@@ -432,7 +357,7 @@ export default function TransactionsPage() {
             <Clock className="w-5 h-5 text-yellow-600" />
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(stats.availableForPayout)}
+            {formatCurrency(displayStats.availableForPayout)}
           </p>
           <p className="text-xs text-gray-500 mt-1">Ready to withdraw</p>
         </div>
@@ -443,7 +368,7 @@ export default function TransactionsPage() {
             <Send className="w-5 h-5 text-blue-600" />
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(stats.pendingPayouts)}
+            {formatCurrency(displayStats.pendingPayouts)}
           </p>
           <p className="text-xs text-gray-500 mt-1">Under processing</p>
         </div>
@@ -454,7 +379,7 @@ export default function TransactionsPage() {
             <CheckCircle className="w-5 h-5 text-green-600" />
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(stats.paidOut)}
+            {formatCurrency(displayStats.paidOut)}
           </p>
           <p className="text-xs text-gray-500 mt-1">Successfully transferred</p>
         </div>
@@ -462,100 +387,72 @@ export default function TransactionsPage() {
 
       {/* Actions Bar */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="flex gap-2">
-            <button
-              onClick={handleBulkPayoutRequest}
-              disabled={stats.availableForPayout === 0}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Send className="w-4 h-4" />
-              Request Bulk Payout
-            </button>
-            <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              Export
-            </button>
-          </div>
-
-          {/* Time Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Period:</span>
-            <select
-              value={timeFilter}
-              onChange={(e) => setTimeFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="all">All Time</option>
-              <option value="week">Last 7 Days</option>
-              <option value="month">Last 30 Days</option>
-            </select>
-          </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleBulkPayoutRequest}
+            disabled={displayStats.availableForPayout === 0}
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Send className="w-4 h-4" />
+            Request Bulk Payout
+          </button>
+          <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm flex items-center gap-2">
+            <Download className="w-4 h-4" />
+            Export
+          </button>
         </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by customer, transaction ID, order ID, or service..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* Status Filter */}
-          <div className="flex gap-2 overflow-x-auto">
-            <button
-              onClick={() => setSelectedStatus("all")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "all"
-                  ? "bg-primary-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              All ({getStatusCount("all")})
-            </button>
-            <button
-              onClick={() => setSelectedStatus("pending")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "pending"
-                  ? "bg-yellow-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Pending ({getStatusCount("pending")})
-            </button>
-            <button
-              onClick={() => setSelectedStatus("requested")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "requested"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Requested ({getStatusCount("requested")})
-            </button>
-            <button
-              onClick={() => setSelectedStatus("paid")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "paid"
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Paid ({getStatusCount("paid")})
-            </button>
-          </div>
-        </div>
-      </div>
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by customer, transaction ID, order ID, or service..."
+        filters={[
+          {
+            value: "all",
+            label: "All",
+            count: getStatusCount("all"),
+            activeClass: "bg-primary-500 text-white",
+            inactiveClass: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          },
+          {
+            value: "pending",
+            label: "Pending",
+            count: getStatusCount("pending"),
+            activeClass: "bg-yellow-500 text-white",
+            inactiveClass: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          },
+          {
+            value: "requested",
+            label: "Requested",
+            count: getStatusCount("requested"),
+            activeClass: "bg-blue-500 text-white",
+            inactiveClass: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          },
+          {
+            value: "paid",
+            label: "Paid",
+            count: getStatusCount("paid"),
+            activeClass: "bg-green-500 text-white",
+            inactiveClass: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }
+        ]}
+        activeFilter={selectedStatus}
+        onFilterChange={setSelectedStatus}
+        dropdownFilters={[
+          {
+            label: "Period",
+            value: timeFilter,
+            onChange: setTimeFilter,
+            options: [
+              { value: "all", label: "All Time" },
+              { value: "week", label: "Last 7 Days" },
+              { value: "month", label: "Last 30 Days" }
+            ]
+          }
+        ]}
+      />
 
       {/* Transactions Table */}
       {filteredTransactions.length === 0 ? (

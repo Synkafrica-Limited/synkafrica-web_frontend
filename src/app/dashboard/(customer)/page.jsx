@@ -4,6 +4,7 @@ import ProfileCard from "@/components/dashboard/customer/profile/ProfileCard";
 import ProfileProgress from "@/components/dashboard/customer/profile/ProfileProgress";
 import ProfileDetails from "@/components/dashboard/customer/profile/ProfileDetails";
 import {EditProfileModal} from "@/components/dashboard/customer/profile/EditProfileModal";
+import { useToast } from '@/components/ui/ToastProvider';
 
 // --- Main Profile Page ---
 const initialUser = {
@@ -26,6 +27,7 @@ const initialUser = {
 export default function ProfilePage() {
   const [user, setUser] = useState(initialUser);
   const [showEdit, setShowEdit] = useState(false);
+  const toast = useToast();
 
   // Calculate profile completion (simple logic, adjust as needed)
   const requiredFields = [
@@ -45,11 +47,11 @@ export default function ProfilePage() {
   // Example handlers for the other buttons
   const handleSaveBookingInfo = () => {
     // Navigate to or open booking info section/modal
-    alert("Navigate to Save Booking Information page or modal.");
+    toast?.info?.("Navigate to Save Booking Information page or modal.");
   };
   const handleCompleteBooking = () => {
     // Navigate to or open booking completion section/modal
-    alert("Navigate to Complete a Booking page or modal.");
+    toast?.info?.("Navigate to Complete a Booking page or modal.");
   };
 
   return (
