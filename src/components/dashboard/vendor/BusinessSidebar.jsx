@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -14,9 +14,13 @@ import {
   X,
   Menu,
   User,
+  Bell,
+  Settings,
 } from "lucide-react";
 
 import { useSignOut } from "@/hooks/business/useSignOut";
+import { useUserProfile } from "@/hooks/business/useUserProfileVendor";
+import authService from '@/services/authService';
 
 /**
  * Business Dashboard Sidebar Component
@@ -25,6 +29,16 @@ import { useSignOut } from "@/hooks/business/useSignOut";
 export default function BusinessSidebar() {
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [token, setToken] = useState(null);
+
+  // Load token after client mount
+  useEffect(() => {
+    const t = authService.getAccessToken();
+    setToken(t);
+  }, []);
+
+  // Only use hook if token exists
+  const { user, loading: userLoading } = useUserProfile(token);
 
   const { signOut, loading } = useSignOut();
 
@@ -58,6 +72,18 @@ export default function BusinessSidebar() {
       icon: CreditCard,
       href: "/dashboard/business/transaction",
       active: pathname.startsWith("/dashboard/business/transaction"),
+    },
+    {
+      label: "Notifications",
+      icon: Bell,
+      href: "/dashboard/business/notifications",
+      active: pathname.startsWith("/dashboard/business/notifications"),
+    },
+    {
+      label: "Settings",
+      icon: Settings,
+      href: "/dashboard/business/settings",
+      active: pathname.startsWith("/dashboard/business/settings"),
     },
     {
       label: "Dispute",
@@ -116,7 +142,7 @@ export default function BusinessSidebar() {
             className="flex items-center gap-3"
             onClick={closeMobile}
           >
-            <div className="relative w-8 h-8 flex-shrink-0">
+            <div className="relative w-8 h-8 shrink-0">
               <Image
                 src="/images/brand/synkafrica-logo-single.png"
                 alt="Synkkafrica Logo"
@@ -146,7 +172,7 @@ export default function BusinessSidebar() {
                     }`}
                   >
                     <Icon
-                      className={`w-5 h-5 flex-shrink-0 ${
+                      className={`w-5 h-5 shrink-0 ${
                         item.active
                           ? "text-primary-600"
                           : "text-gray-500 group-hover:text-gray-900"
@@ -160,6 +186,38 @@ export default function BusinessSidebar() {
           </ul>
         </nav>
 
+        {/* User Greeting Section */}
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center shrink-0">
+              {userLoading ? (
+                <div className="w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
+              ) : user?.firstName ? (
+                <span className="text-sm font-semibold text-primary-700">
+                  {user.firstName[0]}{user.lastName?.[0] || ""}
+                </span>
+              ) : (
+                <span className="text-sm font-semibold text-primary-700">SA</span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              {userLoading ? (
+                <div className="space-y-1">
+                  <div className="h-3 bg-gray-300 rounded animate-pulse w-20"></div>
+                  <div className="h-4 bg-gray-300 rounded animate-pulse w-24"></div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs text-gray-500">Welcome back,</p>
+                  <p className="text-sm font-semibold text-gray-900 truncate">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Logout Section */}
         <div className="p-3 border-t border-gray-200">
           <button
@@ -167,7 +225,7 @@ export default function BusinessSidebar() {
             disabled={loading}
             className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-colors w-full group"
           >
-            <LogOut className="w-5 h-5 flex-shrink-0 text-gray-500 group-hover:text-red-600" />
+            <LogOut className="w-5 h-5 shrink-0 text-gray-500 group-hover:text-red-600" />
             <span className="font-medium text-sm">
               {loading ? "Logging out..." : "Log out"}
             </span>

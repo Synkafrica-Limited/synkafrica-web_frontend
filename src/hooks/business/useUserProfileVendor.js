@@ -1,7 +1,6 @@
 // hooks/useUserProfile.js
 import { useState, useEffect, useCallback } from 'react';
-
-const API_URL = 'https://synkkafrica-backend-core.onrender.com/api/auth/profile';
+import { api } from '@/lib/fetchClient';
 
 export const useUserProfile = (token) => {
   const [user, setUser] = useState(null);
@@ -15,19 +14,7 @@ export const useUserProfile = (token) => {
     setError(null);
 
     try {
-      const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await api.get('/api/auth/profile', { auth: true });
       setUser(data);
     } catch (err) {
       const message = err.message || 'Something went wrong';

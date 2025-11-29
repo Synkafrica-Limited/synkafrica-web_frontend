@@ -1,5 +1,8 @@
 import { Montserrat, Montserrat_Alternates } from "next/font/google";
 import "../styles/globals.css"; 
+import ToastProvider from "@/components/ui/ToastProvider";
+import LoadingProvider from "@/components/ui/LoadingProvider";
+import { Providers } from "@/components/Providers";
 
 
 const montserratAlternates = Montserrat_Alternates({
@@ -24,8 +27,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-       <body className="font-sans bg-[var(--background)] text-[var(--foreground)]">
-          {children}
+       <body className="font-sans bg-(--background) text-(--foreground)">
+          <LoadingProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </LoadingProvider>
         </body>
     </html>
   );

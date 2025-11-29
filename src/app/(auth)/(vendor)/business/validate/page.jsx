@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
 import AuthLayout from "@/components/layout/AuthLayout";
 import { useEmailValidation } from "@/hooks/useEmailValidation";
 
 export default function VendorEmailValidationScreen() {
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "";
+  const email = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('email')) || "";
 
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState("");

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ChevronLeft, Car, Clock, MapPin, CreditCard } from "lucide-react";
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 
 export default function TransportationDetails() {
   const router = useRouter();
@@ -32,14 +33,7 @@ export default function TransportationDetails() {
   }, [id]);
 
   if (!booking) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto" />
-          <p className="mt-2 text-gray-600">Loading booking details...</p>
-        </div>
-      </div>
-    );
+    return <PageLoadingScreen message="Loading booking details..." />;
   }
 
   return (

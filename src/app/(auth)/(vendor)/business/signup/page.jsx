@@ -47,7 +47,8 @@ export default function VendorSignUpScreen() {
 
   // Redirect if already logged in
   useEffect(() => {
-    const token = localStorage.getItem("vendorToken");
+    const authService = require('@/services/authService').default;
+    const token = typeof window !== 'undefined' ? authService.getAccessToken() : null;
     if (token) router.replace("/dashboard/business/home");
   }, [router]);
 

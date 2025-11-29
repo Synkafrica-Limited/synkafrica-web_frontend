@@ -4,81 +4,189 @@ import { useState, useEffect } from "react";
 import BusinessProfileCard from "@/components/dashboard/vendor/profile/BusinessProfileCard";
 import BusinessProfileProgress from "@/components/dashboard/vendor/profile/BusinessProfileProgress";
 import BusinessProfileDetails from "@/components/dashboard/vendor/profile/BusinessProfileDetails";
+import BusinessVerificationCard from "@/components/dashboard/vendor/profile/BusinessVerificationCard";
 import { BusinessEditProfileModal } from "@/components/dashboard/vendor/profile/BusinessEditProfileModal";
 import { useUserProfile } from "@/hooks/business/useUserProfileVendor";
+import { useBusiness } from '@/context/BusinessContext';
+import authService from '@/services/authService';
+import businessService from '@/services/business.service';
+import verificationService from '@/services/verification.service';
+import { useRouter } from 'next/navigation';
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+import { useToast } from "@/components/ui/ToastProvider";
+import { ProtectedPage } from "@/components/ui/PageWrapper";
+import { useDataLoader } from "@/hooks/useDataLoader";
 
-export default function BusinessProfilePage() {
-  // Get token from localStorage
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("vendorToken") : null;
 
-  // Fetch user profile
-  const {
-    user,
-    loading: profileLoading,
-    error: profileError,
-    refetch,
-  } = useUserProfile(token);
+function BusinessProfileContent() {
+  const router = useRouter();
+  const toast = useToast();
 
-  // Local state for business data and edit modal
-  const [business, setBusiness] = useState(null);
+  // Get token and user profile
+  const token = typeof window !== "undefined" ? authService.getAccessToken() : null;
+  const { user, loading: profileLoading, error: profileError, refetch: refetchProfile } = useUserProfile(token);
+
+  // State management
   const [showEdit, setShowEdit] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState({
+    state: 'not_started',
+    percent: 0
+  });
 
-  // Update business state when user data is loaded
-  useEffect(() => {
-    if (user) {
-      setBusiness({
-        initials:
-          user.firstName && user.lastName
-            ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-            : "SA",
-        name: user.firstName
-          ? `${user.firstName} ${user.lastName || ""}`.trim()
-          : "Business Name",
-        email: user.email || "",
-        businessName: user.firstName
-          ? `${user.firstName} ${user.lastName || ""}`.trim()
-          : "",
-        businessLocation: "", // Could extend API later
-        businessDescription: "",
-        phoneNumber: user.phoneNumber || "",
-        phoneNumber2: "",
-        businessURL: "",
-        bankName: "",
-        accountName: "",
-        accountNumber: "",
-        faqs: null,
-        serviceLicense: null,
-        availability: "",
-        profileImage: user.avatar || null,
-      });
+  // Load business data using the simplified hook
+  const {
+    data: businessData,
+    loading: businessLoading,
+    error: businessError,
+    refetch: refetchBusiness
+  } = useDataLoader(
+    async () => {
+      if (!user) return null;
+
+      const business = await businessService.getMyBusinesses();
+      if (!business) {
+        throw new Error('No business found. Please complete your business onboarding first.');
+      }
+
+      return {
+        id: business.id || business._id,
+        initials: business.businessName
+          ?.split(" ")
+          .map((word) => word[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase() || "SA",
+        name: business.businessName || "Business Name",
+        email: user?.email || business.email || "",
+        businessName: business.businessName || "",
+        businessLocation: business.businessLocation || "",
+        businessDescription: business.businessDescription || "",
+        phoneNumber: business.phoneNumber || user?.phoneNumber || "",
+        phoneNumber2: business.phoneNumber2 || "",
+        businessURL: business.businessURL || "",
+        bankName: business.bankName || "",
+        accountName: business.accountName || "",
+        accountNumber: business.accountNumber || "",
+        faqs: business.faqs || null,
+        serviceLicense: business.serviceLicense || null,
+        availability: business.availability || "",
+        profileImage: business.profileImage || user?.avatar || null,
+      };
+    },
+    [user],
+    {
+      enabled: !!user,
+      onError: (error) => {
+        if (error.message.includes('No business found')) {
+          toast?.info?.('No business found. Please complete your business onboarding first.');
+          setTimeout(() => {
+            router.push('/dashboard/business');
+          }, 2000);
+        } else {
+          toast?.danger?.('Failed to load business data. Please try again or contact support.');
+        }
+      }
     }
-  }, [user]);
+  );
 
-  if (profileLoading || !business) {
+  // Sync business data into shared BusinessContext so other pages can reuse it
+  const { business: contextBusiness, setBusiness: setContextBusiness } = useBusiness();
+  useEffect(() => {
+    if (businessData && setContextBusiness) {
+      setContextBusiness(businessData);
+    }
+  }, [businessData, setContextBusiness]);
+
+  // Load verification status when business data is available
+  useEffect(() => {
+    const loadVerification = async () => {
+      if (!businessData?.id) return;
+
+      try {
+        const verificationData = await verificationService.getProgress(businessData.id);
+        setVerificationStatus({
+          state: verificationData.status,
+          percent: verificationData.progress
+        });
+      } catch (verificationError) {
+        console.warn('Could not load verification status:', verificationError);
+        setVerificationStatus({ state: 'not_started', percent: 0 });
+      }
+    };
+
+    loadVerification();
+  }, [businessData?.id]);
+
+  // Show loading only when actively fetching data
+  if (profileLoading || businessLoading) {
+    return <PageLoadingScreen message="Loading your profile..." />;
+  }
+
+  // Show error states
+  if (profileError || businessError) {
+    const isNoBusinessError = businessError?.includes('No business found');
+
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading profile...</p>
+        <div className="text-center">
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+            isNoBusinessError ? 'bg-blue-100' : 'bg-red-100'
+          }`}>
+            <svg className={`w-8 h-8 ${isNoBusinessError ? 'text-blue-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={
+                isNoBusinessError
+                  ? "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  : "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+              } />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            {isNoBusinessError ? 'No Business Found' : 'Failed to Load Profile'}
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {isNoBusinessError
+              ? 'Redirecting you to create your business profile...'
+              : (profileError || businessError)
+            }
+          </p>
+          {!isNoBusinessError && (
+            <button
+              onClick={() => {
+                refetchProfile();
+                refetchBusiness();
+              }}
+              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            >
+              Try Again
+            </button>
+          )}
+          {isNoBusinessError && (
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto"></div>
+          )}
+        </div>
       </div>
     );
   }
 
-  if (profileError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-600">{profileError}</p>
-      </div>
-    );
+  // Should not reach here if there's no business data, but just in case
+  if (!businessData) {
+    return <PageLoadingScreen message="Loading your profile..." />;
   }
 
-  // Calculate profile completion
-  const requiredFields = [
+  // Calculate profile completion - include both user and business data
+  const userRequiredFields = [
+    "firstName",
+    "lastName",
+    "email",
+    "phoneNumber",
+  ];
+
+  const businessRequiredFields = [
     "businessName",
     "businessLocation",
     "businessDescription",
-    "phoneNumber",
-    "businessURL",
-    "email",
+    "businessURL", // Business-specific URL
     "bankName",
     "accountName",
     "accountNumber",
@@ -87,100 +195,231 @@ export default function BusinessProfilePage() {
     "availability",
   ];
 
-  const completed = requiredFields.filter((f) => {
-    const value = business[f];
+  // Check user profile completion
+  const userCompleted = userRequiredFields.filter((field) => {
+    const value = user?.[field];
     return value && value.toString().trim() !== "";
   }).length;
 
-  const progress = Math.round((completed / requiredFields.length) * 100);
+  // Check business profile completion
+  const businessCompleted = businessRequiredFields.filter((field) => {
+    const value = businessData[field];
+    return value && value.toString().trim() !== "";
+  }).length;
+
+  // Calculate overall progress
+  const totalRequired = userRequiredFields.length + businessRequiredFields.length;
+  const totalCompleted = userCompleted + businessCompleted;
+  const progress = Math.round((totalCompleted / totalRequired) * 100);
+
+  // Progress breakdown for detailed display
+  const profileProgress = {
+    overall: progress,
+    user: {
+      completed: userCompleted,
+      total: userRequiredFields.length,
+      percentage: Math.round((userCompleted / userRequiredFields.length) * 100)
+    },
+    business: {
+      completed: businessCompleted,
+      total: businessRequiredFields.length,
+      percentage: Math.round((businessCompleted / businessRequiredFields.length) * 100)
+    }
+  };
 
   // For ProfileCard initials and name
   const cardBusiness = {
     initials:
-      business.businessName
+      businessData.businessName
         ?.split(" ")
         .map((word) => word[0])
         .join("")
         .slice(0, 2)
         .toUpperCase() || "SA",
-    name: business.businessName || "Business Name",
-    email: business.email,
-    profileImage: business.profileImage,
+    name: businessData.businessName || "Business Name",
+    email: businessData.email,
+    profileImage: businessData.profileImage,
   };
 
   // Payment details formatted
   const paymentDetails =
-    business.bankName && business.accountNumber
-      ? `${business.accountNumber} - ${business.bankName}`
+    businessData.bankName && businessData.accountNumber
+      ? `${businessData.accountNumber} - ${businessData.bankName}`
       : null;
 
   const businessWithFormattedDetails = {
-    ...business,
+    ...businessData,
     paymentDetails,
   };
 
-  // Example handlers for the action buttons
-  const handleSaveInfo = () => {
-    alert("Save information action triggered");
+  // Business update handler
+  const handleUpdateBusiness = async ({ userData, businessData }) => {
+    if (!businessData?.id && !userData) {
+      toast?.danger?.('No data to update');
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      // Update user profile if userData is provided
+      if (userData && Object.keys(userData).length > 0) {
+        await authService.updateProfile(userData);
+      }
+
+      // Update business profile
+      if (businessData.id || Object.keys(businessData).length > 0) {
+        // Create FormData to handle both regular fields and files
+        const formData = new FormData();
+
+        // Add regular fields
+        Object.keys(businessData).forEach(key => {
+          if (businessData[key] !== null && businessData[key] !== undefined && 
+              businessData[key] !== '' && 
+              !(businessData[key] instanceof File)) {
+            formData.append(key, businessData[key]);
+          }
+        });
+
+        // Add files
+        if (businessData.profileImage instanceof File) {
+          formData.append('profileImage', businessData.profileImage);
+        }
+        if (businessData.faqs instanceof File) {
+          formData.append('faqs', businessData.faqs);
+        }
+        if (businessData.serviceLicense instanceof File) {
+          formData.append('serviceLicense', businessData.serviceLicense);
+        }
+
+        // Update business with FormData
+        await businessService.updateBusiness(businessData.id || businessData.businessId, formData);
+      }
+
+      // Update local state by refetching
+      refetchProfile();
+      refetchBusiness();
+
+      toast?.success?.('Profile updated successfully');
+      setShowEdit(false);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      toast?.danger?.(error?.message || 'Failed to update profile');
+    } finally {
+      setUpdating(false);
+    }
   };
 
-  const handleGetBookings = () => {
-    alert("Get bookings action triggered");
+  // Example handlers for the action buttons
+  const handleSaveInfo = async () => {
+    try {
+      toast?.info?.('Save information functionality coming soon');
+    } catch (err) {
+      toast?.danger?.(err?.message || 'Failed to save information');
+    }
+  };
+
+  const handleGetBookings = async () => {
+    try {
+      router.push('/dashboard/business/orders');
+    } catch (err) {
+      toast?.danger?.(err?.message || 'Failed to navigate to bookings');
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F6]">
-      {/* Dashboard Main Content */}
-      <div className="flex-1 flex flex-col w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Dashboard Content */}
-        <section className="flex-1 flex flex-col gap-6 py-6 px-2 sm:px-4 md:px-8 lg:px-16">
-          <div className="flex flex-col md:flex-row gap-6 w-full">
-            {/* Profile Card */}
-            <div className="flex flex-col gap-4 w-full md:w-auto md:max-w-xs">
-              <BusinessProfileCard business={cardBusiness} />
+    <div className="min-h-screen bg-[#FAF8F6]">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Business Profile</h1>
+                <p className="mt-1 text-sm text-gray-600">Manage your business information and verification status</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowEdit(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edit Profile
+                </button>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Profile Progress */}
-            <div className="flex-1">
-              <BusinessProfileProgress
-                progress={progress}
-                onEdit={() => setShowEdit(true)}
-                onSaveInfo={handleSaveInfo}
-                onGetBookings={handleGetBookings}
-              />
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Sidebar - Profile Card */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8">
+              <BusinessProfileCard business={cardBusiness} user={user} />
             </div>
           </div>
 
-          {/* Profile Details */}
-          <div className="w-full ">
+          {/* Main Content Area */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Profile Progress */}
+            <BusinessProfileProgress
+              progress={progress}
+              profileProgress={profileProgress}
+              verificationState={verificationStatus.state}
+              verificationPercent={verificationStatus.percent}
+              onEdit={() => setShowEdit(true)}
+              onSaveInfo={handleSaveInfo}
+              onGetBookings={handleGetBookings}
+                  onVerify={() => {
+                    const target = businessData?.id ? `/dashboard/business/verification?businessId=${businessData.id}` : '/dashboard/business/verification';
+                    if (router && router.push) router.push(target);
+                    else window.location.href = target;
+                  }}
+            />
+
+            {/* Verification Card */}
+            <BusinessVerificationCard
+              verificationState={verificationStatus.state}
+              verificationPercent={verificationStatus.percent}
+              onVerify={() => {
+                const target = businessData?.id ? `/dashboard/business/verification?businessId=${businessData.id}` : '/dashboard/business/verification';
+                if (router && router.push) router.push(target);
+                else window.location.href = target;
+              }}
+            />
+
+            {/* Profile Details */}
             <BusinessProfileDetails
               business={businessWithFormattedDetails}
+              user={user}
               onEdit={() => setShowEdit(true)}
             />
           </div>
-        </section>
+        </div>
       </div>
 
       {/* Edit Profile Modal */}
       {showEdit && (
         <BusinessEditProfileModal
-          business={business}
+          business={businessData}
+          user={user}
           onClose={() => setShowEdit(false)}
-          onSave={(updated) => {
-            setBusiness((prev) => ({ ...prev, ...updated }));
-            refetch(); // Re-fetch profile from backend after save
-          }}
+          onSave={handleUpdateBusiness}
+          loading={updating}
         />
       )}
-
-      <style jsx global>{`
-        @media (max-width: 768px) {
-          section {
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
-          }
-        }
-      `}</style>
     </div>
+  );
+}
+
+export default function BusinessProfilePage() {
+  return (
+    <ProtectedPage>
+      <BusinessProfileContent />
+    </ProtectedPage>
   );
 }

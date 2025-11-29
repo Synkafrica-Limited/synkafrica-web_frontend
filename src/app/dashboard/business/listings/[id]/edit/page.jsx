@@ -7,6 +7,7 @@ import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
 import { useToast } from "@/hooks/useNotifications";
 import { Toast } from "@/components/ui/Toast";
+import listingsService from '@/services/listings.service';
 
 export default function EditListingPage() {
   const router = useRouter();
@@ -39,35 +40,45 @@ export default function EditListingPage() {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
-    // Mock loading listing data - replace with actual API call
     const loadListing = async () => {
       setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        const id = params.id;
+        const res = await listingsService.getListing(id);
+        if (res) {
+          // Map API listing to form shape
+          const mapped = {
+            vehicleName: res.title || '',
+            vehicleType: res.vehicleType || res.category || '',
+            brand: res.carRental?.carMake || res.brand || '',
+            model: res.carRental?.carModel || res.model || '',
+            year: res.carRental?.carYear || res.year || '',
+            seats: res.carRental?.carSeats || res.seats || '',
+            transmission: res.carRental?.carTransmission || res.transmission || '',
+            fuelType: res.carRental?.carFuelType || res.fuelType || '',
+            pricePerDay: res.basePrice || '',
+            pricePerHour: res.carRental?.chauffeurPricePerHour || res.pricePerHour || '',
+            chauffeurIncluded: res.carRental?.chauffeurIncluded || false,
+            chauffeurPrice: res.carRental?.chauffeurPricePerDay || '',
+            features: res.carRental?.carFeatures || res.features || [],
+            description: res.description || '',
+            location: res.location?.address || (typeof res.location === 'string' ? res.location : ''),
+            availability: res.status || res.availability || 'available',
+            carPlateNumber: res.carRental?.carPlateNumber || '',
+          };
 
-      // Mock data based on listing ID
-      const mockData = {
-        id: params.id,
-        vehicleName: "Luxury SUV with Driver",
-        vehicleType: "SUV",
-        brand: "Mercedes Benz",
-        model: "S-Class",
-        year: "2024",
-        seats: "5",
-        transmission: "Automatic",
-        fuelType: "Petrol",
-        pricePerDay: "25000",
-        pricePerHour: "5000",
-        chauffeurIncluded: true,
-        chauffeurPrice: "10000",
-        features: ["Air Conditioning", "GPS", "Bluetooth", "Backup Camera"],
-        description: "Luxury SUV with professional chauffeur service",
-        location: "Lagos, Victoria Island",
-        availability: "available",
-      };
-
-      setForm(mockData);
-      setListingType("car-rental");
-      setIsLoading(false);
+          setForm(mapped);
+          // initialize images: keep existing URLs as previews
+          const existing = (res.images || []).map((url) => ({ preview: url, existing: true }));
+          setImages(existing);
+          setListingType(res.category || 'car-rental');
+        }
+      } catch (err) {
+        console.error('Failed to load listing:', err);
+        addToast('Failed to load listing. Please try again.', 'error');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadListing();
@@ -99,18 +110,50 @@ export default function EditListingPage() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Submit to API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // basic validation
+      if (!form.vehicleName) throw new Error('Vehicle name is required');
+      if (!form.location) throw new Error('Pickup location is required');
 
-      console.log("Updated listing:", form, images);
+      const payload = {
+        title: form.vehicleName,
+        description: form.description,
+        category: listingType === 'car-rental' ? 'CAR_RENTAL' : listingType,
+        basePrice: Number(form.pricePerDay) || 0,
+        currency: 'NGN',
+        location: {
+          address: form.location,
+        },
+        carRental: {
+          carMake: form.brand,
+          carModel: form.model,
+          carYear: Number(form.year) || null,
+          carPlateNumber: form.carPlateNumber,
+          carSeats: Number(form.seats) || null,
+          carTransmission: form.transmission,
+          carFuelType: form.fuelType,
+          carFeatures: form.features,
+          chauffeurIncluded: !!form.chauffeurIncluded,
+          chauffeurPricePerDay: form.chauffeurIncluded ? Number(form.chauffeurPrice || 0) : 0,
+        }
+      };
 
-      addToast("Listing updated successfully!", "success");
+      const hasNewFiles = images.some((i) => i.file instanceof File);
+      const listingId = params.id;
 
-      setTimeout(() => {
-        router.push("/dashboard/business/listings");
-      }, 1000);
-    } catch {
-      addToast("Failed to update listing. Please try again.", "error");
+      let res;
+      if (hasNewFiles) {
+        res = await listingsService.updateListingMultipart(listingId, payload, images);
+      } else {
+        // include existing images urls if any
+        if (images.length > 0) payload.images = images.map((i) => i.preview);
+        res = await listingsService.updateListing(listingId, payload);
+      }
+
+      addToast('Listing updated successfully', 'success');
+      setTimeout(() => router.push('/dashboard/business/listings'), 800);
+    } catch (err) {
+      console.error('Update failed:', err);
+      addToast(err?.message || 'Failed to update listing', 'error');
       setIsSubmitting(false);
     }
   };

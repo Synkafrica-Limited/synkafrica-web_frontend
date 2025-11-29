@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
+import { useToast } from '@/components/ui/ToastProvider';
 import { Edit2, Calendar, Clock, Shield, Headphones, DollarSign, MapPin, ChevronLeft, ChevronRight, MessageCircle, Phone, Users, Utensils, Waves, Package, Shirt, Car } from 'lucide-react';
 
 // Service type configurations with proper booking forms
@@ -121,6 +122,7 @@ export default function BookingForm({
 
   const [paymentOption, setPaymentOption] = useState(config.paymentOptions[0].value);
   const [paymentMethod, setPaymentMethod] = useState('credit-card');
+  const toast = useToast();
 
   const handleEdit = (section) => {
     setEditingSection(section);
@@ -184,7 +186,7 @@ export default function BookingForm({
       onBookingComplete(bookingDetails);
     } else {
       console.log('Booking completed:', bookingDetails);
-      alert(`${config.title} booking completed! Total: $${selectedPaymentOption.price}`);
+      toast?.success?.(`${config.title} booking completed! Total: $${selectedPaymentOption.price}`);
     }
   };
 

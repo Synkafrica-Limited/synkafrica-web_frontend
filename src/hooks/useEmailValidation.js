@@ -1,6 +1,7 @@
 // hooks/useEmailValidation.js
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import authService from '@/services/authService';
 
 export function useEmailValidation() {
   const router = useRouter();
@@ -14,32 +15,12 @@ export function useEmailValidation() {
     setError("");
 
     try {
-      const token = localStorage.getItem("vendorToken");
-      const res = await fetch(
-        "https://synkkafrica-backend-core.onrender.com/api/auth/verify-email",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : undefined,
-          },
-          body: JSON.stringify({ code }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data?.message || "Invalid code, please try again");
-        return false;
-      }
-
-      // Success → navigate to onboarding
+      await authService.verifyEmail(code);
       router.push("/business/onboarding");
       return true;
     } catch (err) {
       console.error(err);
-      setError("Something went wrong. Try again.");
+      setError(err?.message || "Invalid code, please try again");
       return false;
     } finally {
       setLoading(false);
@@ -50,24 +31,10 @@ export function useEmailValidation() {
   const resendOtp = async (email) => {
     setIsResending(true);
     try {
-      const token = localStorage.getItem("vendorToken");
-      const res = await fetch(
-        "https://synkkafrica-backend-core.onrender.com/api/auth/resend-otp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : undefined,
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
-
-      if (!res.ok) {
-        console.error("Failed to resend OTP");
-      }
+      await authService.resendOtp(email);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to resend OTP", err);
+      setError(err?.message || "Failed to resend OTP");
     } finally {
       setIsResending(false);
     }

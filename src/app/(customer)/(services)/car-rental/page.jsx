@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
 import CarCard from "@/components/cards/ProductCard";
 
 function CarRentalContent() {
-  const searchParams = useSearchParams();
+  const searchParamsString = typeof window !== 'undefined' ? window.location.search : '';
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [carType, setCarType] = useState("");
@@ -125,9 +124,10 @@ function CarRentalContent() {
     let filtered = [...allCars];
 
     // Check for query parameters
-    const queryLocation = searchParams.get("location");
-    const queryType = searchParams.get("type");
-    const queryMaxPrice = searchParams.get("maxPrice");
+    const params = new URLSearchParams(searchParamsString);
+    const queryLocation = params.get("location");
+    const queryType = params.get("type");
+    const queryMaxPrice = params.get("maxPrice");
 
     // Apply URL query filters
     if (queryLocation) {
@@ -162,7 +162,7 @@ function CarRentalContent() {
     filtered = filtered.filter((car) => car.price <= priceRange[1]);
 
     return filtered;
-  }, [searchParams, selectedLocation, carType, priceRange]);
+  }, [searchParamsString, selectedLocation, carType, priceRange]);
 
   // Load more cars
   const loadMoreCars = useCallback(() => {
@@ -191,14 +191,15 @@ function CarRentalContent() {
 
   // Initialize filters from URL params
   useEffect(() => {
-    const queryLocation = searchParams.get("location");
-    const queryType = searchParams.get("type");
-    const queryMaxPrice = searchParams.get("maxPrice");
+    const params = new URLSearchParams(searchParamsString);
+    const queryLocation = params.get("location");
+    const queryType = params.get("type");
+    const queryMaxPrice = params.get("maxPrice");
 
     if (queryLocation) setSelectedLocation(queryLocation.toLowerCase());
     if (queryType) setCarType(queryType.toLowerCase());
     if (queryMaxPrice) setPriceRange([0, parseInt(queryMaxPrice)]);
-  }, [searchParams]);
+  }, [searchParamsString]);
 
   // Reset and reload when filters change
   useEffect(() => {
@@ -206,7 +207,7 @@ function CarRentalContent() {
     setPage(1);
     setHasMore(true);
     loadMoreCars();
-  }, [selectedLocation, carType, priceRange[1], searchParams]);
+  }, [selectedLocation, carType, priceRange[1], searchParamsString]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {

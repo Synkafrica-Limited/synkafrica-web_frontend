@@ -1,7 +1,6 @@
 // hooks/business/useBusiness.js
 import { useState, useEffect, useCallback } from 'react';
-
-const API_URL = 'https://synkkafrica-backend-core.onrender.com/api/business';
+import { api } from '@/lib/fetchClient';
 
 export const useBusiness = (token) => {
   const [business, setBusiness] = useState(null);
@@ -9,31 +8,54 @@ export const useBusiness = (token) => {
   const [error, setError] = useState(null);
 
   const fetchBusiness = useCallback(async () => {
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      // Use the correct endpoint: /api/business/
+      const data = await api.get('/api/business/', { auth: true });
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      // Backend returns single object
+      setBusiness(data || null);
+    } catch (err) {
+      let errorMessage = 'Failed to fetch business data';
+
+      // Provide more specific error messages based on status
+      if (err.status === 401) {
+        errorMessage = 'Authentication required. Please log in again.';
+      } else if (err.status === 403) {
+        errorMessage = 'You do not have permission to access business data.';
+      } else if (err.status === 404) {
+        // 404 is expected for users who haven't set up their business yet
+        errorMessage = 'Business profile not found. Please complete your business setup.';
+        if (process.env.NODE_ENV !== 'development') {
+          // In production, don't log 404s as they're expected
+          console.log('Business profile not found - user needs to set up business first');
+        }
+      } else if (err.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (err.message) {
+        errorMessage = err.message;
       }
 
-      const data = await response.json();
-      // The API returns an array, so we take the first business
-      setBusiness(data[0] || null);
-    } catch (err) {
-      const message = err.message || 'Failed to fetch business data';
-      console.error("Failed to fetch business:", message);
-      setError(message);
+      console.error("Business fetch error:", {
+        message: errorMessage,
+        status: err.status,
+        originalError: err.message
+      });
+
+      setError({
+        message: errorMessage,
+        status: err.status,
+        retryable: err.status >= 500 || err.status === 401
+      });
+
+      // Don't set business to null on error - keep previous data if available
     } finally {
       setLoading(false);
     }
