@@ -13,7 +13,16 @@ export async function getMyBusinesses() {
     console.debug('[business.service] getMyBusinesses - token present:', !!token, token ? `${String(token).slice(0, 8)}...` : null);
     const res = await api.get('/api/business', { auth: true });
     console.debug('[business.service] getMyBusinesses response:', res);
-    return res;
+    // Normalize backend payloads: some backends return an array, others return { business } or a single object
+    let business = res;
+    if (Array.isArray(res)) {
+      business = res.length > 0 ? res[0] : null;
+    }
+    if (business && business.business) {
+      business = business.business;
+    }
+
+    return business;
   } catch (err) {
     console.error('[business.service] getMyBusinesses error:', err);
     throw err;

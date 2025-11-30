@@ -68,7 +68,7 @@ async function request(method, path, body = null, opts = {}) {
       // If refresh fails, clear tokens and redirect to login
       authService.clearTokens();
       if (typeof window !== 'undefined') {
-        window.location.href = '/auth/login?expired=true';
+        window.location.href = '/business/login?expired=true';
       }
       throw new Error('Authentication expired. Please log in again.');
     }
@@ -83,14 +83,38 @@ async function request(method, path, body = null, opts = {}) {
     err.method = method;
 
   // Only log errors in development or for non-auth errors
-  if (process.env.NODE_ENV === 'development' || (res.status !== 401 && res.status !== 404)) {
+  // Skip logging for expected 404s on verification endpoints (we use fallback)
+  const isVerificationEndpoint = fullUrl.includes('/verification');
+  const shouldSkipLog = (res.status === 404 && isVerificationEndpoint);
+  
+  if (!shouldSkipLog && (process.env.NODE_ENV === 'development' || (res.status !== 401 && res.status !== 404))) {
+    let headersObj = {};
+    try {
+      if (res && res.headers) {
+        if (typeof res.headers.entries === 'function') {
+          headersObj = Object.fromEntries(res.headers.entries());
+        } else if (typeof res.headers.forEach === 'function') {
+          // Some environments expose headers with forEach
+          const tmp = {};
+          res.headers.forEach((value, key) => {
+            tmp[key] = value;
+          });
+          headersObj = tmp;
+        }
+      }
+    } catch (hdrErr) {
+      headersObj = { error: 'failed to read headers', message: String(hdrErr) };
+    }
+
     console.error(`API Error ${method} ${fullUrl}:`, {
-      status: res.status,
-      statusText: res.statusText,
+      status: res && res.status,
+      statusText: res && res.statusText,
       response: data,
-      headers: Object.fromEntries(res.headers.entries())
+      headers: headersObj,
     });
-  }    throw err;
+  }
+
+  throw err;
   }
 
   console.log(`API Success ${method} ${fullUrl}:`, data);

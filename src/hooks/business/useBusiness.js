@@ -20,8 +20,13 @@ export const useBusiness = (token) => {
       // Use the correct endpoint: /api/business/
       const data = await api.get('/api/business/', { auth: true });
 
-      // Backend returns single object
-      setBusiness(data || null);
+      // Backend returns single object or array
+      let businessData = data;
+      if (Array.isArray(data)) {
+        businessData = data.length > 0 ? data[0] : null;
+      }
+      
+      setBusiness(businessData || null);
     } catch (err) {
       let errorMessage = 'Failed to fetch business data';
 

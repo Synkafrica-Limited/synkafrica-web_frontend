@@ -19,8 +19,10 @@ import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/hooks/useNotifications";
 import FilterBar from "@/components/ui/FilterBar";
 import { useVendorTransactions } from "@/hooks/business/useVendorTransactions";
-import { requestPayout, requestPayoutForTransactions } from "@/services/transactions.service";
+import { useBusiness } from '@/context/BusinessContext';
+import transactionsService from "@/services/transactions.service";
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+import DashboardHeader from '@/components/dashboard/vendor/DashboardHeader';
 
 const PAYOUT_STATUS_CONFIG = {
   pending: {
@@ -59,41 +61,91 @@ export default function TransactionsPage() {
   const { toasts, addToast, removeToast } = useToast();
 
   // Use the vendor transactions hook
-  const { 
-    transactions, 
-    stats, 
-    loading, 
-    error, 
-    refetch 
+  const {
+    transactions,
+    stats,
+    loading,
+    error,
+    refetch
   } = useVendorTransactions(token, {
     status: selectedStatus !== "all" ? selectedStatus : undefined,
     dateRange: timeFilter !== "all" ? timeFilter : undefined
   });
+
+  // Business context (for debug overlay)
+  const { business: ctxBusiness } = useBusiness();
 
   // Filter transactions
   const filteredTransactions = transactions.filter((txn) => {
     const matchesStatus =
       selectedStatus === "all" || txn.payoutStatus === selectedStatus;
     const matchesSearch =
-      txn.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.serviceName.toLowerCase().includes(searchQuery.toLowerCase());
+      (txn.customerName || txn.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (txn.id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (txn.orderId || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (txn.serviceName || txn.booking?.listingTitle || '').toLowerCase().includes(searchQuery.toLowerCase());
 
     // Time filter
     let matchesTime = true;
     if (timeFilter === "week") {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
-      matchesTime = new Date(txn.date) >= weekAgo;
+      matchesTime = new Date(txn.date || txn.createdAt) >= weekAgo;
     } else if (timeFilter === "month") {
       const monthAgo = new Date();
       monthAgo.setMonth(monthAgo.getMonth() - 1);
-      matchesTime = new Date(txn.date) >= monthAgo;
+      matchesTime = new Date(txn.date || txn.createdAt) >= monthAgo;
     }
 
     return matchesStatus && matchesSearch && matchesTime;
   });
+
+  // Normalize status helper
+  const normalizeStatus = (s) => (s || '').toString().toLowerCase();
+
+  // Derive stats from the filtered transactions so we reflect business-scoped values
+  const derived = (() => {
+    const sumBy = (arr, fn) => arr.reduce((acc, item) => acc + (Number(fn(item)) || 0), 0);
+
+    if (!filteredTransactions || filteredTransactions.length === 0) {
+      return {
+        totalEarnings: 0,
+        availableForPayout: 0,
+        pendingPayouts: 0,
+        paidOut: 0,
+        transactionCount: 0,
+        completedTransactions: 0,
+      };
+    }
+
+    const totalEarnings = sumBy(filteredTransactions, (t) => t.vendorAmount ?? t.netAmount ?? t.amount);
+    const availableForPayout = sumBy(
+      filteredTransactions.filter((t) => normalizeStatus(t.payoutStatus) === 'pending'),
+      (t) => t.vendorAmount ?? t.netAmount ?? t.amount
+    );
+    const pendingPayouts = sumBy(
+      filteredTransactions.filter((t) => normalizeStatus(t.payoutStatus) === 'requested' || normalizeStatus(t.payoutStatus) === 'processing'),
+      (t) => t.vendorAmount ?? t.netAmount ?? t.amount
+    );
+    const paidOut = sumBy(
+      filteredTransactions.filter((t) => normalizeStatus(t.payoutStatus) === 'paid'),
+      (t) => t.vendorAmount ?? t.netAmount ?? t.amount
+    );
+
+    return {
+      totalEarnings,
+      availableForPayout,
+      pendingPayouts,
+      paidOut,
+      transactionCount: filteredTransactions.length,
+      completedTransactions: filteredTransactions.filter((t) => normalizeStatus(t.status) === 'completed' || normalizeStatus(t.transactionStatus) === 'completed').length,
+    };
+  })();
+
+  // Debug log derived vs API stats for easier verification during development
+  if (process.env.NODE_ENV === 'development') {
+    console.debug('[TransactionsPage] derived stats:', derived, 'api stats:', stats);
+  }
 
   // Get status counts
   const getStatusCount = (status) => {
@@ -111,19 +163,17 @@ export default function TransactionsPage() {
     setIsProcessing(true);
 
     try {
-      await requestPayout({ transactionId: selectedTransaction.id });
+      await transactionsService.requestPayout({ transactionIds: [selectedTransaction.id] });
 
       addToast(
-        `Payout request submitted for ${
-          selectedTransaction.id
-        } (₦${selectedTransaction.netAmount.toLocaleString()})`,
+        `Payout request submitted for ${selectedTransaction.id} (${formatCurrency(selectedTransaction?.netAmount || 0, selectedTransaction?.currency || stats?.currency || 'NGN')})`,
         "success"
       );
       setShowPayoutModal(false);
       setSelectedTransaction(null);
       refetch(); // Refresh the transactions list
     } catch (err) {
-      addToast("Failed to submit payout request. Please try again.", "error");
+      addToast(err?.message || "Failed to submit payout request. Please try again.", "error");
     } finally {
       setIsProcessing(false);
     }
@@ -150,21 +200,19 @@ export default function TransactionsPage() {
       );
       const transactionIds = eligibleTransactions.map((t) => t.id);
 
-      await requestPayoutForTransactions({ transactionIds });
+      await transactionsService.requestPayout({ transactionIds });
 
       const totalAmount = eligibleTransactions.reduce((sum, t) => sum + (t.netAmount || 0), 0);
 
       addToast(
-        `Bulk payout request submitted for ${
-          transactionIds.length
-        } transactions (₦${totalAmount.toLocaleString()})`,
+        `Bulk payout request submitted for ${transactionIds.length} transactions (${formatCurrency(totalAmount, statsCurrency)})`,
         "success"
       );
       setShowBulkPayoutModal(false);
       refetch(); // Refresh the transactions list
     } catch (err) {
       addToast(
-        "Failed to submit bulk payout request. Please try again.",
+        err?.message || "Failed to submit bulk payout request. Please try again.",
         "error"
       );
     } finally {
@@ -206,8 +254,29 @@ export default function TransactionsPage() {
     }
   };
 
-  // Format currency
-  const formatCurrency = (amount) => `₦${amount.toLocaleString()}`;
+  // Format currency safely — handle undefined/null and non-numeric values
+  const currencySymbol = (code) => {
+    if (!code) return '₦';
+    const map = { NGN: '₦', USD: '$', EUR: '€' };
+    return map[code.toUpperCase()] || code;
+  };
+
+  const formatCurrency = (amount, code = 'NGN') => {
+    const n = Number(amount);
+    if (!Number.isFinite(n)) return `${currencySymbol(code)}0`;
+    return `${currencySymbol(code)}${n.toLocaleString()}`;
+  };
+
+  // Display stats: prefer derived business-scoped stats, fall back to API stats
+  const displayStats = {
+    totalEarnings: derived?.totalEarnings ?? stats?.totalEarnings ?? 0,
+    availableForPayout: derived?.availableForPayout ?? stats?.availableForPayout ?? 0,
+    pendingPayouts: derived?.pendingPayouts ?? stats?.pendingPayouts ?? 0,
+    paidOut: derived?.paidOut ?? stats?.paidOut ?? 0,
+    transactionCount: derived?.transactionCount ?? stats?.transactionCount ?? 0,
+    completedTransactions: derived?.completedTransactions ?? stats?.completedTransactions ?? 0,
+  };
+  const statsCurrency = stats?.currency || (filteredTransactions[0]?.currency) || 'NGN';
 
   // Show loading state
   if (loading) {
@@ -237,6 +306,16 @@ export default function TransactionsPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
+      {/* Dev-only overlay: show current business id/name and txn business match counts */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed right-4 top-4 z-50 bg-white border border-gray-200 rounded-md shadow p-3 text-xs text-gray-700 max-w-sm">
+          <div className="font-medium text-sm mb-1">Debug: Business Context</div>
+          <div className="text-xxs">id: <span className="font-mono text-xs break-all">{ctxBusiness?.id || '—'}</span></div>
+          <div className="text-xxs">name: <span className="font-medium">{ctxBusiness?.businessName || '—'}</span></div>
+          <div className="mt-2">Transactions: {transactions.length}</div>
+          <div>Filtered: {filteredTransactions.length}</div>
+        </div>
+      )}
       {/* Toast Notifications */}
       {toasts.map((toast, index) => (
         <div key={toast.id} style={{ top: `${1 + index * 5}rem` }}>
@@ -255,11 +334,7 @@ export default function TransactionsPage() {
         onClose={() => !isProcessing && setShowPayoutModal(false)}
         onConfirm={confirmPayoutRequest}
         title="Request Payout"
-        message={`Submit payout request for ${
-          selectedTransaction?.id
-        }? You will receive ${formatCurrency(
-          selectedTransaction?.netAmount || 0
-        )} after processing.`}
+        message={`Submit payout request for ${selectedTransaction?.id}? You will receive ${formatCurrency(selectedTransaction?.netAmount || 0, selectedTransaction?.currency || statsCurrency)} after processing.`}
         confirmText="Request Payout"
         cancelText="Cancel"
         type="info"
@@ -291,7 +366,7 @@ export default function TransactionsPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Total Amount:</span>
                   <span className="font-bold text-primary-600 text-lg">
-                    {formatCurrency(displayStats.availableForPayout)}
+                    {formatCurrency(displayStats.availableForPayout, statsCurrency)}
                   </span>
                 </div>
               </div>
@@ -346,9 +421,10 @@ export default function TransactionsPage() {
             <DollarSign className="w-5 h-5 text-green-600" />
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(displayStats.totalEarnings)}
+            {formatCurrency(displayStats.totalEarnings, statsCurrency)}
           </p>
           <p className="text-xs text-gray-500 mt-1">From completed orders</p>
+          <p className="text-xs text-gray-500 mt-1">{displayStats.completedTransactions} completed</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
@@ -357,9 +433,10 @@ export default function TransactionsPage() {
             <Clock className="w-5 h-5 text-yellow-600" />
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(displayStats.availableForPayout)}
+            {formatCurrency(displayStats.availableForPayout, statsCurrency)}
           </p>
           <p className="text-xs text-gray-500 mt-1">Ready to withdraw</p>
+          <p className="text-xs text-gray-500 mt-1">{displayStats.transactionCount} transactions</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
@@ -368,7 +445,7 @@ export default function TransactionsPage() {
             <Send className="w-5 h-5 text-blue-600" />
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(displayStats.pendingPayouts)}
+            {formatCurrency(displayStats.pendingPayouts, statsCurrency)}
           </p>
           <p className="text-xs text-gray-500 mt-1">Under processing</p>
         </div>
@@ -379,7 +456,7 @@ export default function TransactionsPage() {
             <CheckCircle className="w-5 h-5 text-green-600" />
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(displayStats.paidOut)}
+            {formatCurrency(displayStats.paidOut, statsCurrency)}
           </p>
           <p className="text-xs text-gray-500 mt-1">Successfully transferred</p>
         </div>
@@ -465,8 +542,8 @@ export default function TransactionsPage() {
             {searchQuery
               ? "No transactions match your search criteria"
               : selectedStatus === "all"
-              ? "You haven't received any payments yet"
-              : `No ${selectedStatus} transactions`}
+                ? "You haven't received any payments yet"
+                : `No ${selectedStatus} transactions`}
           </p>
         </div>
       ) : (
@@ -503,8 +580,9 @@ export default function TransactionsPage() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredTransactions.map((txn) => {
-                  const StatusIcon =
-                    PAYOUT_STATUS_CONFIG[txn.payoutStatus].icon;
+                  // Defensive lookup for payout status config — fall back to 'unavailable'
+                  const payoutConfig = PAYOUT_STATUS_CONFIG[txn.payoutStatus] || PAYOUT_STATUS_CONFIG.unavailable;
+                  const StatusIcon = payoutConfig.icon || AlertCircle;
 
                   return (
                     <tr
@@ -518,6 +596,14 @@ export default function TransactionsPage() {
                         <div className="text-xs text-gray-500">
                           Order: {txn.orderId}
                         </div>
+                        {process.env.NODE_ENV === 'development' && (
+                          <div className="text-xxs text-gray-400 mt-1">
+                            bizId: <span className="font-mono">{txn.businessId || txn.business?.id || '—'}</span>
+                            {txn.business?.businessName && (
+                              <span> — {txn.business.businessName}</span>
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm text-gray-900">
@@ -531,15 +617,15 @@ export default function TransactionsPage() {
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {formatCurrency(txn.amount)}
+                          {formatCurrency(txn.amount, txn.currency || statsCurrency)}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Fee: -{formatCurrency(txn.commission)}
+                          Fee: -{formatCurrency(txn.commission, txn.currency || statsCurrency)}
                         </div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm font-bold text-primary-600">
-                          {formatCurrency(txn.netAmount)}
+                          {formatCurrency(txn.netAmount, txn.currency || statsCurrency)}
                         </div>
                       </td>
                       <td className="px-4 py-4">
@@ -557,12 +643,10 @@ export default function TransactionsPage() {
                       </td>
                       <td className="px-4 py-4">
                         <span
-                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
-                            PAYOUT_STATUS_CONFIG[txn.payoutStatus].color
-                          }`}
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${payoutConfig.color || 'bg-gray-100 text-gray-700'}`}
                         >
                           <StatusIcon className="w-3 h-3" />
-                          {PAYOUT_STATUS_CONFIG[txn.payoutStatus].label}
+                          {payoutConfig.label || 'Unavailable'}
                         </span>
                         {txn.lastReminderDate && (
                           <div className="text-xs text-gray-500 mt-2">
@@ -612,7 +696,7 @@ export default function TransactionsPage() {
 
       {/* Summary Footer */}
       {filteredTransactions.length > 0 && (
-        <div className="mt-6 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="mt-6 bg-linear-to-r from-primary-500 to-primary-600 rounded-xl shadow-lg p-6 text-white">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-sm opacity-90">Filtered Transactions</p>
@@ -624,7 +708,8 @@ export default function TransactionsPage() {
               <p className="text-sm opacity-90">Total Net Amount</p>
               <p className="text-2xl font-bold">
                 {formatCurrency(
-                  filteredTransactions.reduce((sum, t) => sum + t.netAmount, 0)
+                  filteredTransactions.reduce((sum, t) => sum + (t.netAmount || 0), 0),
+                  statsCurrency
                 )}
               </p>
             </div>
@@ -632,7 +717,8 @@ export default function TransactionsPage() {
               <p className="text-sm opacity-90">Total Commission</p>
               <p className="text-2xl font-bold">
                 {formatCurrency(
-                  filteredTransactions.reduce((sum, t) => sum + t.commission, 0)
+                  filteredTransactions.reduce((sum, t) => sum + (t.commission || 0), 0),
+                  statsCurrency
                 )}
               </p>
             </div>

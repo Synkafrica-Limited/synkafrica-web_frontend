@@ -13,10 +13,10 @@ import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 export default function NewCarRentalListing() {
   const router = useRouter();
   const { toasts, removeToast } = useToast();
-  
+
   // Use the custom hook for creating car listings - UPDATED: now uses business data
   const { createCarListing, isSubmitting, businessLoading, businessError } = useCreateCarListing();
-  
+
   const [form, setForm] = useState({
     vehicleName: "",
     vehicleType: "",

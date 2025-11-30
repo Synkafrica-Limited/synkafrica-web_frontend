@@ -24,7 +24,7 @@ export default function VerificationProgress({ status = "not_started", percent =
 
       <div className="flex items-center gap-3">
         <div className="hidden sm:block text-sm text-gray-600">{percent}% complete</div>
-        <Link href="/dashboard/business/verification" className={`px-3 py-1 rounded-md font-medium text-sm ${status === 'verified' ? 'bg-green-600 text-white' : 'bg-[#E05D3D] text-white'}`}>
+        <Link href="/dashboard/business/settings?tab=verification" className={`px-3 py-1 rounded-md font-medium text-sm ${status === 'verified' ? 'bg-green-600 text-white' : 'bg-[#E05D3D] text-white'}`}>
           {status === 'verified' ? 'View' : 'Complete'}
         </Link>
       </div>

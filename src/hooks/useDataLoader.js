@@ -62,7 +62,7 @@ export function useDataLoader(fetchFunction, dependencies = [], options = {}) {
  * @param {string} redirectTo - Where to redirect on auth failure
  * @returns {Object} { isAuthenticated, loading, user }
  */
-export function useAuthCheck(requireAuth = true, redirectTo = '/auth/login') {
+export function useAuthCheck(requireAuth = true, redirectTo = '/business/login') {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);

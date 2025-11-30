@@ -17,8 +17,9 @@ import {
 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
 import { useVendorBookings } from "@/hooks/business/useVendorBookings";
+import DashboardHeader from '@/components/layout/DashboardHeader';
 
 const STATUS_CONFIG = {
   pending: {
@@ -56,11 +57,11 @@ export default function OrdersPage() {
   const { toasts, addToast, removeToast } = useToast();
 
   // Use the vendor bookings hook
-  const { 
-    bookings, 
-    loading, 
-    error, 
-    refetch 
+  const {
+    bookings,
+    loading,
+    error,
+    refetch
   } = useVendorBookings(token, {
     status: selectedStatus !== "all" ? selectedStatus : undefined
   });
@@ -93,12 +94,12 @@ export default function OrdersPage() {
       // TODO: Implement actual API call to accept booking
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      addToast(`Booking ${selectedOrder.id} accepted successfully!`, "success");
+      addToast({ message: `Booking ${selectedOrder.id} accepted successfully!`, type: "success" });
       setShowAcceptConfirm(false);
       setSelectedOrder(null);
       refetch(); // Refresh the bookings list
     } catch {
-      addToast("Failed to accept booking. Please try again.", "error");
+      addToast({ message: "Failed to accept booking. Please try again.", type: "error" });
     } finally {
       setIsProcessing(false);
     }
@@ -113,7 +114,7 @@ export default function OrdersPage() {
 
   const confirmDecline = async () => {
     if (!declineReason.trim()) {
-      addToast("Please provide a reason for declining", "warning");
+      addToast({ message: "Please provide a reason for declining", type: "warning" });
       return;
     }
 
@@ -123,13 +124,13 @@ export default function OrdersPage() {
       // TODO: Implement actual API call to decline booking
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      addToast(`Booking ${selectedOrder.id} declined`, "info");
+      addToast({ message: `Booking ${selectedOrder.id} declined`, type: "info" });
       setShowDeclineConfirm(false);
       setSelectedOrder(null);
       setDeclineReason("");
       refetch(); // Refresh the bookings list
     } catch {
-      addToast("Failed to decline booking. Please try again.", "error");
+      addToast({ message: "Failed to decline booking. Please try again.", type: "error" });
     } finally {
       setIsProcessing(false);
     }
@@ -285,9 +286,8 @@ export default function OrdersPage() {
               {/* Status Badge */}
               <div className="flex items-center justify-between">
                 <span
-                  className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    STATUS_CONFIG[selectedOrder.status]?.color || 'bg-gray-100 text-gray-700'
-                  }`}
+                  className={`px-4 py-2 rounded-full text-sm font-medium ${STATUS_CONFIG[selectedOrder.status]?.color || 'bg-gray-100 text-gray-700'
+                    }`}
                 >
                   {STATUS_CONFIG[selectedOrder.status]?.label || selectedOrder.status}
                 </span>
@@ -417,13 +417,10 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Manage Bookings</h1>
-        <p className="text-gray-600 mt-1">
-          View and manage all incoming booking requests
-        </p>
-      </div>
+      <DashboardHeader
+        title="Manage Bookings"
+        subtitle="View and manage all incoming booking requests"
+      />
 
       {/* Filters and Search */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
@@ -446,51 +443,46 @@ export default function OrdersPage() {
           <div className="flex gap-2 overflow-x-auto">
             <button
               onClick={() => setSelectedStatus("all")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "all"
-                  ? "bg-primary-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${selectedStatus === "all"
+                ? "bg-primary-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
             >
               All ({getStatusCount("all")})
             </button>
             <button
               onClick={() => setSelectedStatus("pending")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "pending"
-                  ? "bg-yellow-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${selectedStatus === "pending"
+                ? "bg-yellow-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
             >
               Pending ({getStatusCount("pending")})
             </button>
             <button
               onClick={() => setSelectedStatus("confirmed")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "confirmed"
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${selectedStatus === "confirmed"
+                ? "bg-green-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
             >
               Confirmed ({getStatusCount("confirmed")})
             </button>
             <button
               onClick={() => setSelectedStatus("cancelled")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "cancelled"
-                  ? "bg-red-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${selectedStatus === "cancelled"
+                ? "bg-red-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
             >
               Cancelled ({getStatusCount("cancelled")})
             </button>
             <button
               onClick={() => setSelectedStatus("completed")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedStatus === "completed"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${selectedStatus === "completed"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
             >
               Completed ({getStatusCount("completed")})
             </button>
@@ -509,8 +501,8 @@ export default function OrdersPage() {
             {searchQuery
               ? "No bookings match your search criteria"
               : selectedStatus === "all"
-              ? "You haven't received any bookings yet"
-              : `No ${selectedStatus} bookings`}
+                ? "You haven't received any bookings yet"
+                : `No ${selectedStatus} bookings`}
           </p>
         </div>
       ) : (
@@ -537,9 +529,8 @@ export default function OrdersPage() {
                         </p>
                       </div>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
-                          STATUS_CONFIG[booking.status]?.color || 'bg-gray-100 text-gray-700'
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${STATUS_CONFIG[booking.status]?.color || 'bg-gray-100 text-gray-700'
+                          }`}
                       >
                         <StatusIcon className="w-3 h-3" />
                         {STATUS_CONFIG[booking.status]?.label || booking.status}

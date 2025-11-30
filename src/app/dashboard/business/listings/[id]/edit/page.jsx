@@ -11,7 +11,7 @@ import listingsService from '@/services/listings.service';
 
 export default function EditListingPage() {
   const router = useRouter();
-  const params = useParams();
+  const { id } = useParams();
   const { toasts, addToast, removeToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +35,17 @@ export default function EditListingPage() {
     description: "",
     location: "",
     availability: "available",
+    // additional backend fields
+    currency: 'NGN',
+    contactPhone: '',
+    contactEmail: '',
+    website: '',
+    tags: [],
+    amenities: [],
+    extras: [],
+    capacity: '',
+    rules: [],
+    cancellationPolicy: '',
   });
 
   const [images, setImages] = useState([]);
@@ -43,28 +54,49 @@ export default function EditListingPage() {
     const loadListing = async () => {
       setIsLoading(true);
       try {
-        const id = params.id;
         const res = await listingsService.getListing(id);
         if (res) {
+          // Helper to convert "AUTOMATIC" to "Automatic"
+          const toTitleCase = (str) => {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+          };
+
           // Map API listing to form shape
           const mapped = {
             vehicleName: res.title || '',
             vehicleType: res.vehicleType || res.category || '',
-            brand: res.carRental?.carMake || res.brand || '',
-            model: res.carRental?.carModel || res.model || '',
-            year: res.carRental?.carYear || res.year || '',
-            seats: res.carRental?.carSeats || res.seats || '',
-            transmission: res.carRental?.carTransmission || res.transmission || '',
-            fuelType: res.carRental?.carFuelType || res.fuelType || '',
-            pricePerDay: res.basePrice || '',
-            pricePerHour: res.carRental?.chauffeurPricePerHour || res.pricePerHour || '',
-            chauffeurIncluded: res.carRental?.chauffeurIncluded || false,
-            chauffeurPrice: res.carRental?.chauffeurPricePerDay || '',
-            features: res.carRental?.carFeatures || res.features || [],
-            description: res.description || '',
-            location: res.location?.address || (typeof res.location === 'string' ? res.location : ''),
+            brand: res.carMake || res.carRental?.carMake || res.brand || '',
+            model: res.carModel || res.carRental?.carModel || res.model || '',
+            year: res.carYear || res.carRental?.carYear || res.year || '',
+            seats: res.carSeats || res.carRental?.carSeats || res.seats || '',
+            transmission: toTitleCase(res.carTransmission || res.carRental?.carTransmission || res.transmission || ''),
+            fuelType: toTitleCase(res.carFuelType || res.carRental?.carFuelType || res.fuelType || ''),
+            pricePerDay: res.basePrice || res.pricing?.perDay || res.prices?.daily || '',
+            pricePerHour:
+              res.chauffeurPricePerHour || res.carRental?.chauffeurPricePerHour || res.pricing?.perHour || res.pricePerHour || res.prices?.hourly || '',
+            chauffeurIncluded: typeof res.chauffeurIncluded === 'boolean' ? res.chauffeurIncluded : (typeof res.carRental?.chauffeurIncluded === 'boolean' ? res.carRental?.chauffeurIncluded : !!res.chauffeurIncluded),
+            chauffeurPrice:
+              res.chauffeurPricePerDay || res.carRental?.chauffeurPricePerDay || res.carRental?.chauffeurPrice || res.chauffeurPrice || '',
+            features: res.carFeatures || res.carRental?.carFeatures || res.features || res.amenities || [],
+            description: res.description || res.summary || '',
+            location:
+              (res.location && (res.location.address || res.location.name)) ||
+              (typeof res.location === 'string' ? res.location : '') ||
+              res.address || '',
             availability: res.status || res.availability || 'available',
-            carPlateNumber: res.carRental?.carPlateNumber || '',
+            carPlateNumber: res.carPlateNumber || res.carRental?.carPlateNumber || res.registrationNumber || '',
+            // new fields
+            currency: res.currency || res.pricing?.currency || 'NGN',
+            contactPhone: res.phoneNumber || res.contact?.phone || res.contactPhone || '',
+            contactEmail: res.email || res.contact?.email || res.contactEmail || '',
+            website: res.website || res.url || '',
+            tags: res.tags || res.categories || [],
+            amenities: res.amenities || res.facilities || [],
+            extras: res.extras || res.addons || [],
+            capacity: res.capacity || res.maxGuests || res.guests || '',
+            rules: res.rules || res.policies || [],
+            cancellationPolicy: res.cancellationPolicy || res.cancellation || '',
           };
 
           setForm(mapped);
@@ -82,7 +114,7 @@ export default function EditListingPage() {
     };
 
     loadListing();
-  }, [params.id]);
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -138,7 +170,7 @@ export default function EditListingPage() {
       };
 
       const hasNewFiles = images.some((i) => i.file instanceof File);
-      const listingId = params.id;
+      const listingId = id;
 
       let res;
       if (hasNewFiles) {
@@ -225,11 +257,10 @@ export default function EditListingPage() {
             </div>
             <div className="flex items-center gap-4">
               <span
-                className={`text-sm font-medium ${
-                  form.availability === "available"
-                    ? "text-green-600"
-                    : "text-gray-600"
-                }`}
+                className={`text-sm font-medium ${form.availability === "available"
+                  ? "text-green-600"
+                  : "text-gray-600"
+                  }`}
               >
                 {form.availability === "available" ? "Active" : "Inactive"}
               </span>
@@ -242,25 +273,22 @@ export default function EditListingPage() {
                       : "available";
                   setForm((prev) => ({ ...prev, availability: newStatus }));
                   addToast(
-                    `Listing ${
-                      newStatus === "available" ? "activated" : "deactivated"
+                    `Listing ${newStatus === "available" ? "activated" : "deactivated"
                     }`,
                     "info",
                     2000
                   );
                 }}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                  form.availability === "available"
-                    ? "bg-green-500"
-                    : "bg-gray-300"
-                }`}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.availability === "available"
+                  ? "bg-green-500"
+                  : "bg-gray-300"
+                  }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                    form.availability === "available"
-                      ? "translate-x-7"
-                      : "translate-x-1"
-                  }`}
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.availability === "available"
+                    ? "translate-x-7"
+                    : "translate-x-1"
+                    }`}
                 />
               </button>
             </div>
@@ -329,14 +357,13 @@ export default function EditListingPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vehicle Type *
+                Vehicle Type (Optional)
               </label>
               <select
                 name="vehicleType"
                 value={form.vehicleType}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                required
               >
                 <option value="">Select type</option>
                 {vehicleTypes.map((type) => (
