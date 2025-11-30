@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/layout/AuthLayout";
 import Buttons from "@/components/ui/Buttons";
+import authService from '@/services/authService';
 
 export default function VendorForgotPasswordScreen() {
   const router = useRouter();
@@ -30,15 +31,16 @@ export default function VendorForgotPasswordScreen() {
 
   const handleSubmit = () => {
     if (!isValid) return;
-    // Handle password reset request
-    console.log("Password reset requested for:", email);
-    setIsSubmitted(true);
-    
-    // In a real app, you would send the reset email here
-    // then redirect or show success message after a delay
-    setTimeout(() => {
-      router.push("/business/login");
-    }, 3000);
+    // Call API to request password reset
+    (async () => {
+      try {
+        await authService.forgotPassword(email.trim());
+        setIsSubmitted(true);
+      } catch (err) {
+        console.error("Forgot password failed:", err);
+        setEmailError(err?.message || "Failed to request password reset. Try again.");
+      }
+    })();
   };
 
   if (isSubmitted) {

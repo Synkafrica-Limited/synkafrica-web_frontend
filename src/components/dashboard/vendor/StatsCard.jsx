@@ -1,4 +1,5 @@
-import { TrendingUp } from "lucide-react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 
 /**
  * Stats Card Component for Dashboard Metrics
@@ -10,7 +11,11 @@ export default function StatsCard({ icon: Icon, title, value, trend, link }) {
       <div className="flex items-start justify-between mb-3 sm:mb-4">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="p-1.5 sm:p-2 bg-blue-50 rounded-lg">
-            <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            {typeof Icon === 'function' ? (
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            ) : Icon && Icon.prefix ? (
+              <FontAwesomeIcon icon={Icon} className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            ) : null}
           </div>
           <span className="text-xs sm:text-sm text-gray-600">{title}</span>
         </div>
@@ -21,7 +26,7 @@ export default function StatsCard({ icon: Icon, title, value, trend, link }) {
           <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{value}</div>
           {trend && (
             <div className="flex items-center gap-1 text-xs sm:text-sm text-green-600">
-              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
+              <FontAwesomeIcon icon={faArrowUp} className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>+{trend}</span>
             </div>
           )}

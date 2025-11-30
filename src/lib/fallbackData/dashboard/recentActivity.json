@@ -1,0 +1,5 @@
+[
+  { "id": "a1", "message": "New booking received for Mercedes S-Class", "createdAt": "2025-11-29T09:12:00Z" },
+  { "id": "a2", "message": "Listing \"available\" updated: Toyota Prado", "createdAt": "2025-11-28T17:45:00Z" },
+  { "id": "a3", "message": "Payout requested: ₦150,000", "createdAt": "2025-11-28T10:05:00Z" }
+]

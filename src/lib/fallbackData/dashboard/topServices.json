@@ -1,0 +1,7 @@
+[
+  { "name": "Mercedes S-Class", "price": 1200000 },
+  { "name": "Toyota Prado", "price": 850000 },
+  { "name": "Jet Ski", "price": 450000 },
+  { "name": "La Campagne Suite", "price": 350000 },
+  { "name": "Fine Dining Experience", "price": 250000 }
+]

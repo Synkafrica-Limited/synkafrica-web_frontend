@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/ToastProvider';
 import { Calendar, Clock, MapPin, Phone, Mail, User, Users, ChevronLeft, ChevronRight, MessageCircle, PhoneCall, Shield, DollarSign, Headphones } from 'lucide-react';
 
 const BookingComponent = ({ serviceId, serviceType = 'resort' }) => {
@@ -20,6 +21,7 @@ const BookingComponent = ({ serviceId, serviceType = 'resort' }) => {
   });
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const toast = useToast();
 
   // Update current service when serviceType prop changes
   useEffect(() => {
@@ -92,7 +94,7 @@ const BookingComponent = ({ serviceId, serviceType = 'resort' }) => {
       timestamp: new Date().toISOString()
     };
     console.log('Processing booking:', bookingData);
-    alert(`Processing ${currentService} booking for ${contactDetails.name}${serviceId ? ` (Service ID: ${serviceId})` : ''}`);
+    toast?.info?.(`Processing ${currentService} booking for ${contactDetails.name}${serviceId ? ` (Service ID: ${serviceId})` : ''}`);
   };
 
   return (
