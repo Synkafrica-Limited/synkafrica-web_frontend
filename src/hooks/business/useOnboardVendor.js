@@ -15,12 +15,8 @@ export function useOnboardVendor() {
   const [error, setError] = useState(null);
 
   // Try to get BusinessContext if available (may not be present during onboarding pages)
-  let businessCtx = null;
-  try {
-    businessCtx = useBusiness();
-  } catch (e) {
-    businessCtx = null;
-  }
+  // Try to get BusinessContext if available (may not be present during onboarding pages)
+  const businessCtx = useBusiness();
 
   // split out fields for creating a business vs additional onboarding metadata
   const pickCreateFields = (data) => {

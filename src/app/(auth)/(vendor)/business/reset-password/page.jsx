@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import AuthLayout from "@/components/layout/AuthLayout";
 import Buttons from "@/components/ui/Buttons";
 import authService from '@/services/authService';
 
-export default function VendorResetPasswordScreen() {
+function ResetPasswordForm() {
   const search = useSearchParams();
   const router = useRouter();
   const emailParam = search.get("email") || "";
@@ -68,7 +68,7 @@ export default function VendorResetPasswordScreen() {
             type="text"
             inputMode="numeric"
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0,6))}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             placeholder="6-digit code"
             className="w-full px-5 py-4 border-2 rounded-xl text-center"
           />
@@ -99,5 +99,13 @@ export default function VendorResetPasswordScreen() {
         </Buttons>
       </div>
     </AuthLayout>
+  );
+}
+
+export default function VendorResetPasswordScreen() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

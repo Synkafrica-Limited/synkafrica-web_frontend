@@ -32,7 +32,7 @@ async function request(method, path, body = null, opts = {}) {
   let data = null;
   try {
     data = await res.json();
-  } catch (e) {
+  } catch {
     // ignore non-json responses
   }
 
@@ -59,7 +59,7 @@ async function request(method, path, body = null, opts = {}) {
         data = null;
         try {
           data = await res.json();
-        } catch (e) {
+        } catch {
           // ignore non-json responses
         }
       }
