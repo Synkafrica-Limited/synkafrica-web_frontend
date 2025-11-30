@@ -16,6 +16,7 @@ import {
   User,
   Bell,
   Settings,
+  MessageSquare,
 } from "lucide-react";
 
 import { useSignOut } from "@/hooks/business/useSignOut";
@@ -86,10 +87,10 @@ export default function BusinessSidebar() {
       active: pathname.startsWith("/dashboard/business/settings"),
     },
     {
-      label: "Dispute",
-      icon: AlertCircle,
-      href: "/dashboard/business/dispute",
-      active: pathname.startsWith("/dashboard/business/dispute"),
+      label: "Support",
+      icon: MessageSquare,
+      href: "/dashboard/business/support",
+      active: pathname.startsWith("/dashboard/business/support"),
     },
   ];
 
@@ -120,10 +121,9 @@ export default function BusinessSidebar() {
           bg-white border-r border-gray-200 
           transition-all duration-300 flex flex-col
           w-64 z-50
-          ${
-            isMobileOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
+          ${isMobileOpen
+            ? "translate-x-0"
+            : "-translate-x-full lg:translate-x-0"
           }
         `}
       >
@@ -165,18 +165,16 @@ export default function BusinessSidebar() {
                   <Link
                     href={item.href}
                     onClick={closeMobile}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
-                      item.active
-                        ? "bg-primary-50 text-primary-600 border-l-4 border-primary-600"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${item.active
+                      ? "bg-primary-50 text-primary-600 border-l-4 border-primary-600"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
                   >
                     <Icon
-                      className={`w-5 h-5 shrink-0 ${
-                        item.active
-                          ? "text-primary-600"
-                          : "text-gray-500 group-hover:text-gray-900"
-                      }`}
+                      className={`w-5 h-5 shrink-0 ${item.active
+                        ? "text-primary-600"
+                        : "text-gray-500 group-hover:text-gray-900"
+                        }`}
                     />
                     <span className="font-medium text-sm">{item.label}</span>
                   </Link>

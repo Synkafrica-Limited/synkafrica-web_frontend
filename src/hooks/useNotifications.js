@@ -1,74 +1,113 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { api } from "@/lib/fetchClient";
+import authService from "@/services/authService";
 
 /**
- * Custom hook for managing toast notifications
- * Usage:
- * const { toasts, addToast, removeToast } = useToast();
- * addToast('Success!', 'success');
+ * Remote Notifications Hook
+ * Supports:
+ * - Authenticated polling
+ * - Pagination
+ * - Mark single notification read
+ * - Mark all read
+ * - Robust response validation
+ * - Zero JSON parsing errors
  */
-export function useToast() {
-  const [toasts, setToasts] = useState([]);
-
-  const addToast = useCallback((message, type = "info", duration = 3000) => {
-    const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { id, message, type, duration }]);
-    return id;
-  }, []);
-
-  const removeToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  }, []);
-
-  return { toasts, addToast, removeToast };
-}
-
-/**
- * Custom hook for managing notifications
- * Usage:
- * const { notifications, unreadCount, addNotification, markAsRead } = useNotifications();
- */
-export function useNotifications() {
+export function useRemoteNotifications({
+  pollInterval = 30000,
+  pageSize = 20,
+} = {}) {
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
 
-  const addNotification = useCallback((notification) => {
-    const id = Date.now() + Math.random();
-    const newNotification = {
-      id,
-      read: false,
-      time: "Just now",
-      ...notification,
-    };
-    setNotifications((prev) => [newNotification, ...prev]);
-    return id;
-  }, []);
+  /**
+   * Fetch list of notifications
+   */
+  const fetchNotifications = useCallback(
+    async ({ skip = page * pageSize, take = pageSize } = {}) => {
+      setLoading(true);
+      try {
+        const token = authService.getAccessToken();
+        if (!token) throw new Error("Auth token missing");
 
-  const markAsRead = useCallback((id) => {
-    if (id === 'all') {
+        const res = await api.get(
+          `/api/notifications?skip=${skip}&take=${take}`,
+          { auth: true }
+        );
+
+        if (!res || typeof res !== "object") {
+          console.error("Unexpected notifications response:", res);
+          return;
+        }
+
+        const items = Array.isArray(res.items) ? res.items : [];
+        const unread = Number(res.unread ?? 0);
+
+        setNotifications(items);
+        setUnreadCount(unread);
+      } catch (err) {
+        console.error("[Notifications] Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [page, pageSize]
+  );
+
+  /**
+   * Mark a single notification as read
+   */
+  const markRead = useCallback(async (id) => {
+    try {
+      await api.patch(`/api/notifications/${id}/read`, {}, { auth: true });
+
       setNotifications((prev) =>
-        prev.map((notif) => ({ ...notif, read: true }))
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
-    } else {
-      setNotifications((prev) =>
-        prev.map((notif) =>
-          notif.id === id ? { ...notif, read: true } : notif
-        )
-      );
+
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error("[Notifications] markRead error:", err);
     }
   }, []);
 
-  const removeNotification = useCallback((id) => {
-    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+  /**
+   * Mark ALL as read
+   */
+  const markAllRead = useCallback(async () => {
+    try {
+      await api.patch(`/api/notifications/read-all`, {}, { auth: true });
+
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, read: true }))
+      );
+
+      setUnreadCount(0);
+    } catch (err) {
+      console.error("[Notifications] markAllRead error:", err);
+    }
   }, []);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  /**
+   * Auto-refresh
+   */
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, pollInterval);
+    return () => clearInterval(interval);
+  }, [fetchNotifications, pollInterval]);
 
   return {
     notifications,
     unreadCount,
-    addNotification,
-    markAsRead,
-    removeNotification,
+    loading,
+    page,
+    setPage,
+    fetchNotifications,
+    markRead,
+    markAllRead,
   };
 }

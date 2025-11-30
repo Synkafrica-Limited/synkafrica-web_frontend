@@ -1,108 +1,304 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRemoteNotifications } from '@/hooks/useNotifications';
-import { formatDistanceToNow } from 'date-fns';
-import { Bell } from 'lucide-react';
+import { useState, useMemo } from "react";
+import { useRemoteNotifications } from "@/hooks/useNotifications";
+import { formatDistanceToNow, isToday, isYesterday } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Bell,
+  CheckCircle,
+  Info,
+  AlertTriangle,
+  Mail,
+  Search,
+  Clock,
+} from "lucide-react";
 
 export default function NotificationsPage() {
-  const { notifications, unreadCount, loading, fetchNotifications, markRead, markAllRead } = useRemoteNotifications({ pollInterval: 30000 });
-  const [page, setPage] = useState(0);
-  const pageSize = 20;
-  const [query, setQuery] = useState('');
-  const [filtered, setFiltered] = useState([]);
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    markAllRead,
+    markRead,
+  } = useRemoteNotifications();
 
-  useEffect(() => {
-    const load = async () => {
-      await fetchNotifications({ skip: page * pageSize, take: pageSize });
+  const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
+
+  // Filter and Search Logic
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter((n) => {
+      const matchesQuery =
+        n.title?.toLowerCase().includes(query.toLowerCase()) ||
+        n.message?.toLowerCase().includes(query.toLowerCase());
+
+      const matchesFilter =
+        filter === "all"
+          ? true
+          : filter === "unread"
+            ? !n.read
+            : n.type === filter;
+
+      return matchesQuery && matchesFilter;
+    });
+  }, [notifications, filter, query]);
+
+  // Group by Date
+  const groupedNotifications = useMemo(() => {
+    const groups = {
+      today: [],
+      yesterday: [],
+      earlier: [],
     };
-    load();
-  }, [fetchNotifications, page]);
 
-  useEffect(() => {
-    if (!query) setFiltered(notifications);
-    else {
-      const q = query.toLowerCase().trim();
-      setFiltered(
-        notifications.filter((n) => {
-          return (
-            String(n.title || n.subject || '').toLowerCase().includes(q) ||
-            String(n.body || n.message || '').toLowerCase().includes(q)
-          );
-        })
-      );
-    }
-  }, [query, notifications]);
+    filteredNotifications.forEach((n) => {
+      const date = new Date(n.createdAt);
+      if (isToday(date)) {
+        groups.today.push(n);
+      } else if (isYesterday(date)) {
+        groups.yesterday.push(n);
+      } else {
+        groups.earlier.push(n);
+      }
+    });
+
+    return groups;
+  }, [filteredNotifications]);
+
+  const hasNotifications = filteredNotifications.length > 0;
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-primary-50 rounded-md">
-            <Bell className="h-6 w-6 text-primary-600" />
-          </div>
+    <div className="min-h-screen bg-[#FAF8F6] p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold">Notifications</h1>
-            <p className="text-sm text-gray-500">Manage your notifications and alerts</p>
+            <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+            <p className="text-gray-500 mt-1">Stay updated with your business activity</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={markAllRead}
+              disabled={unreadCount === 0}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${unreadCount > 0
+                ? "bg-white text-primary-600 border border-primary-200 hover:bg-primary-50 hover:border-primary-300 shadow-sm"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                }`}
+            >
+              <CheckCircle size={16} />
+              Mark all as read
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <div className="text-sm text-gray-600">Unread: <span className="font-semibold">{unreadCount}</span></div>
-          <button onClick={markAllRead} className="px-3 py-2 bg-gray-100 rounded-md text-sm hover:bg-gray-200">Mark all read</button>
-          <Link href="/dashboard" className="px-3 py-2 bg-white border rounded-md text-sm hover:bg-gray-50">Back</Link>
-        </div>
-      </div>
-
-      <div className="mb-4">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search notifications"
-          className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-300"
-        />
-      </div>
-
-      <div className="bg-white border rounded-lg shadow-sm">
-        <div className="divide-y">
-          {loading && (
-            <div className="p-6 text-center text-sm text-gray-500">Loading notifications…</div>
-          )}
-
-          {!loading && filtered.length === 0 && (
-            <div className="p-8 text-center text-gray-500">No notifications found.</div>
-          )}
-
-          {!loading && filtered.map((n) => (
-            <div key={n.id} className={`p-4 flex items-start justify-between ${n.read || n.isRead ? 'bg-gray-50' : 'bg-white'}`}>
-              <div className="flex-1">
-                <div className="flex items-center space-x-3">
-                  <p className="text-sm font-semibold text-gray-900">{n.title || n.subject || 'Notification'}</p>
-                  {!n.read && !n.isRead && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">New</span>}
-                </div>
-                <p className="text-sm text-gray-600 mt-1">{n.body || n.message || n.description}</p>
-                <p className="text-xs text-gray-400 mt-2">{n.time || (n.createdAt ? formatDistanceToNow(new Date(n.createdAt), { addSuffix: true }) : '')}</p>
-              </div>
-
-              <div className="ml-4 flex-shrink-0">
-                {!n.read && !n.isRead && (
-                  <button onClick={() => markRead(n.id)} className="px-3 py-1 rounded-md bg-primary-50 text-primary-600 hover:bg-primary-100">Mark read</button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {!loading && filtered.length > 0 && (
-          <div className="flex items-center justify-between p-4 border-t">
-            <div className="text-sm text-gray-600">Showing {filtered.length} of {notifications.length} items</div>
-            <div className="flex items-center space-x-2">
-              <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Prev</button>
-              <button onClick={() => setPage((p) => p + 1)} className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200">Next</button>
-            </div>
+        {/* Controls Section */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4">
+          {/* Filters */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+            <FilterPill label="All" active={filter === "all"} onClick={() => setFilter("all")} />
+            <FilterPill label="Unread" active={filter === "unread"} onClick={() => setFilter("unread")} count={unreadCount} />
+            <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
+            <FilterPill label="Booking" active={filter === "booking"} onClick={() => setFilter("booking")} />
+            <FilterPill label="Payout" active={filter === "payout"} onClick={() => setFilter("payout")} />
+            <FilterPill label="Verification" active={filter === "verification"} onClick={() => setFilter("verification")} />
           </div>
-        )}
+
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search..."
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="space-y-8">
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <NotificationSkeleton key={i} />
+              ))}
+            </div>
+          ) : !hasNotifications ? (
+            <EmptyState filter={filter} query={query} setFilter={setFilter} setQuery={setQuery} />
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {groupedNotifications.today.length > 0 && (
+                <NotificationGroup key="today" title="Today" items={groupedNotifications.today} markRead={markRead} />
+              )}
+              {groupedNotifications.yesterday.length > 0 && (
+                <NotificationGroup key="yesterday" title="Yesterday" items={groupedNotifications.yesterday} markRead={markRead} />
+              )}
+              {groupedNotifications.earlier.length > 0 && (
+                <NotificationGroup key="earlier" title="Earlier" items={groupedNotifications.earlier} markRead={markRead} />
+              )}
+            </AnimatePresence>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NotificationGroup({ title, items, markRead }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="space-y-3"
+    >
+      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider px-1">{title}</h2>
+      <div className="space-y-3">
+        {items.map((notification) => (
+          <NotificationItem key={notification.id} notification={notification} onMarkRead={markRead} />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function NotificationItem({ notification, onMarkRead }) {
+  const { id, type, title, message, createdAt, read } = notification;
+
+  const getIcon = (type) => {
+    switch (type) {
+      case "booking":
+        return { icon: CheckCircle, color: "text-green-600", bg: "bg-green-50" };
+      case "payout":
+        return { icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-50" };
+      case "verification":
+        return { icon: Mail, color: "text-secondary-600", bg: "bg-secondary-50" };
+      default:
+        return { icon: Info, color: "text-gray-600", bg: "bg-gray-100" };
+    }
+  };
+
+  const { icon: Icon, color, bg } = getIcon(type);
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      className={`group relative flex items-start gap-4 p-5 rounded-xl border transition-all duration-200 ${read
+        ? "bg-white border-gray-100 hover:border-gray-200"
+        : "bg-primary-50/40 border-primary-100 hover:border-primary-200 shadow-sm"
+        }`}
+    >
+      {/* Icon */}
+      <div className={`flex-shrink-0 p-2.5 rounded-full ${bg} ${color}`}>
+        <Icon size={20} />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className={`text-base font-semibold ${read ? "text-gray-900" : "text-primary-900"}`}>
+            {title}
+          </h3>
+          <span className="flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap mt-1">
+            <Clock size={12} />
+            {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+          </span>
+        </div>
+        <p className={`mt-1 text-sm leading-relaxed ${read ? "text-gray-600" : "text-gray-700"}`}>
+          {message}
+        </p>
+      </div>
+
+      {/* Actions */}
+      {!read && (
+        <button
+          onClick={() => onMarkRead(id)}
+          className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-primary-600 hover:bg-primary-50 rounded-full"
+          title="Mark as read"
+        >
+          <div className="w-2.5 h-2.5 bg-primary-600 rounded-full" />
+        </button>
+      )}
+
+      {/* Unread Indicator (Mobile/Always visible) */}
+      {!read && (
+        <div className="absolute right-4 top-4 w-2 h-2 bg-primary-500 rounded-full group-hover:hidden" />
+      )}
+    </motion.div>
+  );
+}
+
+function FilterPill({ label, active, onClick, count }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`relative px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${active
+        ? "bg-primary-600 text-white shadow-md"
+        : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+        }`}
+    >
+      {label}
+      {count > 0 && (
+        <span className={`ml-2 px-1.5 py-0.5 text-[10px] rounded-full ${active ? "bg-white text-primary-600" : "bg-gray-100 text-gray-600"
+          }`}>
+          {count}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function EmptyState({ filter, query, setFilter, setQuery }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center justify-center py-16 px-4 text-center"
+    >
+      <div className="bg-white p-6 rounded-full shadow-sm mb-6">
+        <Bell className="w-12 h-12 text-gray-300" />
+      </div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+        {query ? "No matches found" : "All caught up!"}
+      </h3>
+      <p className="text-gray-500 max-w-sm">
+        {query
+          ? `We couldn't find any notifications matching "${query}"`
+          : filter === "unread"
+            ? "You have no unread notifications. Great job!"
+            : "You don't have any notifications yet. We'll let you know when something important happens."}
+      </p>
+      {(filter !== "all" || query) && (
+        <button
+          onClick={() => {
+            setFilter("all");
+            setQuery("");
+          }}
+          className="mt-6 text-primary-600 font-medium hover:underline"
+        >
+          Clear filters
+        </button>
+      )}
+    </motion.div>
+  );
+}
+
+function NotificationSkeleton() {
+  return (
+    <div className="flex items-start gap-4 p-5 bg-white rounded-xl border border-gray-100 animate-pulse">
+      <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0" />
+      <div className="flex-1 space-y-3">
+        <div className="flex justify-between">
+          <div className="h-4 bg-gray-200 rounded w-1/3" />
+          <div className="h-3 bg-gray-200 rounded w-16" />
+        </div>
+        <div className="h-3 bg-gray-200 rounded w-3/4" />
+        <div className="h-3 bg-gray-200 rounded w-1/2" />
       </div>
     </div>
   );
