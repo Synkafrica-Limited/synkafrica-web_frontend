@@ -131,7 +131,7 @@ class VerificationService {
   async getDetails(businessId) {
     try {
       return await api.get(`/api/business/${businessId}/verification/details`, { auth: true });
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -140,7 +140,7 @@ class VerificationService {
   async cancel(businessId) {
     try {
       return await api.del(`/api/business/${businessId}/verification`, { auth: true });
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -149,7 +149,7 @@ class VerificationService {
   async getHistory(businessId) {
     try {
       return await api.get(`/api/business/${businessId}/verification/history`, { auth: true });
-    } catch (e) {
+    } catch {
       return [];
     }
   }

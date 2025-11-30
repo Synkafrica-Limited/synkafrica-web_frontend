@@ -76,8 +76,11 @@ export function BusinessProvider({ children }) {
 
 export function useBusiness() {
   const ctx = useContext(BusinessContext);
+  // Return context if available; allow callers to handle null when provider is not present
   if (!ctx) {
-    throw new Error('useBusiness must be used within BusinessProvider');
+    // eslint-disable-next-line no-console
+    console.debug('useBusiness called outside BusinessProvider - returning null');
+    return null;
   }
   return ctx;
 }

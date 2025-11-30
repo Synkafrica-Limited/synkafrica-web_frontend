@@ -13,7 +13,7 @@ export function useVendorListings(token) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { business, loading: businessLoading } = useBusiness(token);
+  const { loading: businessLoading } = useBusiness(token);
 
   const fetchListings = useCallback(async () => {
     setLoading(true);

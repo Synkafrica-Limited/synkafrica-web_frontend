@@ -320,7 +320,7 @@ async function updateProfile(userData) {
     try { usersData = await usersRes.json(); } catch {}
 
     if (debug && !usersRes.ok) {
-      try { console.debug('[authService.updateProfile] users PATCH failed', { url: usersUrl, method: 'PATCH', status: usersRes.status, body: usersData }); } catch (e) {}
+      try { console.debug('[authService.updateProfile] users PATCH failed', { url: usersUrl, method: 'PATCH', status: usersRes.status, body: usersData }); } catch {}
     }
 
     if (usersRes.ok) {
@@ -348,7 +348,7 @@ async function updateProfile(userData) {
       let usersPutData = null;
       try { usersPutData = await usersPutRes.json(); } catch {}
       if (debug && !usersPutRes.ok) {
-        try { console.debug('[authService.updateProfile] users PUT failed', { url: `${BASE}/api/users/profile`, method: 'PUT', status: usersPutRes.status, body: usersPutData }); } catch (e) {}
+        try { console.debug('[authService.updateProfile] users PUT failed', { url: `${BASE}/api/users/profile`, method: 'PUT', status: usersPutRes.status, body: usersPutData }); } catch {}
       }
 
       if (usersPutRes.ok) {
@@ -390,7 +390,7 @@ async function updateProfile(userData) {
         status: res.status,
         body: data,
       });
-    } catch (e) {
+    } catch {
       // swallow logging errors
     }
   }
@@ -424,7 +424,7 @@ async function updateProfile(userData) {
             status: putRes.status,
             body: putData,
           });
-        } catch (e) {}
+        } catch {}
       }
 
       if (!putRes.ok) {
@@ -469,7 +469,7 @@ async function updateProfile(userData) {
             status: altRes.status,
             body: altData,
           });
-        } catch (e) {}
+        } catch {}
       }
 
       if (altRes.ok) {
@@ -504,7 +504,7 @@ async function updateProfile(userData) {
               status: altPutRes.status,
               body: altPutData,
             });
-          } catch (e) {}
+          } catch {}
         }
 
         if (altPutRes.ok) {
