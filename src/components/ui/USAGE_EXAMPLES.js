@@ -9,7 +9,7 @@
 // 1. TOAST NOTIFICATIONS
 // ============================================
 
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
 import { Toast } from "@/components/ui/Toast";
 
 function ExampleComponent() {

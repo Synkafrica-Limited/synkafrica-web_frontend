@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
 import { useCreateResortListing } from '@/hooks/business/useCreateResortListing';
 import { Toast } from "@/components/ui/Toast";
 

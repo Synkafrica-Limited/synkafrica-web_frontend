@@ -4,7 +4,7 @@ export { default } from './useCreateCarListing';
 // hooks/business/useCreateCarListing.js
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
 import { useBusiness } from "@/hooks/business/useBusiness";
 import { useCreateListing } from "./useCreateListing";
 import authService from '@/services/authService';

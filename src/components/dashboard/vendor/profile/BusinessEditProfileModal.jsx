@@ -22,15 +22,16 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
       id: business?.id || business?._id || business?.businessId || "",
       businessName: business?.businessName || business?.name || "",
       businessLocation: business?.businessLocation || business?.location || "",
-      businessDescription: business?.businessDescription || business?.description || "",
-      businessURL: business?.businessURL || business?.url || "",
+      // map to backend fields
+      description: business?.description || business?.businessDescription || "",
+      url: business?.url || business?.businessURL || "",
     bankName: business?.bankName || "",
-    accountName: business?.accountName || "",
-    accountNumber: business?.accountNumber || "",
+    bankAccountName: business?.bankAccountName || business?.accountName || "",
+    bankAccountNumber: business?.bankAccountNumber || business?.accountNumber || "",
     availability: business?.availability || "",
-    businessEmail: business?.email || business?.businessEmail || "",
+    businessEmail: business?.businessEmail || business?.email || "",
     businessPhone: business?.phoneNumber || business?.businessPhone || "",
-    phoneNumber2: business?.phoneNumber2 || business?.phoneNumber2 || "",
+    secondaryPhone: business?.secondaryPhone || business?.phoneNumber2 || "",
   });
 
   // Debug: log incoming business prop to help diagnose population issues
@@ -64,7 +65,7 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
       const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRe.test(value)) message = "Invalid email address";
     }
-    if (name === "accountNumber" && value) {
+    if ((name === "accountNumber" || name === 'bankAccountNumber') && value) {
       if (!/^[0-9]{6,20}$/.test(value)) message = "Invalid account number";
     }
 
@@ -73,14 +74,14 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
   }
 
   function validateAll() {
-    const required = ["firstName", "lastName", "email", "phoneNumber", "businessName", "businessLocation", "businessDescription"];
+    const required = ["firstName", "lastName", "email", "phoneNumber", "businessName", "businessLocation", "description"];
     const newErrors = {};
     required.forEach((field) => {
       const val = form[field];
       if (!val || val.toString().trim() === "") newErrors[field] = "This field is required";
     });
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = "Invalid email address";
-    if (form.accountNumber && !/^[0-9]{6,20}$/.test(form.accountNumber)) newErrors.accountNumber = "Invalid account number";
+    if (form.bankAccountNumber && !/^[0-9]{6,20}$/.test(form.bankAccountNumber)) newErrors.bankAccountNumber = "Invalid account number";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -121,17 +122,18 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
       id: form.id,
       businessName: form.businessName,
       businessLocation: form.businessLocation,
-      businessDescription: form.businessDescription,
-      businessURL: form.businessURL,
+      // backend-expected keys
+      description: form.description,
+      url: form.url,
       bankName: form.bankName,
-      accountName: form.accountName,
-      accountNumber: form.accountNumber,
+      bankAccountName: form.bankAccountName || form.accountName,
+      bankAccountNumber: form.bankAccountNumber || form.accountNumber,
       availability: form.availability,
-      // ensure we pass the File object (if any) so parent builds FormData correctly
+      // include file only if user selected one
       profileImage: profileImageFile || null,
       businessEmail: form.businessEmail,
-      businessPhone: form.businessPhone,
-      phoneNumber2: form.phoneNumber2,
+      phoneNumber: form.businessPhone,
+      secondaryPhone: form.secondaryPhone,
     };
 
     try {
@@ -388,15 +390,15 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold mb-1">Business Description</label>
                 <textarea
-                  name="businessDescription"
-                  value={form.businessDescription}
+                  name="description"
+                  value={form.description}
                   onChange={handleChange}
                   className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 min-h-20"
                   placeholder="This company is built on trust..."
                   required
                 />
-                {errors.businessDescription && (
-                  <p className="text-red-600 text-xs mt-1">{errors.businessDescription}</p>
+                {errors.description && (
+                  <p className="text-red-600 text-xs mt-1">{errors.description}</p>
                 )}
               </div>
 
@@ -404,9 +406,9 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
               <div>
                 <label className="block text-xs font-semibold mb-1">Business's URL</label>
                 <input
-                  name="businessURL"
+                  name="url"
                   type="url"
-                  value={form.businessURL}
+                  value={form.url}
                   onChange={handleChange}
                   className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
                   placeholder="Synkkafrica.com"
@@ -442,8 +444,8 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
               <div>
                 <label className="block text-xs font-semibold mb-1">Secondary Phone</label>
                 <input
-                  name="phoneNumber2"
-                  value={form.phoneNumber2}
+                  name="secondaryPhone"
+                  value={form.secondaryPhone}
                   onChange={handleChange}
                   className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
                   placeholder="+2348012345679"
@@ -469,16 +471,16 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                     ))}
                   </select>
                   <input
-                    name="accountName"
-                    value={form.accountName}
+                    name="bankAccountName"
+                    value={form.bankAccountName || form.accountName}
                     onChange={handleChange}
                     className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
                     placeholder="Odeyale Emmanuel"
                     required
                   />
                   <input
-                    name="accountNumber"
-                    value={form.accountNumber}
+                    name="bankAccountNumber"
+                    value={form.bankAccountNumber || form.accountNumber}
                     onChange={handleChange}
                     className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
                     placeholder="0246591373"
@@ -487,7 +489,7 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                     required
                   />
                   {errors.accountNumber && (
-                    <p className="text-red-600 text-xs mt-1">{errors.accountNumber}</p>
+                    <p className="text-red-600 text-xs mt-1">{errors.bankAccountNumber}</p>
                   )}
                 </div>
               </div>

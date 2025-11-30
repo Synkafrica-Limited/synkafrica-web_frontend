@@ -67,13 +67,14 @@ function BusinessProfileContent() {
         email: user?.email || business.email || "",
         businessName: business.businessName || business.name || "",
         businessLocation: business.businessLocation || business.location || "",
-        businessDescription: business.businessDescription || business.description || "",
+        // use backend-aligned keys
+        description: business.description || business.businessDescription || "",
         phoneNumber: business.phoneNumber || business.businessPhone || user?.phoneNumber || "",
-        phoneNumber2: business.phoneNumber2 || business.secondaryPhone || "",
-        businessURL: business.businessURL || business.url || "",
+        secondaryPhone: business.secondaryPhone || business.phoneNumber2 || "",
+        url: business.url || business.businessURL || "",
         bankName: business.bankName || "",
-        accountName: business.accountName || "",
-        accountNumber: business.accountNumber || "",
+        bankAccountName: business.bankAccountName || business.accountName || "",
+        bankAccountNumber: business.bankAccountNumber || business.accountNumber || "",
         faqs: business.faqs || null,
         serviceLicense: business.serviceLicense || null,
         availability: business.availability || "",
@@ -173,11 +174,11 @@ function BusinessProfileContent() {
   const businessRequiredFields = [
     "businessName",
     "businessLocation",
-    "businessDescription",
-    "businessURL", // Business-specific URL
+    "description",
+    "url", // Business-specific URL
     "bankName",
-    "accountName",
-    "accountNumber",
+    "bankAccountName",
+    "bankAccountNumber",
     "faqs",
     "serviceLicense",
     "availability",
@@ -231,8 +232,8 @@ function BusinessProfileContent() {
 
   // Payment details formatted
   const paymentDetails =
-    businessData.bankName && businessData.accountNumber
-      ? `${businessData.accountNumber} - ${businessData.bankName}`
+    businessData.bankName && (businessData.bankAccountNumber || businessData.accountNumber)
+      ? `${businessData.bankAccountNumber || businessData.accountNumber} - ${businessData.bankName}`
       : null;
 
   const businessWithFormattedDetails = {
@@ -255,37 +256,47 @@ function BusinessProfileContent() {
       }
 
       // Update business profile
-      if (businessData.id || Object.keys(businessData).length > 0) {
-        // Create FormData to handle both regular fields and files
-        const formData = new FormData();
+      if (businessData && (businessData.id || Object.keys(businessData).length > 0)) {
+        const hasFile = (businessData.profileImage instanceof File) || (businessData.faqs instanceof File) || (businessData.serviceLicense instanceof File);
+        if (hasFile) {
+          const formData = new FormData();
+          Object.keys(businessData).forEach(key => {
+            const val = businessData[key];
+            if (val === null || val === undefined) return;
+            if (val instanceof File) {
+              formData.append(key, val);
+            } else if (typeof val === 'string' && val.trim() === '') {
+              // skip blank strings
+            } else {
+              formData.append(key, String(val));
+            }
+          });
 
-        // Add regular fields
-        Object.keys(businessData).forEach(key => {
-          if (businessData[key] !== null && businessData[key] !== undefined && 
-              businessData[key] !== '' && 
-              !(businessData[key] instanceof File)) {
-            formData.append(key, businessData[key]);
-          }
-        });
-
-        // Add files
-        if (businessData.profileImage instanceof File) {
-          formData.append('profileImage', businessData.profileImage);
+          await businessService.updateBusiness(businessData.id || businessData.businessId, formData);
+        } else {
+          const payload = { ...businessData };
+          Object.keys(payload).forEach(k => {
+            if (payload[k] === null || payload[k] === undefined || (typeof payload[k] === 'string' && payload[k].trim() === '')) {
+              delete payload[k];
+            }
+          });
+          await businessService.updateBusiness(businessData.id || businessData.businessId, payload);
         }
-        if (businessData.faqs instanceof File) {
-          formData.append('faqs', businessData.faqs);
-        }
-        if (businessData.serviceLicense instanceof File) {
-          formData.append('serviceLicense', businessData.serviceLicense);
-        }
-
-        // Update business with FormData
-        await businessService.updateBusiness(businessData.id || businessData.businessId, formData);
       }
 
-      // Update local state by refetching
-      refetchProfile();
-      refetchBusiness();
+      // Update local state by refetching core endpoints
+      await refetchProfile();
+      await refetchBusiness();
+
+      // Also refetch verification status for the business so UI reflects any verification-related changes
+      try {
+        const bizId = businessData.id || businessData.businessId || (businessData && businessData.id) || businessData;
+        if (bizId) {
+          await businessService.getVerificationStatus(bizId);
+        }
+      } catch (vErr) {
+        console.debug('verification refetch failed', vErr);
+      }
 
       toast?.success?.('Profile updated successfully');
       setShowEdit(false);

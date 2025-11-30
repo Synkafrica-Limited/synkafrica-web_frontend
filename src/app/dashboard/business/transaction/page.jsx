@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
 import FilterBar from "@/components/ui/FilterBar";
 import { useVendorTransactions } from "@/hooks/business/useVendorTransactions";
 import { useBusiness } from '@/context/BusinessContext';
@@ -306,16 +306,6 @@ export default function TransactionsPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      {/* Dev-only overlay: show current business id/name and txn business match counts */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed right-4 top-4 z-50 bg-white border border-gray-200 rounded-md shadow p-3 text-xs text-gray-700 max-w-sm">
-          <div className="font-medium text-sm mb-1">Debug: Business Context</div>
-          <div className="text-xxs">id: <span className="font-mono text-xs break-all">{ctxBusiness?.id || '—'}</span></div>
-          <div className="text-xxs">name: <span className="font-medium">{ctxBusiness?.businessName || '—'}</span></div>
-          <div className="mt-2">Transactions: {transactions.length}</div>
-          <div>Filtered: {filteredTransactions.length}</div>
-        </div>
-      )}
       {/* Toast Notifications */}
       {toasts.map((toast, index) => (
         <div key={toast.id} style={{ top: `${1 + index * 5}rem` }}>

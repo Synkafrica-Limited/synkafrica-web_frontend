@@ -5,8 +5,8 @@ import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
-import { useToast } from "@/hooks/useNotifications";
-import { Toast } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/ToastProvider";
+
 import listingsService from '@/services/listings.service';
 
 export default function EditListingPage() {
