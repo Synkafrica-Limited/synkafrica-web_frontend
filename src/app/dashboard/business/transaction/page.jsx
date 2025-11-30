@@ -19,8 +19,9 @@ import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/hooks/useNotifications";
 import FilterBar from "@/components/ui/FilterBar";
 import { useVendorTransactions } from "@/hooks/business/useVendorTransactions";
-import { requestPayout, requestPayoutForTransactions } from "@/services/transactions.service";
+import transactionsService from "@/services/transactions.service";
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+import DashboardHeader from '@/components/dashboard/vendor/DashboardHeader';
 
 const PAYOUT_STATUS_CONFIG = {
   pending: {
@@ -59,12 +60,12 @@ export default function TransactionsPage() {
   const { toasts, addToast, removeToast } = useToast();
 
   // Use the vendor transactions hook
-  const { 
-    transactions, 
-    stats, 
-    loading, 
-    error, 
-    refetch 
+  const {
+    transactions,
+    stats,
+    loading,
+    error,
+    refetch
   } = useVendorTransactions(token, {
     status: selectedStatus !== "all" ? selectedStatus : undefined,
     dateRange: timeFilter !== "all" ? timeFilter : undefined
@@ -75,21 +76,21 @@ export default function TransactionsPage() {
     const matchesStatus =
       selectedStatus === "all" || txn.payoutStatus === selectedStatus;
     const matchesSearch =
-      txn.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.serviceName.toLowerCase().includes(searchQuery.toLowerCase());
+      (txn.customerName || txn.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (txn.id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (txn.orderId || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (txn.serviceName || txn.booking?.listingTitle || '').toLowerCase().includes(searchQuery.toLowerCase());
 
     // Time filter
     let matchesTime = true;
     if (timeFilter === "week") {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
-      matchesTime = new Date(txn.date) >= weekAgo;
+      matchesTime = new Date(txn.date || txn.createdAt) >= weekAgo;
     } else if (timeFilter === "month") {
       const monthAgo = new Date();
       monthAgo.setMonth(monthAgo.getMonth() - 1);
-      matchesTime = new Date(txn.date) >= monthAgo;
+      matchesTime = new Date(txn.date || txn.createdAt) >= monthAgo;
     }
 
     return matchesStatus && matchesSearch && matchesTime;
@@ -111,11 +112,10 @@ export default function TransactionsPage() {
     setIsProcessing(true);
 
     try {
-      await requestPayout({ transactionId: selectedTransaction.id });
+      await transactionsService.requestPayout({ transactionIds: [selectedTransaction.id] });
 
       addToast(
-        `Payout request submitted for ${
-          selectedTransaction.id
+        `Payout request submitted for ${selectedTransaction.id
         } (₦${selectedTransaction.netAmount.toLocaleString()})`,
         "success"
       );
@@ -123,7 +123,7 @@ export default function TransactionsPage() {
       setSelectedTransaction(null);
       refetch(); // Refresh the transactions list
     } catch (err) {
-      addToast("Failed to submit payout request. Please try again.", "error");
+      addToast(err?.message || "Failed to submit payout request. Please try again.", "error");
     } finally {
       setIsProcessing(false);
     }
@@ -150,13 +150,12 @@ export default function TransactionsPage() {
       );
       const transactionIds = eligibleTransactions.map((t) => t.id);
 
-      await requestPayoutForTransactions({ transactionIds });
+      await transactionsService.requestPayout({ transactionIds });
 
       const totalAmount = eligibleTransactions.reduce((sum, t) => sum + (t.netAmount || 0), 0);
 
       addToast(
-        `Bulk payout request submitted for ${
-          transactionIds.length
+        `Bulk payout request submitted for ${transactionIds.length
         } transactions (₦${totalAmount.toLocaleString()})`,
         "success"
       );
@@ -164,7 +163,7 @@ export default function TransactionsPage() {
       refetch(); // Refresh the transactions list
     } catch (err) {
       addToast(
-        "Failed to submit bulk payout request. Please try again.",
+        err?.message || "Failed to submit bulk payout request. Please try again.",
         "error"
       );
     } finally {
@@ -206,8 +205,20 @@ export default function TransactionsPage() {
     }
   };
 
-  // Format currency
-  const formatCurrency = (amount) => `₦${amount.toLocaleString()}`;
+  // Format currency safely — handle undefined/null and non-numeric values
+  const formatCurrency = (amount) => {
+    const n = Number(amount);
+    if (!Number.isFinite(n)) return '₦0';
+    return `₦${n.toLocaleString()}`;
+  };
+
+  // Display stats with fallback values
+  const displayStats = {
+    totalEarnings: stats?.totalEarnings || 0,
+    availableForPayout: stats?.availableForPayout || 0,
+    pendingPayouts: stats?.pendingPayouts || 0,
+    paidOut: stats?.paidOut || 0,
+  };
 
   // Show loading state
   if (loading) {
@@ -255,11 +266,10 @@ export default function TransactionsPage() {
         onClose={() => !isProcessing && setShowPayoutModal(false)}
         onConfirm={confirmPayoutRequest}
         title="Request Payout"
-        message={`Submit payout request for ${
-          selectedTransaction?.id
-        }? You will receive ${formatCurrency(
-          selectedTransaction?.netAmount || 0
-        )} after processing.`}
+        message={`Submit payout request for ${selectedTransaction?.id
+          }? You will receive ${formatCurrency(
+            selectedTransaction?.netAmount || 0
+          )} after processing.`}
         confirmText="Request Payout"
         cancelText="Cancel"
         type="info"
@@ -465,8 +475,8 @@ export default function TransactionsPage() {
             {searchQuery
               ? "No transactions match your search criteria"
               : selectedStatus === "all"
-              ? "You haven't received any payments yet"
-              : `No ${selectedStatus} transactions`}
+                ? "You haven't received any payments yet"
+                : `No ${selectedStatus} transactions`}
           </p>
         </div>
       ) : (
@@ -503,8 +513,9 @@ export default function TransactionsPage() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredTransactions.map((txn) => {
-                  const StatusIcon =
-                    PAYOUT_STATUS_CONFIG[txn.payoutStatus].icon;
+                  // Defensive lookup for payout status config — fall back to 'unavailable'
+                  const payoutConfig = PAYOUT_STATUS_CONFIG[txn.payoutStatus] || PAYOUT_STATUS_CONFIG.unavailable;
+                  const StatusIcon = payoutConfig.icon || AlertCircle;
 
                   return (
                     <tr
@@ -557,12 +568,10 @@ export default function TransactionsPage() {
                       </td>
                       <td className="px-4 py-4">
                         <span
-                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
-                            PAYOUT_STATUS_CONFIG[txn.payoutStatus].color
-                          }`}
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${payoutConfig.color || 'bg-gray-100 text-gray-700'}`}
                         >
                           <StatusIcon className="w-3 h-3" />
-                          {PAYOUT_STATUS_CONFIG[txn.payoutStatus].label}
+                          {payoutConfig.label || 'Unavailable'}
                         </span>
                         {txn.lastReminderDate && (
                           <div className="text-xs text-gray-500 mt-2">
@@ -612,7 +621,7 @@ export default function TransactionsPage() {
 
       {/* Summary Footer */}
       {filteredTransactions.length > 0 && (
-        <div className="mt-6 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="mt-6 bg-linear-to-r from-primary-500 to-primary-600 rounded-xl shadow-lg p-6 text-white">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-sm opacity-90">Filtered Transactions</p>

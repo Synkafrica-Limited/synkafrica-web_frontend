@@ -186,6 +186,13 @@ function BusinessProfileDetails({ business, user, onEdit }) {
               </div>
 
               <div>
+                <label className="block text-xs text-gray-500 font-medium mb-1">Secondary Phone</label>
+                <div className="text-sm font-medium text-gray-900">
+                  {business.phoneNumber2 || <span className="text-gray-400 italic">Not set</span>}
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-xs text-gray-500 font-medium mb-1">Business URL</label>
                 <div className="text-sm text-blue-600 break-all">
                   {business.businessURL ? (
@@ -221,18 +228,15 @@ function BusinessProfileDetails({ business, user, onEdit }) {
               </div>
 
               <div>
-                <label className="block text-xs text-gray-500 font-medium mb-1">Business FAQs</label>
-                <div className="flex items-center gap-2">
-                  {business.faqs ? (
+                <label className="block text-xs text-gray-500 font-medium mb-1">Payment Details</label>
+                <div className="text-sm font-medium text-gray-900">
+                  {business.bankName && business.accountNumber ? (
                     <>
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-green-700 font-medium">Uploaded</span>
+                      <div>{business.accountNumber} - {business.bankName}</div>
+                      {business.accountName && <div className="text-sm text-gray-600">{business.accountName}</div>}
                     </>
                   ) : (
-                    <>
-                      <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                      <span className="text-sm text-gray-400 italic">Not uploaded</span>
-                    </>
+                    <span className="text-gray-400 italic">Not set</span>
                   )}
                 </div>
               </div>

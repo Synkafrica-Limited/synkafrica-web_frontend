@@ -100,7 +100,7 @@ function BusinessVerificationCard({
               Your business is verified and trusted by customers. You now have access to premium features.
             </p>
             <Link
-              href="/dashboard/business/verification"
+              href="/dashboard/business/settings?tab=verification"
               className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
             >
               View Certificate
@@ -144,20 +144,18 @@ function BusinessVerificationCard({
             <div className="space-y-3 mb-6">
               {verificationSteps.map((step, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                    step.completed
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-400'
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${step.completed
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-400'
+                    }`}>
                     {step.completed ? (
                       <CheckCircle className="w-4 h-4" />
                     ) : (
                       <span>{index + 1}</span>
                     )}
                   </div>
-                  <span className={`text-sm ${
-                    step.completed ? 'text-green-700 font-medium' : 'text-gray-600'
-                  }`}>
+                  <span className={`text-sm ${step.completed ? 'text-green-700 font-medium' : 'text-gray-600'
+                    }`}>
                     {step.name}
                   </span>
                 </div>
@@ -167,7 +165,7 @@ function BusinessVerificationCard({
             {/* CTA Button */}
             <div className="flex gap-3">
               <Link
-                href="/dashboard/business/verification"
+                href="/dashboard/business/settings?tab=verification"
                 className="flex-1 inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all font-medium shadow-lg hover:shadow-xl"
               >
                 {verificationState === "rejected" ? "Update Information" : "Complete Verification"}

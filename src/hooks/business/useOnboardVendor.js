@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import authService from '@/services/authService';
 import { api } from '@/lib/fetchClient';
-import { useToast } from '@/components/ui/ToastProvider';
+import { useToast } from '@/hooks/useNotifications';
 import { useBusiness } from '@/context/BusinessContext';
 
 export function useOnboardVendor() {
@@ -186,7 +186,7 @@ export function useOnboardVendor() {
       }
 
       toast?.success?.('Business created and profile saved.');
-      router.replace('/dashboard/vendor');
+      router.replace('/dashboard/business/home');
       return created;
     } catch (err) {
       console.error('[useOnboardVendor] Error during onboarding:', err);

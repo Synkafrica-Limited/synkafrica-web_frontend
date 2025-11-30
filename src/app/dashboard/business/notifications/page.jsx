@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Bell, MessageSquare, Eye, Calendar, CheckCircle, AlertCircle, Info } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import FilterBar from "@/components/ui/FilterBar";
+import DashboardHeader from '@/components/layout/DashboardHeader';
 
 export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
@@ -66,11 +67,12 @@ export default function NotificationsPage() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard/business/home" className="text-sm text-primary-600 hover:underline">← Back to dashboard</Link>
-        </div>
-      </div>
+      <DashboardHeader
+        title="Notifications"
+        subtitle="View your recent notifications and alerts"
+        showBack={true}
+        backHref="/dashboard/business/home"
+      />
 
       <div className="space-y-4">
         <div className="grid grid-cols-3 gap-4 mb-4">

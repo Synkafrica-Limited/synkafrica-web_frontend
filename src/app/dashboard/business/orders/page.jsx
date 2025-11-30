@@ -19,6 +19,7 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/hooks/useNotifications";
 import { useVendorBookings } from "@/hooks/business/useVendorBookings";
+import DashboardHeader from '@/components/layout/DashboardHeader';
 
 const STATUS_CONFIG = {
   pending: {
@@ -417,13 +418,10 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Manage Bookings</h1>
-        <p className="text-gray-600 mt-1">
-          View and manage all incoming booking requests
-        </p>
-      </div>
+      <DashboardHeader
+        title="Manage Bookings"
+        subtitle="View and manage all incoming booking requests"
+      />
 
       {/* Filters and Search */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">

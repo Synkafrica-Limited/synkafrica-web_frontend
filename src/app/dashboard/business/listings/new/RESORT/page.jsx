@@ -6,12 +6,14 @@ import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
 import { useToast } from "@/hooks/useNotifications";
+import { useCreateResortListing } from '@/hooks/business/useCreateResortListing';
 import { Toast } from "@/components/ui/Toast";
 
 export default function NewResortListing() {
   const router = useRouter();
   const { toasts, addToast, removeToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { createResortListing, isSubmitting: creating, businessLoading, businessError } = useCreateResortListing();
   const [form, setForm] = useState({
     resortName: "",
     packageType: "",
@@ -50,14 +52,11 @@ export default function NewResortListing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Resort listing:", form, images);
-      addToast("Resort package listing created successfully!", "success");
-      setTimeout(() => router.push("/dashboard/business/listings"), 1000);
-    } catch {
-      addToast("Failed to create listing. Please try again.", "error");
+      await createResortListing(form, images);
+    } catch (err) {
+      // createResortListing already shows toasts
+    } finally {
       setIsSubmitting(false);
     }
   };

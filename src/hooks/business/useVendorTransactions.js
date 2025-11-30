@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getVendorTransactions, getVendorStats } from "@/services/transactions.service";
+import transactionsService from "@/services/transactions.service";
 
 export const useVendorTransactions = (token, options = {}) => {
   const [transactions, setTransactions] = useState([]);
@@ -33,22 +33,65 @@ export const useVendorTransactions = (token, options = {}) => {
     setError(null);
 
     try {
-      // Build query parameters
-      const queryParams = new URLSearchParams();
-      if (currentOptions.status) queryParams.append('status', currentOptions.status);
-      if (currentOptions.dateRange) queryParams.append('dateRange', currentOptions.dateRange);
-      if (currentOptions.page) queryParams.append('page', currentOptions.page);
-      if (currentOptions.limit) queryParams.append('limit', currentOptions.limit);
-
-      const queryString = queryParams.toString();
-      const query = queryString ? `?${queryString}` : '';
+      // Build query parameters for transactionsService
+      const params = {};
+      if (currentOptions.status) params.payoutStatus = currentOptions.status;
+      if (currentOptions.dateRange) {
+        // Convert dateRange to startDate/endDate
+        if (currentOptions.dateRange === 'week') {
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          params.startDate = weekAgo.toISOString();
+        } else if (currentOptions.dateRange === 'month') {
+          const monthAgo = new Date();
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          params.startDate = monthAgo.toISOString();
+        }
+      }
+      if (currentOptions.page) params.skip = (currentOptions.page - 1) * (currentOptions.limit || 20);
+      if (currentOptions.limit) params.take = currentOptions.limit;
 
       const [transactionsResponse, statsResponse] = await Promise.all([
-        getVendorTransactions(query),
-        getVendorStats()
+        transactionsService.getVendorTransactions(params),
+        transactionsService.getVendorStats()
       ]);
 
-      setTransactions(transactionsResponse || []);
+      // Normalize transactions response into an array, supporting wrapped shapes
+      const normalizeToArray = (resp) => {
+        if (!resp && resp !== 0) return [];
+
+        // If already an array
+        if (Array.isArray(resp)) return resp;
+
+        // Common wrappers
+        if (resp.data && Array.isArray(resp.data)) return resp.data;
+        if (resp.transactions && Array.isArray(resp.transactions)) return resp.transactions;
+        if (resp.items && Array.isArray(resp.items)) return resp.items;
+        if (resp.results && Array.isArray(resp.results)) return resp.results;
+
+        // If resp is an object with nested array at any key, try to find it
+        for (const key of Object.keys(resp)) {
+          if (Array.isArray(resp[key])) return resp[key];
+        }
+
+        // Fallback: wrap single object into array
+        return [resp];
+      };
+
+      let txns = normalizeToArray(transactionsResponse || []);
+
+      // Deduplicate using multiple possible id keys
+      const idCandidates = (t) => t?.id || t?._id || t?.transactionId || t?.txnId || t?.reference || t?.ref || null;
+      const map = new Map();
+      txns.forEach((t) => {
+        const id = idCandidates(t) || JSON.stringify(t);
+        if (!map.has(id)) map.set(id, t);
+      });
+      const uniqueTxns = Array.from(map.values());
+
+      console.debug('[useVendorTransactions] fetched', (transactionsResponse && (Array.isArray(transactionsResponse) ? transactionsResponse.length : 1)) , 'returned,', uniqueTxns.length, 'unique');
+
+      setTransactions(uniqueTxns);
       setStats(statsResponse || null);
     } catch (err) {
       console.error("Failed to fetch transactions:", err);

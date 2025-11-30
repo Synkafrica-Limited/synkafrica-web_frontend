@@ -1,4 +1,5 @@
 import { api } from '../lib/fetchClient';
+import { appendNested } from '@/utils/appendNested';
 
 // Create a full listing (JSON)
 export function createListing(payload) {
@@ -13,26 +14,31 @@ export function createQuickListing(payload) {
 // Create listing with multipart form data (images/files)
 export function createListingMultipart(payload, files = []) {
 	const form = new FormData();
-	Object.keys(payload || {}).forEach((key) => {
-		const val = payload[key];
-		if (val === undefined || val === null) return;
-		if (typeof val === 'object') {
-			try {
-				form.append(key, JSON.stringify(val));
-			} catch (e) {
-				form.append(key, String(val));
-			}
-		} else {
-			form.append(key, String(val));
+
+	// 1) Append primitive top-level fields
+	Object.entries(payload || {}).forEach(([key, value]) => {
+		if (value === undefined || value === null) return;
+		if (typeof value !== 'object') {
+			form.append(key, String(value));
 		}
 	});
 
+	// 2) Append nested objects using bracketed notation expected by backend
+	if (payload.location) appendNested(form, 'location', payload.location);
+	if (payload.resort) appendNested(form, 'resort', payload.resort);
+	if (payload.carRental) appendNested(form, 'carRental', payload.carRental);
+	if (payload.convenience) appendNested(form, 'convenience', payload.convenience);
+	if (payload.dining) appendNested(form, 'dining', payload.dining);
+
+	// 3) Attach files (images and any other File objects passed)
 	files.forEach((f, idx) => {
 		const file = f instanceof File ? f : f?.file || f;
-		if (file) form.append('images', file, file.name || `image_${idx}`);
+		if (file instanceof File) {
+			form.append('images', file, file.name || `image_${idx}`);
+		}
 	});
 
-	return api.post('/api/listings', form, { auth: true });
+	return api.post('/api/listings', form, { auth: true, multipart: true });
 }
 
 // Get listings with optional filters
@@ -60,26 +66,31 @@ export function updateListing(id, payload) {
 
 export function updateListingMultipart(id, payload, files = []) {
 	const form = new FormData();
-	Object.keys(payload || {}).forEach((key) => {
-		const val = payload[key];
-		if (val === undefined || val === null) return;
-		if (typeof val === 'object') {
-			try {
-				form.append(key, JSON.stringify(val));
-			} catch (e) {
-				form.append(key, String(val));
-			}
-		} else {
-			form.append(key, String(val));
+
+	// 1) Append primitive top-level fields
+	Object.entries(payload || {}).forEach(([key, value]) => {
+		if (value === undefined || value === null) return;
+		if (typeof value !== 'object') {
+			form.append(key, String(value));
 		}
 	});
 
+	// 2) Append nested objects using bracketed notation
+	if (payload.location) appendNested(form, 'location', payload.location);
+	if (payload.resort) appendNested(form, 'resort', payload.resort);
+	if (payload.carRental) appendNested(form, 'carRental', payload.carRental);
+	if (payload.convenience) appendNested(form, 'convenience', payload.convenience);
+	if (payload.dining) appendNested(form, 'dining', payload.dining);
+
+	// 3) Attach files
 	files.forEach((f, idx) => {
 		const file = f instanceof File ? f : f?.file || f;
-		if (file) form.append('images', file, file.name || `image_${idx}`);
+		if (file instanceof File) {
+			form.append('images', file, file.name || `image_${idx}`);
+		}
 	});
 
-	return api.patch(`/api/listings/${id}`, form, { auth: true });
+	return api.patch(`/api/listings/${id}`, form, { auth: true, multipart: true });
 }
 
 export function deleteListing(id) {
@@ -110,6 +121,7 @@ const listingsService = {
 	createListing,
 	createQuickListing,
 	createListingMultipart,
+	updateListingMultipart,
 	getListings,
 	getVendorListings,
 	getListing,
@@ -117,7 +129,6 @@ const listingsService = {
 	deleteListing,
 	toggleListingAvailability,
 	updateListingStatus,
-	getListingAnalytics,
 };
 
 export default listingsService;

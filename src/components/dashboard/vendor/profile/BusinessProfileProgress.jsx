@@ -46,48 +46,61 @@ function BusinessProfileProgress({
       {/* Detailed Progress Breakdown */}
       {profileProgress && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm font-medium text-gray-700">Personal Info</span>
+          {/* Personal Info: hide when fully completed */}
+          {profileProgress.user.percentage < 100 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-gray-700">Personal Info</span>
+                </div>
+                <span className="text-sm text-gray-600 font-semibold">
+                  {profileProgress.user.percentage}%
+                </span>
               </div>
-              <span className="text-sm text-gray-600 font-semibold">
-                {profileProgress.user.percentage}%
-              </span>
+              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div
+                  className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${profileProgress.user.percentage}%` }}
+                ></div>
+              </div>
+              <div className="text-xs text-gray-500">
+                {profileProgress.user.completed} of {profileProgress.user.total} fields completed
+              </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div
-                className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-                style={{ width: `${profileProgress.user.percentage}%` }}
-              ></div>
-            </div>
-            <div className="text-xs text-gray-500">
-              {profileProgress.user.completed} of {profileProgress.user.total} fields completed
-            </div>
-          </div>
+          )}
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm font-medium text-gray-700">Business Info</span>
+          {/* Business Info: always show (you can change to hide when 100% similarly) */}
+          {profileProgress.business.percentage < 100 ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-gray-700">Business Info</span>
+                </div>
+                <span className="text-sm text-gray-600 font-semibold">
+                  {profileProgress.business.percentage}%
+                </span>
               </div>
-              <span className="text-sm text-gray-600 font-semibold">
-                {profileProgress.business.percentage}%
-              </span>
+              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div
+                  className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${profileProgress.business.percentage}%` }}
+                ></div>
+              </div>
+              <div className="text-xs text-gray-500">
+                {profileProgress.business.completed} of {profileProgress.business.total} fields completed
+              </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div
-                className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
-                style={{ width: `${profileProgress.business.percentage}%` }}
-              ></div>
-            </div>
-            <div className="text-xs text-gray-500">
-              {profileProgress.business.completed} of {profileProgress.business.total} fields completed
-            </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-center text-sm text-gray-600">Business info complete</div>
+          )}
         </div>
+      )}
+
+      {/* If both completed, show single complete message */}
+      {profileProgress && profileProgress.user.percentage === 100 && profileProgress.business.percentage === 100 && (
+        <div className="p-4 text-center text-sm text-green-600 font-medium">Profile complete ✅</div>
       )}
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -118,9 +131,9 @@ function BusinessProfileProgress({
             </button>
           )}
 
-          <Link href="/dashboard/business/verification" className="w-full sm:w-auto px-3 py-2 rounded bg-primary-500 text-white font-medium text-sm text-center flex items-center justify-center hover:bg-primary-600 transition-colors">
+          <Link href="/dashboard/business/settings" className="w-full sm:w-auto px-3 py-2 rounded bg-primary-500 text-white font-medium text-sm text-center flex items-center justify-center hover:bg-primary-600 transition-colors">
             <span className="mr-1">{verificationState === "verified" ? "🔍" : "✅"}</span>
-            <span className="hidden xs:inline">{verificationState === "verified" ? "View verification" : "Complete verification"}</span>
+            <span className="hidden xs:inline">{verificationState === "verified" ? "View verification" : "Manage verification"}</span>
             <span className="inline xs:hidden">{verificationState === "verified" ? "View" : "Verify"}</span>
           </Link>
         </div>

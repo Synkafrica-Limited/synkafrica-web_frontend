@@ -3,8 +3,11 @@
 import { useState, useRef } from "react";
 import { FiCamera } from "react-icons/fi";
 import Button from "@/components/ui/Buttons";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export function BusinessEditProfileModal({ business, user, onClose, onSave, loading = false }) {
+  const toast = useToast();
+
   const [form, setForm] = useState({
     // User profile fields
     firstName: user?.firstName || "",
@@ -27,6 +30,7 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
     availability: business?.availability || "",
     businessEmail: business?.email || business?.businessEmail || "",
     businessPhone: business?.phoneNumber || business?.businessPhone || "",
+    phoneNumber2: business?.phoneNumber2 || business?.phoneNumber2 || "",
   });
 
   // Debug: log incoming business prop to help diagnose population issues
@@ -37,18 +41,50 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
 
   const [profileImage, setProfileImage] = useState(business?.profileImage || null);
   const [profileImageFile, setProfileImageFile] = useState(null);
-  const [faqsFile, setFaqsFile] = useState(business?.faqs || null);
-  const [licenseFile, setLicenseFile] = useState(business?.serviceLicense || null);
+  const [errors, setErrors] = useState({});
   
   const fileInputRef = useRef(null);
-  const faqsInputRef = useRef(null);
-  const licenseInputRef = useRef(null);
 
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    // Validate single field on change
+    validateField(name, value);
   };
+
+  function validateField(name, value) {
+    let message = "";
+    if (["firstName", "lastName", "email", "phoneNumber"].includes(name)) {
+      if (!value || value.toString().trim() === "") {
+        message = "This field is required";
+      }
+    }
+    if (name === "email" && value) {
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRe.test(value)) message = "Invalid email address";
+    }
+    if (name === "accountNumber" && value) {
+      if (!/^[0-9]{6,20}$/.test(value)) message = "Invalid account number";
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: message }));
+    return message === "";
+  }
+
+  function validateAll() {
+    const required = ["firstName", "lastName", "email", "phoneNumber", "businessName", "businessLocation", "businessDescription"];
+    const newErrors = {};
+    required.forEach((field) => {
+      const val = form[field];
+      if (!val || val.toString().trim() === "") newErrors[field] = "This field is required";
+    });
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = "Invalid email address";
+    if (form.accountNumber && !/^[0-9]{6,20}$/.test(form.accountNumber)) newErrors.accountNumber = "Invalid account number";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
 
   // Handle profile image upload
   const handleImageChange = (e) => {
@@ -61,26 +97,18 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
     }
   };
 
-  // Handle FAQ file upload
-  const handleFaqsChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFaqsFile(file);
-    }
-  };
-
-  // Handle License file upload
-  const handleLicenseChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setLicenseFile(file);
-    }
-  };
+  // No FAQ or license file handlers — these fields were removed
 
   // Save and close
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // Validate before submitting
+    if (!validateAll()) {
+      toast?.danger?.('Please fix errors before saving');
+      return;
+    }
+
     // Separate user and business data
     const userData = {
       firstName: form.firstName,
@@ -88,25 +116,35 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
       email: form.email,
       phoneNumber: form.phoneNumber,
     };
-    
+
     const businessData = {
-        id: form.id,
-        businessName: form.businessName,
-        businessLocation: form.businessLocation,
-        businessDescription: form.businessDescription,
-        businessURL: form.businessURL,
+      id: form.id,
+      businessName: form.businessName,
+      businessLocation: form.businessLocation,
+      businessDescription: form.businessDescription,
+      businessURL: form.businessURL,
       bankName: form.bankName,
       accountName: form.accountName,
       accountNumber: form.accountNumber,
       availability: form.availability,
-      profileImage: profileImageFile,
-      faqs: faqsFile,
-      serviceLicense: licenseFile,
+      // ensure we pass the File object (if any) so parent builds FormData correctly
+      profileImage: profileImageFile || null,
       businessEmail: form.businessEmail,
       businessPhone: form.businessPhone,
+      phoneNumber2: form.phoneNumber2,
     };
-    
-    onSave({ userData, businessData });
+
+    try {
+      // Await parent save to ensure update completes before closing
+      await onSave({ userData, businessData });
+    } catch (err) {
+      // Parent will handle toasts/errors; keep modal open so user can retry
+      // eslint-disable-next-line no-console
+      console.error('BusinessEditProfileModal: save failed', err);
+      toast?.danger?.(err?.message || 'Save failed');
+      return;
+    }
+
     onClose();
   };
 
@@ -214,6 +252,9 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                       placeholder="John"
                       required
                     />
+                    {errors.firstName && (
+                      <p className="text-red-600 text-xs mt-1">{errors.firstName}</p>
+                    )}
                   </div>
 
                   {/* Last Name */}
@@ -227,6 +268,9 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                       placeholder="Doe"
                       required
                     />
+                    {errors.lastName && (
+                      <p className="text-red-600 text-xs mt-1">{errors.lastName}</p>
+                    )}
                   </div>
 
                   {/* Personal Email */}
@@ -241,6 +285,9 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                       placeholder="john.doe@example.com"
                       required
                     />
+                    {errors.email && (
+                      <p className="text-red-600 text-xs mt-1">{errors.email}</p>
+                    )}
                   </div>
 
                   {/* Personal Phone */}
@@ -254,6 +301,9 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                       placeholder="+2348012345678"
                       required
                     />
+                    {errors.phoneNumber && (
+                      <p className="text-red-600 text-xs mt-1">{errors.phoneNumber}</p>
+                    )}
                   </div>
                   
                   {/* Nationality */}
@@ -313,6 +363,9 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                   placeholder="Synkkafrica"
                   required
                 />
+                {errors.businessName && (
+                  <p className="text-red-600 text-xs mt-1">{errors.businessName}</p>
+                )}
               </div>
 
               {/* Business Location */}
@@ -326,6 +379,9 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                   placeholder="Lagos, lekki phase 1"
                   required
                 />
+                {errors.businessLocation && (
+                  <p className="text-red-600 text-xs mt-1">{errors.businessLocation}</p>
+                )}
               </div>
 
               {/* Business Description */}
@@ -339,6 +395,9 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                   placeholder="This company is built on trust..."
                   required
                 />
+                {errors.businessDescription && (
+                  <p className="text-red-600 text-xs mt-1">{errors.businessDescription}</p>
+                )}
               </div>
 
               {/* Business's URL */}
@@ -379,6 +438,18 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                 />
               </div>
 
+              {/* Secondary Business Phone */}
+              <div>
+                <label className="block text-xs font-semibold mb-1">Secondary Phone</label>
+                <input
+                  name="phoneNumber2"
+                  value={form.phoneNumber2}
+                  onChange={handleChange}
+                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                  placeholder="+2348012345679"
+                />
+              </div>
+
               {/* Business Payment Details */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold mb-2">Business Payment Details</label>
@@ -415,48 +486,14 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                     pattern="[0-9]{10}"
                     required
                   />
+                  {errors.accountNumber && (
+                    <p className="text-red-600 text-xs mt-1">{errors.accountNumber}</p>
+                  )}
                 </div>
               </div>
 
               {/* Business FAQ's */}
-              <div className="md:col-span-1">
-                <label className="block text-xs font-semibold mb-1">Business FAQ's</label>
-                <button
-                  type="button"
-                  onClick={() => faqsInputRef.current.click()}
-                  className="w-full border border-dashed border-gray-400 rounded-md px-3 py-2 text-xs sm:text-sm text-gray-600 hover:bg-gray-50 transition flex items-center justify-center gap-2"
-                >
-                  <span className="text-lg">+</span>
-                  {faqsFile ? faqsFile.name || "File uploaded" : "Add FAQ file"}
-                </button>
-                <input
-                  ref={faqsInputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  onChange={handleFaqsChange}
-                />
-              </div>
-
-              {/* Business License */}
-              <div className="md:col-span-1">
-                <label className="block text-xs font-semibold mb-1">Business License</label>
-                <button
-                  type="button"
-                  onClick={() => licenseInputRef.current.click()}
-                  className="w-full border border-dashed border-gray-400 rounded-md px-3 py-2 text-xs sm:text-sm text-gray-600 hover:bg-gray-50 transition flex items-center justify-center gap-2"
-                >
-                  <span className="text-lg">+</span>
-                  {licenseFile ? licenseFile.name || "File uploaded" : "Add license file"}
-                </button>
-                <input
-                  ref={licenseInputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  className="hidden"
-                  onChange={handleLicenseChange}
-                />
-              </div>
+              {/* Removed Business FAQ and License upload fields per request */}
 
               {/* Business Availability */}
               <div className="md:col-span-2">

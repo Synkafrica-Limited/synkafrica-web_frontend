@@ -14,13 +14,46 @@ export function BusinessProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await businessService.getMyBusinesses();
+      let res = await businessService.getMyBusinesses();
       console.debug('[BusinessContext] fetchBusiness response:', res);
-      setBusiness(res || null);
+
+      // Normalize responses: backend may return an array of businesses or a single object
+      if (Array.isArray(res)) {
+        res = res.length > 0 ? res[0] : null;
+      }
+
+      // If the response wraps user/business ({ user, business }) extract business
+      if (res && res.business) {
+        res = res.business;
+      }
+
+      // Normalize fields into a consistent business object
+      const normalized = res
+        ? {
+            id: res.id || res._id || res.businessId || null,
+            businessName: res.businessName || res.name || '',
+            businessLocation: res.businessLocation || res.location || '',
+            businessDescription: res.businessDescription || res.description || '',
+            phoneNumber: res.phoneNumber || res.businessPhone || '',
+            phoneNumber2: res.phoneNumber2 || '',
+            businessURL: res.businessURL || res.url || '',
+            bankName: res.bankName || '',
+            accountName: res.accountName || '',
+            accountNumber: res.accountNumber || '',
+            faqs: res.faqs || null,
+            serviceLicense: res.serviceLicense || null,
+            availability: res.availability || '',
+            profileImage: res.profileImage || res.logo || null,
+          }
+        : null;
+
+      setBusiness(normalized);
+      return normalized;
     } catch (err) {
       console.error('[BusinessContext] fetchBusiness error:', err);
       setError(err);
       setBusiness(null);
+      return null;
     } finally {
       setLoading(false);
     }
