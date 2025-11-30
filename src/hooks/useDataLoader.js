@@ -46,6 +46,7 @@ export function useDataLoader(fetchFunction, dependencies = [], options = {}) {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies);
 
   return {

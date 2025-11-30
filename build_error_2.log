@@ -1,0 +1,33 @@
+
+> synkkafrica-web-frontend@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.6
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 7.8s
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/hooks/useNotifications.js
+98:14  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+109:14  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+117:14  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/cloudinary.js
+34:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/services/authService.js
+427:18  Error: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+472:18  Error: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+507:20  Error: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/services/dashboardService.js
+20:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/utils/authUpdateProbe.js
+68:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules

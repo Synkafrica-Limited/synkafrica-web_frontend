@@ -23,7 +23,7 @@ async function _tryRequest(url, method, token, body) {
     let parsed = null;
     try {
       parsed = await res.json();
-    } catch (e) {
+    } catch {
       parsed = null;
     }
 
