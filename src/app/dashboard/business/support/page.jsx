@@ -68,6 +68,17 @@ export default function SupportPage() {
         }
     }, [activeTicket]);
 
+    // Auto-refresh messages every 10 seconds for active ticket
+    useEffect(() => {
+        if (!activeTicket) return;
+
+        const interval = setInterval(() => {
+            fetchMessages(activeTicket.id);
+        }, 10000); // Poll every 10 seconds
+
+        return () => clearInterval(interval);
+    }, [activeTicket]);
+
     // Scroll to bottom of messages
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
