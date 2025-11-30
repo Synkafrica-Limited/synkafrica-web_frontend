@@ -1,95 +1,69 @@
-// hooks/business/useVendorBookings.js
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useBusiness } from "@/hooks/business/useBusiness";
+import { useState, useEffect, useCallback } from "react";
 
-const API_URL = "https://synkkafrica-backend-core.onrender.com/api/bookings/business";
+const API_URL = "https://synkkafrica-backend-core.onrender.com/api/bookings/vendor";
 
 export const useVendorBookings = (token, options = {}) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Use refs to prevent unnecessary re-renders
-  const optionsRef = useRef(options);
-  const tokenRef = useRef(token);
 
-  // Update refs when dependencies change
-  useEffect(() => {
-    optionsRef.current = options;
-    tokenRef.current = token;
-  }, [options, token]);
-
-  // Fetch business data to get businessId
-  const { business, loading: businessLoading, error: businessError } = useBusiness(token);
+  // Extract status to avoid object dependency issues
+  const status = options.status;
 
   const fetchBookings = useCallback(async () => {
-    const currentToken = tokenRef.current;
-    const currentOptions = optionsRef.current;
-
-    if (!currentToken || !business) {
+    if (!token) {
       setLoading(false);
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    const params = new URLSearchParams();
+    if (status) params.append("status", status);
 
     try {
-      // Build query parameters
-      const queryParams = new URLSearchParams();
-      if (currentOptions.status) queryParams.append('status', currentOptions.status);
-      if (currentOptions.dateRange) queryParams.append('dateRange', currentOptions.dateRange);
+      setLoading(true);
+      setError(null);
       
-      const queryString = queryParams.toString();
-      const url = `${API_URL}/${business.id}${queryString ? `?${queryString}` : ''}`;
-
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${currentToken}`,
-          "Content-Type": "application/json",
+      const response = await fetch(`${API_URL}?${params}`, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
       });
 
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to load bookings");
       }
 
       const data = await response.json();
-      setBookings(data || []);
+      
+      // Handle different response structures
+      if (Array.isArray(data)) {
+        setBookings(data);
+      } else if (data.bookings && Array.isArray(data.bookings)) {
+        setBookings(data.bookings);
+      } else {
+        setBookings([]);
+      }
     } catch (err) {
       console.error("Failed to fetch bookings:", err);
-      setError(err.message || "Failed to load bookings");
+      setError(err.message);
+      setBookings([]);
     } finally {
       setLoading(false);
     }
-  }, [business]); // Only depend on business
+  }, [token, status]); // Only depend on token and status, not the entire options object
 
   useEffect(() => {
-    if (!businessLoading && business) {
-      fetchBookings();
-    } else if (!businessLoading && !business) {
-      // If business loading is done but no business found
-      setLoading(false);
-      setBookings([]);
-    }
-  }, [fetchBookings, business, businessLoading]);
+    fetchBookings();
+  }, [fetchBookings]);
 
-  // Combined loading state
-  const combinedLoading = loading || businessLoading;
-  // Combined error state (prioritize business errors first)
-  const combinedError = businessError || error;
-
-  return { 
-    bookings, 
-    loading: combinedLoading, 
-    error: combinedError, 
+  return {
+    bookings,
+    loading,
+    error,
     refetch: fetchBookings,
-    businessLoading,
-    businessError
   };
 };
-
-export default useVendorBookings;

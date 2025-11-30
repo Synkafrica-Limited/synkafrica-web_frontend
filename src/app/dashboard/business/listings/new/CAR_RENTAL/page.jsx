@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
 import { Toast } from "@/components/ui/Toast";
 import { useCreateCarListing } from "@/hooks/business/useCreateCarListing";
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";

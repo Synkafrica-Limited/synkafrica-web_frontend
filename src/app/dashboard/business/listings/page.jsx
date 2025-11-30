@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
 import { useQuickListings } from "@/hooks/business/useQuickListing";
 import { useVendorListings } from '@/hooks/business/useVendorListings';
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
@@ -158,10 +158,10 @@ export default function ListingsPage() {
     setIsDeleting(true);
     try {
       await deleteListing(listingToDelete.id);
-      addToast(`"${listingToDelete.title}" has been deleted successfully`, "success");
+      addToast({ message: `"${listingToDelete.title}" has been deleted successfully`, type: "success" });
       setListingToDelete(null);
     } catch (err) {
-      addToast("Failed to delete listing. Please try again.", "error");
+      addToast({ message: "Failed to delete listing. Please try again.", type: "error" });
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -174,12 +174,12 @@ export default function ListingsPage() {
 
     try {
       await toggleStatus(listing.id, newStatus);
-      addToast(
-        `Listing ${newStatus === "ACTIVE" ? "activated" : "deactivated"} successfully`,
-        "success"
-      );
+      addToast({
+        message: `Listing ${newStatus === "ACTIVE" ? "activated" : "deactivated"} successfully`,
+        type: "success"
+      });
     } catch (err) {
-      addToast("Failed to update listing status. Please try again.", "error");
+      addToast({ message: "Failed to update listing status. Please try again.", type: "error" });
     } finally {
       setTogglingStatus(null);
     }
@@ -285,8 +285,8 @@ export default function ListingsPage() {
             <button
               onClick={() => setSelectedCategory("all")}
               className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedCategory === "all"
-                  ? "bg-primary-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? "bg-primary-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
             >
               All ({listings.length})
@@ -299,8 +299,8 @@ export default function ListingsPage() {
                   key={category.value}
                   onClick={() => setSelectedCategory(category.value)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedCategory === category.value
-                      ? "bg-primary-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-primary-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -373,8 +373,8 @@ export default function ListingsPage() {
                         onClick={() => handleToggleStatus(listing)}
                         disabled={togglingStatus === listing.id}
                         className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${listing.status === "ACTIVE"
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          ? "bg-green-100 text-green-700 hover:bg-green-200"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                           }`}
                         title={`Click to ${listing.status === "ACTIVE" ? "deactivate" : "activate"
                           }`}
