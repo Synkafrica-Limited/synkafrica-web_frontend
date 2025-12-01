@@ -158,6 +158,20 @@ export default function BusinessSidebar() {
         {/* Navigation Menu */}
         <nav className="flex-1 py-6 px-3 overflow-y-auto">
           <ul className="space-y-1">
+            {/* Back to Vendor Homepage Link */}
+            <li className="mb-4 pb-4 border-b border-gray-200">
+              <Link
+                href="/business"
+                onClick={closeMobile}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group text-gray-700 hover:bg-gray-50 hover:text-primary-600"
+              >
+                <svg className="w-5 h-5 shrink-0 text-gray-500 group-hover:text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span className="font-medium text-sm">Back to Vendor Homepage</span>
+              </Link>
+            </li>
+
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
