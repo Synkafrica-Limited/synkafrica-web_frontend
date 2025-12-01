@@ -124,3 +124,26 @@
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
 }
+
+/* Custom Utilities */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@theme {
+  --animate-fade-in-scale: fade-in-scale 0.25s ease-out;
+  --animate-fade-in-up: fade-in-up 0.3s ease-out;
+
+  @keyframes fade-in-scale {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes fade-in-up {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}

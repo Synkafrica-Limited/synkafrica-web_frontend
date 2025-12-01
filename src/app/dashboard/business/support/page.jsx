@@ -293,30 +293,75 @@ export default function SupportPage() {
                             </div>
 
                             {/* Messages */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#E5DDD5] dark:bg-[#0B141A] relative">
+                                {/* WhatsApp-style background pattern */}
+                                <div className="absolute inset-0 opacity-[0.06]" style={{
+                                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+                                }} />
                                 {messages.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
                                         <Info className="w-12 h-12 mb-2" />
                                         <p className="text-sm">No messages yet. Start the conversation!</p>
                                     </div>
                                 ) : (
-                                    messages.map((msg) => (
-                                        <div
-                                            key={msg.id}
-                                            className={`flex ${msg.sender === 'user' || msg.senderType === 'BUSINESS' ? 'justify-end' : 'justify-start'}`}
-                                        >
-                                            <div className={`max-w-[80%] rounded-2xl p-4 ${msg.sender === 'user' || msg.senderType === 'BUSINESS'
-                                                ? 'bg-primary-600 text-white rounded-tr-none'
-                                                : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none shadow-sm'
-                                                }`}>
-                                                <p className="text-sm leading-relaxed">{msg.message || msg.content}</p>
-                                                <p className={`text-[10px] mt-1 ${msg.sender === 'user' || msg.senderType === 'BUSINESS' ? 'text-primary-100' : 'text-gray-400'
-                                                    }`}>
-                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
+                                    messages.map((msg, index) => {
+                                        const isVendor = msg.sender === 'user' || msg.senderType === 'BUSINESS';
+                                        const isAdmin = msg.sender === 'admin' || msg.senderType === 'ADMIN' || msg.senderType === 'SUPPORT';
+                                        const showSender = index === 0 || messages[index - 1]?.senderType !== msg.senderType;
+
+                                        return (
+                                            <div key={msg.id} className="relative">
+                                                {/* Sender label */}
+                                                {showSender && (
+                                                    <div className={`flex items-center gap-2 mb-1 ${isVendor ? 'justify-end' : 'justify-start'}`}>
+                                                        {!isVendor && (
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xs font-semibold">
+                                                                    A
+                                                                </div>
+                                                                <span className="text-xs font-medium text-gray-600">Support Team</span>
+                                                            </div>
+                                                        )}
+                                                        {isVendor && (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xs font-medium text-gray-600">You</span>
+                                                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-xs font-semibold">
+                                                                    V
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* Message bubble */}
+                                                <div className={`flex ${isVendor ? 'justify-end' : 'justify-start'}`}>
+                                                    <div className={`max-w-[75%] sm:max-w-[65%] rounded-2xl px-4 py-2.5 shadow-sm relative ${isVendor
+                                                            ? 'bg-[#DCF8C6] dark:bg-[#005C4B] text-gray-900 dark:text-white rounded-tr-sm'
+                                                            : 'bg-white dark:bg-[#202C33] text-gray-900 dark:text-white rounded-tl-sm'
+                                                        }`}>
+                                                        {/* Message tail */}
+                                                        <div className={`absolute top-0 ${isVendor ? 'right-0 -mr-2' : 'left-0 -ml-2'}`}>
+                                                            <svg width="8" height="13" viewBox="0 0 8 13" className={isVendor ? 'text-[#DCF8C6] dark:text-[#005C4B]' : 'text-white dark:text-[#202C33]'}>
+                                                                <path d={isVendor ? "M1.533,3.568 L8.000,0.000 L8.000,13.000 L1.533,3.568 Z" : "M6.467,3.568 L0.000,0.000 L0.000,13.000 L6.467,3.568 Z"} fill="currentColor" />
+                                                            </svg>
+                                                        </div>
+
+                                                        <p className="text-sm leading-relaxed break-words">{msg.message || msg.content}</p>
+                                                        <div className="flex items-center justify-end gap-1 mt-1">
+                                                            <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                                                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </p>
+                                                            {isVendor && (
+                                                                <svg width="16" height="11" viewBox="0 0 16 11" className="text-blue-500">
+                                                                    <path d="M11.071,0.5 L5.5,6.071 L2.929,3.5 L1.5,4.929 L5.5,8.929 L12.5,1.929 L11.071,0.5 Z M13.929,0.5 L12.5,1.929 L15.5,4.929 L13.929,6.5 L15.357,7.929 L18.357,4.929 L13.929,0.5 Z" fill="currentColor" transform="translate(-1 -0.5)" />
+                                                                </svg>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 )}
                                 <div ref={messagesEndRef} />
                             </div>
