@@ -23,6 +23,7 @@ import Image from "next/image";
 import { useUserProfile } from "@/hooks/business/useUserProfileVendor";
 import dashboardService from "@/services/dashboardService";
 import DashboardHeader from '@/components/layout/DashboardHeader';
+import FilterTabs from '@/components/ui/FilterTabs';
 
 // Service categories matching your requirements
 const SERVICE_CATEGORIES = [
@@ -221,10 +222,10 @@ export default function ListingsPage() {
               className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
             >
               <Plus className="w-5 h-5" />
-              Add New Listing
+
             </button>
 
-            <Link
+            {/* <Link
               href="/dashboard/business/profile"
               className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-primary-500 transition-colors shrink-0 group"
             >
@@ -247,7 +248,7 @@ export default function ListingsPage() {
                   {initials}
                 </div>
               )}
-            </Link>
+            </Link> */}
           </>
         )}
       />
@@ -280,35 +281,20 @@ export default function ListingsPage() {
         />
 
         {/* Category Filter Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedCategory("all")}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedCategory === "all"
-                ? "bg-primary-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-            >
-              All ({listings.length})
-            </button>
-            {SERVICE_CATEGORIES.map((category) => {
-              const Icon = category.icon;
-              const count = getCategoryCount(category.value);
-              return (
-                <button
-                  key={category.value}
-                  onClick={() => setSelectedCategory(category.value)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${selectedCategory === category.value
-                    ? "bg-primary-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {category.label} ({count})
-                </button>
-              );
-            })}
-          </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-6 mt-4">
+          <FilterTabs
+            tabs={[
+              { id: "all", label: "All", count: listings.length },
+              ...SERVICE_CATEGORIES.map((category) => ({
+                id: category.value,
+                label: category.label,
+                count: getCategoryCount(category.value)
+              }))
+            ]}
+            activeTab={selectedCategory}
+            onTabChange={setSelectedCategory}
+            layout="scroll"
+          />
         </div>
 
         {/* Listings Grid */}
@@ -435,14 +421,14 @@ export default function ListingsPage() {
 
         {/* Category Selection Modal */}
         {showCategoryModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-6 sm:p-8 animate-fadeIn">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40">
+            <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full sm:max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-6 sm:p-8 animate-fadeIn">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                     Select Service Category
                   </h2>
-                  <p className="text-gray-600 text-sm mt-1">
+                  <p className="text-gray-600 text-xs sm:text-sm mt-1">
                     Choose the type of service you want to list
                   </p>
                 </div>
@@ -466,14 +452,14 @@ export default function ListingsPage() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid animate-fadeIn grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {SERVICE_CATEGORIES.map((category) => {
                   const Icon = category.icon;
                   return (
                     <Link
                       key={category.value}
                       href={`/dashboard/business/listings/new/${category.value}`}
-                      className="group relative bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer"
+                      className="group relative bg-white border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer min-h-[80px]"
                     >
                       <div className="flex items-start gap-4">
                         <div
@@ -500,22 +486,6 @@ export default function ListingsPage() {
             </div>
           </div>
         )}
-
-        <style jsx global>{`
-          .animate-fadeIn {
-            animation: fadeIn 0.2s ease-out;
-          }
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: scale(0.95);
-            }
-            to {
-              opacity: 1;
-              transform: scale(1);
-            }
-          }
-        `}</style>
       </div>
     </div>
   );
