@@ -511,7 +511,7 @@ export default function VerificationSettings() {
                             />
                             {errors.bankName && <p className="text-red-500 text-xs mt-1">{errors.bankName}</p>}
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Account Name *</label>
                                 <input

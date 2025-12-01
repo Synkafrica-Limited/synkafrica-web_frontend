@@ -13,6 +13,8 @@ import {
   Search,
   Clock,
 } from "lucide-react";
+import DashboardHeader from "@/components/layout/DashboardHeader";
+import FilterTabs from "@/components/ui/FilterTabs";
 
 export default function NotificationsPage() {
   const {
@@ -68,42 +70,44 @@ export default function NotificationsPage() {
 
   const hasNotifications = filteredNotifications.length > 0;
 
+  const filterTabs = [
+    { id: "all", label: "All" },
+    { id: "unread", label: "Unread", count: unreadCount },
+    { id: "booking", label: "Booking" },
+    { id: "payout", label: "Payout" },
+    { id: "verification", label: "Verification" },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#FAF8F6] p-4 sm:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#FAF8F6]">
+      <DashboardHeader
+        title="Notifications"
+        subtitle="Stay updated with your business activity"
+        rightActions={(
+          <button
+            onClick={markAllRead}
+            disabled={unreadCount === 0}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${unreadCount > 0
+              ? "bg-white text-primary-600 border border-primary-200 hover:bg-primary-50 hover:border-primary-300 shadow-sm"
+              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              }`}
+          >
+            <CheckCircle size={16} />
+            <span className="hidden sm:inline">Mark all as read</span>
+          </button>
+        )}
+      />
 
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-            <p className="text-gray-500 mt-1">Stay updated with your business activity</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={markAllRead}
-              disabled={unreadCount === 0}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${unreadCount > 0
-                ? "bg-white text-primary-600 border border-primary-200 hover:bg-primary-50 hover:border-primary-300 shadow-sm"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                }`}
-            >
-              <CheckCircle size={16} />
-              Mark all as read
-            </button>
-          </div>
-        </div>
-
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Controls Section */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4 mt-4">
           {/* Filters */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
-            <FilterPill label="All" active={filter === "all"} onClick={() => setFilter("all")} />
-            <FilterPill label="Unread" active={filter === "unread"} onClick={() => setFilter("unread")} count={unreadCount} />
-            <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
-            <FilterPill label="Booking" active={filter === "booking"} onClick={() => setFilter("booking")} />
-            <FilterPill label="Payout" active={filter === "payout"} onClick={() => setFilter("payout")} />
-            <FilterPill label="Verification" active={filter === "verification"} onClick={() => setFilter("verification")} />
-          </div>
+          <FilterTabs
+            tabs={filterTabs}
+            activeTab={filter}
+            onTabChange={setFilter}
+            layout="scroll"
+          />
 
           {/* Search */}
           <div className="relative w-full sm:w-64">

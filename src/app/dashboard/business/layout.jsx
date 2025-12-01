@@ -18,15 +18,15 @@ export default function BusinessDashboardLayout({ children }) {
     <RequireAuth>
       <BusinessProvider>
         <div className="flex h-screen overflow-hidden bg-[#FAF8F6]">
-        {/* Sidebar */}
-        <BusinessSidebar />
+          {/* Sidebar */}
+          <BusinessSidebar />
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto flex flex-col">
-          {/* Page Content */}
-          <div className="flex-1">{children}</div>
-        </main>
-      </div>
+          {/* Main Content */}
+          <main className="flex-1 overflow-y-auto flex flex-col lg:pt-0">
+            {/* Page Content */}
+            <div className="flex-1">{children}</div>
+          </main>
+        </div>
       </BusinessProvider>
     </RequireAuth>
   );

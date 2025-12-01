@@ -53,13 +53,14 @@ export default function BusinessSettingsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF8F6]">
-      <div className="flex-1 flex flex-col w-full h-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex-1 flex flex-col w-full h-full max-w-full justify-center ">
+        <DashboardHeader
+          title="Account Settings"
+          subtitle="Manage your account security and preferences"
+        />
         <section className="flex-1 flex flex-col gap-6 py-6 px-2 sm:px-4 md:px-8 lg:px-16">
           <div className="flex flex-col gap-6 w-full">
-            <DashboardHeader
-              title="Account Settings"
-              subtitle="Manage your account security and preferences"
-            />
+
 
             {/* Settings Tabs */}
             <div className="bg-white rounded-xl shadow-sm p-6">

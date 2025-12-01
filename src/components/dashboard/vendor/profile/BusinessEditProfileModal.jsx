@@ -14,17 +14,17 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
     lastName: user?.lastName || "",
     email: user?.email || "",
     phoneNumber: user?.phoneNumber || "",
-    
+
     nationality: user?.nationality || "",
     gender: user?.gender || "",
     dateOfBirth: user?.dateOfBirth || user?.dob || "",
-      // Business (only backend-recognized fields)
-      id: business?.id || business?._id || business?.businessId || "",
-      businessName: business?.businessName || business?.name || "",
-      businessLocation: business?.businessLocation || business?.location || "",
-      // map to backend fields
-      description: business?.description || business?.businessDescription || "",
-      url: business?.url || business?.businessURL || "",
+    // Business (only backend-recognized fields)
+    id: business?.id || business?._id || business?.businessId || "",
+    businessName: business?.businessName || business?.name || "",
+    businessLocation: business?.businessLocation || business?.location || "",
+    // map to backend fields
+    description: business?.description || business?.businessDescription || "",
+    url: business?.url || business?.businessURL || "",
     bankName: business?.bankName || "",
     bankAccountName: business?.bankAccountName || business?.accountName || "",
     bankAccountNumber: business?.bankAccountNumber || business?.accountNumber || "",
@@ -43,7 +43,7 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
   const [profileImage, setProfileImage] = useState(business?.profileImage || null);
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [errors, setErrors] = useState({});
-  
+
   const fileInputRef = useRef(null);
 
   // Handle input changes
@@ -152,9 +152,9 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
 
   // Get initials for avatar
   const initials =
-    (form.businessName?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() || 
-    business?.businessName?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() || 
-    "SA");
+    (form.businessName?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() ||
+      business?.businessName?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() ||
+      "SA");
 
   const banks = [
     "Access Bank",
@@ -179,8 +179,8 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-5xl relative animate-fadeIn my-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-2 overflow-y-auto">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-5xl relative animate-fadeIn my-0 sm:my-4 max-h-[90vh] sm:max-h-full flex flex-col sm:block">
         {/* Close button */}
         <button
           className="absolute top-4 right-4 md:top-6 md:right-8 text-2xl text-gray-500 hover:text-primary-500 transition z-10"
@@ -189,7 +189,7 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
         >
           &times;
         </button>
-        
+
         <div className="flex flex-col md:flex-row gap-0">
           {/* Left: Profile Image Section */}
           <div className="flex flex-col items-center justify-center w-full md:w-[340px] py-8 px-4 md:py-12 md:px-0 bg-gray-50 md:bg-transparent">
@@ -234,7 +234,7 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
             <div className="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6 md:mb-8">
               Update your personal and business information. All fields marked with * are required.
             </div>
-            
+
             <form
               onSubmit={handleSubmit}
               className="space-y-6"
@@ -307,7 +307,7 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                       <p className="text-red-600 text-xs mt-1">{errors.phoneNumber}</p>
                     )}
                   </div>
-                  
+
                   {/* Nationality */}
                   <div>
                     <label className="block text-xs font-semibold mb-1">Nationality</label>
@@ -354,166 +354,166 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
               <div>
                 <h3 className="text-base font-semibold text-gray-900 mb-4">Business Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-6 gap-y-3 md:gap-y-4">
-              {/* Business Name */}
-              <div>
-                <label className="block text-xs font-semibold mb-1">Business Name</label>
-                <input
-                  name="businessName"
-                  value={form.businessName}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                  placeholder="Synkkafrica"
-                  required
-                />
-                {errors.businessName && (
-                  <p className="text-red-600 text-xs mt-1">{errors.businessName}</p>
-                )}
-              </div>
+                  {/* Business Name */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Business Name</label>
+                    <input
+                      name="businessName"
+                      value={form.businessName}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="Synkkafrica"
+                      required
+                    />
+                    {errors.businessName && (
+                      <p className="text-red-600 text-xs mt-1">{errors.businessName}</p>
+                    )}
+                  </div>
 
-              {/* Business Location */}
-              <div>
-                <label className="block text-xs font-semibold mb-1">Business Location</label>
-                <input
-                  name="businessLocation"
-                  value={form.businessLocation}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                  placeholder="Lagos, lekki phase 1"
-                  required
-                />
-                {errors.businessLocation && (
-                  <p className="text-red-600 text-xs mt-1">{errors.businessLocation}</p>
-                )}
-              </div>
+                  {/* Business Location */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Business Location</label>
+                    <input
+                      name="businessLocation"
+                      value={form.businessLocation}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="Lagos, lekki phase 1"
+                      required
+                    />
+                    {errors.businessLocation && (
+                      <p className="text-red-600 text-xs mt-1">{errors.businessLocation}</p>
+                    )}
+                  </div>
 
-              {/* Business Description */}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold mb-1">Business Description</label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 min-h-20"
-                  placeholder="This company is built on trust..."
-                  required
-                />
-                {errors.description && (
-                  <p className="text-red-600 text-xs mt-1">{errors.description}</p>
-                )}
-              </div>
+                  {/* Business Description */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-semibold mb-1">Business Description</label>
+                    <textarea
+                      name="description"
+                      value={form.description}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 min-h-20"
+                      placeholder="This company is built on trust..."
+                      required
+                    />
+                    {errors.description && (
+                      <p className="text-red-600 text-xs mt-1">{errors.description}</p>
+                    )}
+                  </div>
 
-              {/* Business's URL */}
-              <div>
-                <label className="block text-xs font-semibold mb-1">Business's URL</label>
-                <input
-                  name="url"
-                  type="url"
-                  value={form.url}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                  placeholder="Synkkafrica.com"
-                />
-              </div>
+                  {/* Business's URL */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Business's URL</label>
+                    <input
+                      name="url"
+                      type="url"
+                      value={form.url}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="Synkkafrica.com"
+                    />
+                  </div>
 
-              {/* Business Contact: Email */}
-              <div>
-                <label className="block text-xs font-semibold mb-1">Business Email</label>
-                <input
-                  name="businessEmail"
-                  type="email"
-                  value={form.businessEmail}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                  placeholder="vendor@example.com"
-                />
-              </div>
+                  {/* Business Contact: Email */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Business Email</label>
+                    <input
+                      name="businessEmail"
+                      type="email"
+                      value={form.businessEmail}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="vendor@example.com"
+                    />
+                  </div>
 
-              {/* Business Contact: Phone */}
-              <div>
-                <label className="block text-xs font-semibold mb-1">Business Phone</label>
-                <input
-                  name="businessPhone"
-                  value={form.businessPhone}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                  placeholder="+2348012345678"
-                />
-              </div>
+                  {/* Business Contact: Phone */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Business Phone</label>
+                    <input
+                      name="businessPhone"
+                      value={form.businessPhone}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="+2348012345678"
+                    />
+                  </div>
 
-              {/* Secondary Business Phone */}
-              <div>
-                <label className="block text-xs font-semibold mb-1">Secondary Phone</label>
-                <input
-                  name="secondaryPhone"
-                  value={form.secondaryPhone}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                  placeholder="+2348012345679"
-                />
-              </div>
+                  {/* Secondary Business Phone */}
+                  <div>
+                    <label className="block text-xs font-semibold mb-1">Secondary Phone</label>
+                    <input
+                      name="secondaryPhone"
+                      value={form.secondaryPhone}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      placeholder="+2348012345679"
+                    />
+                  </div>
 
-              {/* Business Payment Details */}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold mb-2">Business Payment Details</label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <select
-                    name="bankName"
-                    value={form.bankName}
-                    onChange={handleChange}
-                    className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                    required
-                  >
-                    <option value="">Select Bank</option>
-                    {banks.map((bank) => (
-                      <option key={bank} value={bank}>
-                        {bank}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    name="bankAccountName"
-                    value={form.bankAccountName || form.accountName}
-                    onChange={handleChange}
-                    className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                    placeholder="Odeyale Emmanuel"
-                    required
-                  />
-                  <input
-                    name="bankAccountNumber"
-                    value={form.bankAccountNumber || form.accountNumber}
-                    onChange={handleChange}
-                    className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                    placeholder="0246591373"
-                    maxLength="10"
-                    pattern="[0-9]{10}"
-                    required
-                  />
-                  {errors.accountNumber && (
-                    <p className="text-red-600 text-xs mt-1">{errors.bankAccountNumber}</p>
-                  )}
-                </div>
-              </div>
+                  {/* Business Payment Details */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-semibold mb-2">Business Payment Details</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <select
+                        name="bankName"
+                        value={form.bankName}
+                        onChange={handleChange}
+                        className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                        required
+                      >
+                        <option value="">Select Bank</option>
+                        {banks.map((bank) => (
+                          <option key={bank} value={bank}>
+                            {bank}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        name="bankAccountName"
+                        value={form.bankAccountName || form.accountName}
+                        onChange={handleChange}
+                        className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                        placeholder="Odeyale Emmanuel"
+                        required
+                      />
+                      <input
+                        name="bankAccountNumber"
+                        value={form.bankAccountNumber || form.accountNumber}
+                        onChange={handleChange}
+                        className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                        placeholder="0246591373"
+                        maxLength="10"
+                        pattern="[0-9]{10}"
+                        required
+                      />
+                      {errors.accountNumber && (
+                        <p className="text-red-600 text-xs mt-1">{errors.bankAccountNumber}</p>
+                      )}
+                    </div>
+                  </div>
 
-              {/* Business FAQ's */}
-              {/* Removed Business FAQ and License upload fields per request */}
+                  {/* Business FAQ's */}
+                  {/* Removed Business FAQ and License upload fields per request */}
 
-              {/* Business Availability */}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold mb-1">Business Availability</label>
-                <select
-                  name="availability"
-                  value={form.availability}
-                  onChange={handleChange}
-                  className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                  required
-                >
-                  <option value="">Select availability</option>
-                  <option value="24/7">24/7 - Always Available</option>
-                  <option value="weekdays">Weekdays (Mon-Fri)</option>
-                  <option value="weekends">Weekends Only</option>
-                  <option value="custom">Custom Hours</option>
-                </select>
-              </div>
+                  {/* Business Availability */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-semibold mb-1">Business Availability</label>
+                    <select
+                      name="availability"
+                      value={form.availability}
+                      onChange={handleChange}
+                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      required
+                    >
+                      <option value="">Select availability</option>
+                      <option value="24/7">24/7 - Always Available</option>
+                      <option value="weekdays">Weekdays (Mon-Fri)</option>
+                      <option value="weekends">Weekends Only</option>
+                      <option value="custom">Custom Hours</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -538,7 +538,7 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
           </div>
         </div>
       </div>
-      
+
       <style jsx global>{`
         .animate-fadeIn {
           animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
