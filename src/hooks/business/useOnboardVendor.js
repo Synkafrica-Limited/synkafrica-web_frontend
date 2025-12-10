@@ -5,13 +5,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import authService from '@/services/authService';
 import { api } from '@/lib/fetchClient';
-import { useToast } from '@/hooks/useNotifications';
+import { useToast } from '@/components/ui/ToastProvider';
 import { useBusiness } from '@/context/BusinessContext';
 import { handleApiError } from '@/utils/errorParser';
 
 export function useOnboardVendor() {
   const router = useRouter();
-  const toast = useToast();
+  const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -67,7 +67,7 @@ export function useOnboardVendor() {
       if (!token) {
         const msg = 'Authentication required. Please log in again.';
         console.error('[useOnboardVendor] No access token');
-        toast?.danger?.(msg);
+        addToast({ message: msg, type: 'error' });
         setError(msg);
         setLoading(false);
         return null;
@@ -184,11 +184,11 @@ export function useOnboardVendor() {
         console.warn('[useOnboardVendor] could not merge profile into BusinessContext:', err?.message || err);
       }
 
-      toast?.success?.('Business created and profile saved.');
+      addToast({ message: 'Business created and profile saved.', type: 'success' });
       router.replace('/dashboard/business/home');
       return created;
     } catch (err) {
-      handleApiError(err, toast, { setLoading, setError });
+      handleApiError(err, { addToast: (msg, type) => addToast({ message: msg, type: type || 'error' }) }, { setLoading, setError });
       return null;
     }
   };

@@ -1,6 +1,8 @@
 import authService from '@/services/authService';
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_BASE_URL || '';
+const RAW_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_BASE_URL || '';
+// Normalize so BASE never includes trailing /api to avoid /api/api/... URLs
+const BASE = RAW_BASE.replace(/\/api\/?$/, '');
 
 function buildUrl(path) {
   if (!path) return BASE;
