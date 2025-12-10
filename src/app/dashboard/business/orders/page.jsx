@@ -21,6 +21,7 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useVendorBookings } from "@/hooks/business/useVendorBookings";
+import bookingsService from "@/services/bookings.service";
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import FilterTabs from '@/components/ui/FilterTabs';
 
@@ -69,13 +70,17 @@ export default function OrdersPage() {
   const confirmAccept = async () => {
     setIsProcessing(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      addToast({ message: `Booking ${selectedOrder.id} accepted successfully!`, type: "success" });
+      await bookingsService.acceptBooking(selectedOrder.id, {
+        notes: "Booking accepted by vendor"
+      });
+      const displayId = selectedOrder.orderId || selectedOrder.id;
+      addToast({ message: `Booking ${displayId} accepted successfully!`, type: "success" });
       setShowAcceptConfirm(false);
       setSelectedOrder(null);
       refetch();
-    } catch {
-      addToast({ message: "Failed to accept booking. Please try again.", type: "error" });
+    } catch (err) {
+      console.error('Accept booking error:', err);
+      addToast({ message: err?.message || "Failed to accept booking. Please try again.", type: "error" });
     } finally {
       setIsProcessing(false);
     }
@@ -94,14 +99,19 @@ export default function OrdersPage() {
     }
     setIsProcessing(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      addToast({ message: `Booking ${selectedOrder.id} declined`, type: "info" });
+      await bookingsService.rejectBooking(selectedOrder.id, {
+        reason: declineReason,
+        notes: "Booking declined by vendor"
+      });
+      const displayId = selectedOrder.orderId || selectedOrder.id;
+      addToast({ message: `Booking ${displayId} declined`, type: "info" });
       setShowDeclineConfirm(false);
       setSelectedOrder(null);
       setDeclineReason("");
       refetch();
-    } catch {
-      addToast({ message: "Failed to decline booking. Please try again.", type: "error" });
+    } catch (err) {
+      console.error('Reject booking error:', err);
+      addToast({ message: err?.message || "Failed to decline booking. Please try again.", type: "error" });
     } finally {
       setIsProcessing(false);
     }
@@ -223,7 +233,7 @@ export default function OrdersPage() {
         onClose={() => !isProcessing && setShowAcceptConfirm(false)}
         onConfirm={confirmAccept}
         title="Accept Booking"
-        message={`Are you sure you want to accept booking ${selectedOrder?.id} from ${selectedOrder?.customer?.name || 'customer'}?`}
+        message={`Are you sure you want to accept booking ${selectedOrder?.orderId || selectedOrder?.id} from ${selectedOrder?.customer?.name || 'customer'}?`}
         confirmText="Accept"
         cancelText="Cancel"
         type="info"
@@ -235,7 +245,7 @@ export default function OrdersPage() {
           <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md animate-fadeIn">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Decline Booking</h3>
-              <p className="text-sm text-gray-600 mb-4">Please provide a reason for declining booking {selectedOrder?.id}</p>
+              <p className="text-sm text-gray-600 mb-4">Please provide a reason for declining booking {selectedOrder?.orderId || selectedOrder?.id}</p>
               <textarea
                 value={declineReason}
                 onChange={(e) => setDeclineReason(e.target.value)}
