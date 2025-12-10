@@ -4,6 +4,14 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { api } from '@/lib/fetchClient';
 import authService from '@/services/authService';
 
+function normalizeNotification(n) {
+  return {
+    ...n,
+    isRead: n.isRead ?? n.read ?? false,
+    type: n.type ?? n.category ?? n.eventType ?? 'general',
+  };
+}
+
 /**
  * Simple toast hook (in-memory) for UI components to use locally.
  */
@@ -62,9 +70,12 @@ export function useRemoteNotifications({ pollInterval = 20000 } = {}) {
   const fetchCounts = useCallback(async () => {
     try {
       const res = await api.get('/api/notifications/counts', { auth: true });
-      if (res && typeof res.unread === 'number') setUnreadCount(res.unread);
+      if (res && typeof res.unread === 'number') {
+        setUnreadCount(res.unread);
+      } else if (res && typeof res.data === 'object' && typeof res.data.unread === 'number') {
+        setUnreadCount(res.data.unread);
+      }
     } catch (err) {
-      // ignore
       console.debug('fetchCounts err', err);
     }
   }, []);
@@ -77,9 +88,10 @@ export function useRemoteNotifications({ pollInterval = 20000 } = {}) {
       qs.append('take', String(take));
       const url = `/api/notifications?${qs.toString()}`;
       const data = await api.get(url, { auth: true });
-      const items = Array.isArray(data) ? data : (data?.items || []);
+      let items = Array.isArray(data) ? data : (data?.items || data?.data || []);
+      items = items.map(normalizeNotification);
       setNotifications(items);
-      setUnreadCount(items.filter((n) => !n.isRead && !n.read).length);
+      setUnreadCount(items.filter((n) => !n.isRead).length);
       setError(null);
       return items;
     } catch (err) {
@@ -91,25 +103,39 @@ export function useRemoteNotifications({ pollInterval = 20000 } = {}) {
   }, []);
 
   const markRead = useCallback(async (id) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true, read: true } : n)));
+    const prevNotifications = [...notifications];
+    const prevCount = unreadCount;
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
     setUnreadCount((c) => Math.max(0, c - 1));
     try {
-      await api.patch(`/api/notifications/${id}/read`, {}, { auth: true });
-    } catch {
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: false, read: false } : n)));
-      fetchCounts();
+      const result = await api.patch(`/api/notifications/${id}/read`, {}, { auth: true });
+      if (result && result.id) {
+        setNotifications((prev) => prev.map((n) => 
+          n.id === id ? normalizeNotification({ ...n, ...result }) : n
+        ));
+      }
+      await fetchCounts();
+    } catch (err) {
+      console.error('markRead error:', err);
+      setNotifications(prevNotifications);
+      setUnreadCount(prevCount);
     }
-  }, [fetchCounts]);
+  }, [notifications, unreadCount, fetchCounts]);
 
   const markAllRead = useCallback(async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true, read: true })));
+    const prevNotifications = [...notifications];
+    const prevCount = unreadCount;
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     setUnreadCount(0);
     try {
       await api.patch('/api/notifications/mark-all-read', {}, { auth: true });
-    } catch {
-      fetchNotifications();
+      await fetchCounts();
+    } catch (err) {
+      console.error('markAllRead error:', err);
+      setNotifications(prevNotifications);
+      setUnreadCount(prevCount);
     }
-  }, [fetchNotifications]);
+  }, [notifications, unreadCount, fetchCounts]);
 
   const ack = useCallback(async (payload = {}) => {
     try {

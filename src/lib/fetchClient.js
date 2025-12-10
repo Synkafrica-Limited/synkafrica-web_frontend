@@ -1,6 +1,6 @@
 import authService from '@/services/authService';
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://synkkafrica-backend-core.onrender.com';
+const BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
 function buildUrl(path) {
   if (!path) return BASE;
@@ -30,10 +30,16 @@ async function request(method, path, body = null, opts = {}) {
   });
 
   let data = null;
+  const contentType = res.headers.get('content-type');
   try {
-    data = await res.json();
+    if (contentType && contentType.includes('application/json')) {
+      const text = await res.text();
+      if (text && text.trim().length > 0) {
+        data = JSON.parse(text);
+      }
+    }
   } catch {
-    // ignore non-json responses
+    // ignore non-json or empty responses
   }
 
   // If we get a 401 and this request requires auth, try to refresh the token
@@ -57,10 +63,16 @@ async function request(method, path, body = null, opts = {}) {
         
         // Re-parse the response
         data = null;
+        const contentType = res.headers.get('content-type');
         try {
-          data = await res.json();
+          if (contentType && contentType.includes('application/json')) {
+            const text = await res.text();
+            if (text && text.trim().length > 0) {
+              data = JSON.parse(text);
+            }
+          }
         } catch {
-          // ignore non-json responses
+          // ignore non-json or empty responses
         }
       }
     } catch (refreshError) {
@@ -117,7 +129,9 @@ async function request(method, path, body = null, opts = {}) {
   throw err;
   }
 
-  console.log(`API Success ${method} ${fullUrl}:`, data);
+  if (data !== null && data !== undefined) {
+    console.log(`API Success ${method} ${fullUrl}:`, data);
+  }
   return data;
 }
 

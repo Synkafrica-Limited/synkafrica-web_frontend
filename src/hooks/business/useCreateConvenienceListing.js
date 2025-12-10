@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/useNotifications';
 import { useBusiness } from './useBusiness';
 import { useCreateListing } from './useCreateListing';
 import authService from '@/services/authService';
+import { handleApiError } from '@/utils/errorParser';
 
 export const useCreateConvenienceListing = () => {
   const router = useRouter();
@@ -55,11 +56,8 @@ export const useCreateConvenienceListing = () => {
       addToast('Service listing created successfully', 'success');
       router.push('/dashboard/business/listings');
     } catch (err) {
-      console.error('createConvenienceListing error', err);
-      addToast(err?.message || 'Failed to create listing', 'error');
+      handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
       throw err;
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

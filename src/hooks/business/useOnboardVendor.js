@@ -7,6 +7,7 @@ import authService from '@/services/authService';
 import { api } from '@/lib/fetchClient';
 import { useToast } from '@/hooks/useNotifications';
 import { useBusiness } from '@/context/BusinessContext';
+import { handleApiError } from '@/utils/errorParser';
 
 export function useOnboardVendor() {
   const router = useRouter();
@@ -68,6 +69,7 @@ export function useOnboardVendor() {
         console.error('[useOnboardVendor] No access token');
         toast?.danger?.(msg);
         setError(msg);
+        setLoading(false);
         return null;
       }
 
@@ -133,6 +135,7 @@ export function useOnboardVendor() {
         console.error('[useOnboardVendor] create failed:', created);
         toast?.danger?.(msg);
         setError(msg);
+        setLoading(false);
         return null;
       }
 
@@ -185,13 +188,8 @@ export function useOnboardVendor() {
       router.replace('/dashboard/business/home');
       return created;
     } catch (err) {
-      console.error('[useOnboardVendor] Error during onboarding:', err);
-      const msg = err?.message || 'Onboarding failed. Please try again.';
-      toast?.danger?.(msg);
-      setError(msg);
+      handleApiError(err, toast, { setLoading, setError });
       return null;
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -9,6 +9,8 @@ import { useOnboardVendor } from '@/hooks/business/useOnboardVendor';
 // Use an environment variable for the API key so it can be configured per-environment
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
+const CONVENIENCE_TYPES = ['makeup', 'laundry', 'photography', 'cleaning', 'styling', 'tailoring', 'events', 'fitness', 'spa'];
+
 // ----- Main Component -----
 const OnboardingFlow = () => {
   const [step, setStep] = useState(1);
@@ -311,6 +313,17 @@ const OnboardingFlow = () => {
                   <option value="Car">Car Rental</option>
                   <option value="Resort">Resort</option>
                   <option value="Restaurant">Restaurant</option>
+                  <optgroup label="Convenience Services">
+                    <option value="makeup">Makeup & Beauty</option>
+                    <option value="laundry">Laundry & Dry Cleaning</option>
+                    <option value="photography">Photography & Videography</option>
+                    <option value="cleaning">Home & Office Cleaning</option>
+                    <option value="styling">Fashion Styling</option>
+                    <option value="tailoring">Tailoring & Stitching</option>
+                    <option value="events">Event Services (MC, DJ, Decorators)</option>
+                    <option value="fitness">Fitness Training</option>
+                    <option value="spa">Spa & Wellness</option>
+                  </optgroup>
                 </select>
               </div>
 
