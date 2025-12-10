@@ -24,7 +24,8 @@ class BookingsService {
     if (params.paymentStatus) queryParams.append('paymentStatus', params.paymentStatus);
 
     const queryString = queryParams.toString();
-    const url = `/api/bookings${queryString ? `?${queryString}` : ''}`;
+    // Use the vendor-specific bookings endpoint so results are scoped
+    const url = `/api/bookings/vendor${queryString ? `?${queryString}` : ''}`;
     
     return await api.get(url, { auth: true });
   }

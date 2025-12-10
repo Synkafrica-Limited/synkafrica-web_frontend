@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useToast } from '@/hooks/useNotifications';
+import { useToast } from '@/components/ui/ToastProvider';
 import listingsService from '@/services/listings.service';
 import { useRouter } from 'next/navigation';
 
