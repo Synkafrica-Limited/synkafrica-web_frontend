@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { FiCamera } from "react-icons/fi";
 import Button from "@/components/ui/Buttons";
 import { useToast } from "@/components/ui/ToastProvider";
+import ngBanks from 'ng-banks';
 
 export function BusinessEditProfileModal({ business, user, onClose, onSave, loading = false }) {
   const toast = useToast();
@@ -156,27 +157,20 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
       business?.businessName?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() ||
       "SA");
 
-  const banks = [
-    "Access Bank",
-    "Citibank",
-    "Ecobank Nigeria",
-    "Fidelity Bank Nigeria",
-    "First Bank of Nigeria",
-    "First City Monument Bank",
-    "Guaranty Trust Bank",
-    "Heritage Bank",
-    "Keystone Bank",
-    "Polaris Bank",
-    "Providus Bank",
-    "Stanbic IBTC Bank",
-    "Standard Chartered Bank",
-    "Sterling Bank",
-    "Union Bank of Nigeria",
-    "United Bank for Africa",
-    "Unity Bank",
-    "Wema Bank",
-    "Zenith Bank",
-  ];
+  const banks = useMemo(() => {
+    try {
+      const bankList = ngBanks.getBanks();
+      if (!bankList || bankList.length === 0) {
+        toast?.danger?.('Failed to load bank list');
+        return [];
+      }
+      return bankList.sort((a, b) => a.name.localeCompare(b.name));
+    } catch (error) {
+      console.error('Error loading banks:', error);
+      toast?.danger?.('Failed to load bank list');
+      return [];
+    }
+  }, [toast]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-2 overflow-y-auto">
@@ -465,8 +459,8 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                       >
                         <option value="">Select Bank</option>
                         {banks.map((bank) => (
-                          <option key={bank} value={bank}>
-                            {bank}
+                          <option key={bank.code} value={bank.name}>
+                            {bank.name}
                           </option>
                         ))}
                       </select>

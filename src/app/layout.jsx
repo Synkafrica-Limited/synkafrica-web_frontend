@@ -4,6 +4,7 @@ import ToastProvider from "@/components/ui/ToastProvider";
 import LoadingProvider from "@/components/ui/LoadingProvider";
 import { Providers } from "@/components/Providers";
 import Analytics from '@/components/Analytics';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 
 const montserratAlternates = Montserrat_Alternates({
@@ -67,12 +68,14 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
        <body className="font-sans bg-(--background) text-(--foreground)">
-          <LoadingProvider>
-            <ToastProvider>
-              <Analytics />
-              {children}
-            </ToastProvider>
-          </LoadingProvider>
+          <ErrorBoundary>
+            <LoadingProvider>
+              <ToastProvider>
+                <Analytics />
+                {children}
+              </ToastProvider>
+            </LoadingProvider>
+          </ErrorBoundary>
         </body>
     </html>
   );

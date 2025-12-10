@@ -25,6 +25,8 @@ import { useToast } from "@/components/ui/ToastProvider";
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import OnboardingBanner from '@/components/ui/OnboardingBanner';
 import VerificationBanner from '@/components/ui/VerificationBanner';
+import ConvenienceListingGuidance from '@/components/ui/ConvenienceListingGuidance';
+import { useBusiness } from '@/context/BusinessContext';
 import { api } from "@/lib/fetchClient";
 
 /**
@@ -40,6 +42,7 @@ export default function BusinessDashboard() {
   const [bookingsStats, setBookingsStats] = useState(null);
   const { showLoading, hideLoading } = useLoading();
   const toast = useToast();
+  const { business } = useBusiness();
 
   // Load data function
   const loadData = async (range = timeFilter) => {
@@ -149,6 +152,11 @@ export default function BusinessDashboard() {
       <OnboardingBanner />
       {/* Verification banner - when business exists but not verified */}
       <VerificationBanner />
+      {/* Convenience listing guidance modal */}
+      <ConvenienceListingGuidance 
+        businessType={business?.businessType} 
+        businessId={business?.id || business?._id}
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -25,24 +25,34 @@ import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 import DashboardHeader from '@/components/layout/DashboardHeader';
 
 const PAYOUT_STATUS_CONFIG = {
-  pending: {
+  PENDING: {
     label: "Pending",
     color: "bg-yellow-100 text-yellow-700",
     icon: Clock,
   },
-  requested: {
+  REQUESTED: {
     label: "Requested",
     color: "bg-blue-100 text-blue-700",
     icon: Send,
   },
-  paid: {
+  APPROVED: {
+    label: "Approved",
+    color: "bg-blue-100 text-blue-700",
+    icon: CheckCircle,
+  },
+  PROCESSING: {
+    label: "Processing",
+    color: "bg-purple-100 text-purple-700",
+    icon: Clock,
+  },
+  PAID: {
     label: "Paid",
     color: "bg-green-100 text-green-700",
     icon: CheckCircle,
   },
-  unavailable: {
-    label: "Unavailable",
-    color: "bg-gray-100 text-gray-700",
+  REJECTED: {
+    label: "Rejected",
+    color: "bg-red-100 text-red-700",
     icon: AlertCircle,
   },
 };
@@ -60,7 +70,11 @@ export default function TransactionsPage() {
   const [timeFilter, setTimeFilter] = useState("all"); // all, week, month
   const { toasts, addToast, removeToast } = useToast();
 
-  // Use the vendor transactions hook
+  // Get businessId from context
+  const { business: ctxBusiness } = useBusiness();
+  const businessId = ctxBusiness?.id || ctxBusiness?._id || ctxBusiness?.businessId;
+
+  // Use the vendor transactions hook with backend-compliant parameters
   const {
     transactions,
     stats,
@@ -68,17 +82,15 @@ export default function TransactionsPage() {
     error,
     refetch
   } = useVendorTransactions(token, {
-    status: selectedStatus !== "all" ? selectedStatus : undefined,
+    businessId,
+    status: selectedStatus !== "all" ? selectedStatus.toUpperCase() : undefined,
     dateRange: timeFilter !== "all" ? timeFilter : undefined
   });
 
-  // Business context (for debug overlay)
-  const { business: ctxBusiness } = useBusiness();
-
-  // Filter transactions
+  // Filter transactions (backend handles most filtering, this is for local search only)
   const filteredTransactions = transactions.filter((txn) => {
     const matchesStatus =
-      selectedStatus === "all" || txn.payoutStatus === selectedStatus;
+      selectedStatus === "all" || normalizeStatus(txn.payoutStatus) === normalizeStatus(selectedStatus);
     const matchesSearch =
       (txn.customerName || txn.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (txn.id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -124,7 +136,7 @@ export default function TransactionsPage() {
       (t) => t.vendorAmount ?? t.netAmount ?? t.amount
     );
     const pendingPayouts = sumBy(
-      filteredTransactions.filter((t) => normalizeStatus(t.payoutStatus) === 'requested' || normalizeStatus(t.payoutStatus) === 'processing'),
+      filteredTransactions.filter((t) => ['requested', 'approved', 'processing'].includes(normalizeStatus(t.payoutStatus))),
       (t) => t.vendorAmount ?? t.netAmount ?? t.amount
     );
     const paidOut = sumBy(
@@ -481,23 +493,23 @@ export default function TransactionsPage() {
                 inactiveClass: "bg-gray-100 text-gray-700 hover:bg-gray-200"
               },
               {
-                value: "pending",
+                value: "PENDING",
                 label: "Pending",
-                count: getStatusCount("pending"),
+                count: getStatusCount("PENDING"),
                 activeClass: "bg-yellow-500 text-white",
                 inactiveClass: "bg-gray-100 text-gray-700 hover:bg-gray-200"
               },
               {
-                value: "requested",
+                value: "REQUESTED",
                 label: "Requested",
-                count: getStatusCount("requested"),
+                count: getStatusCount("REQUESTED"),
                 activeClass: "bg-blue-500 text-white",
                 inactiveClass: "bg-gray-100 text-gray-700 hover:bg-gray-200"
               },
               {
-                value: "paid",
+                value: "PAID",
                 label: "Paid",
-                count: getStatusCount("paid"),
+                count: getStatusCount("PAID"),
                 activeClass: "bg-green-500 text-white",
                 inactiveClass: "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }

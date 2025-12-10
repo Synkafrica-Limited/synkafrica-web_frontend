@@ -31,6 +31,21 @@ function BusinessProfileCard({ business, user }) {
           <p className="text-white/90 text-sm">
             {user?.email || business?.email}
           </p>
+          {business?.verificationStatus && (
+            <div className="mt-2">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                business.verificationStatus === 'verified' ? 'bg-green-100 text-green-800' :
+                business.verificationStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                business.verificationStatus === 'rejected' ? 'bg-red-100 text-red-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {business.verificationStatus === 'verified' ? '✓ Verified' :
+                 business.verificationStatus === 'pending' ? '⏳ Pending' :
+                 business.verificationStatus === 'rejected' ? '⚠ Action Required' :
+                 '○ Not Verified'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

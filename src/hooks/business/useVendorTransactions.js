@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import transactionsService from "@/services/transactions.service";
 import { useBusiness } from "@/context/BusinessContext";
-import authService from '@/services/authService';
 
 export const useVendorTransactions = (token, options = {}) => {
   const [transactions, setTransactions] = useState([]);
@@ -36,11 +35,19 @@ export const useVendorTransactions = (token, options = {}) => {
     setError(null);
 
     try {
-      // Build query parameters for transactionsService
+      // Build query parameters for transactionsService - match backend contract exactly
       const params = {};
+      
+      // Add businessId if provided in options (backend will filter by it)
+      if (currentOptions.businessId) params.businessId = currentOptions.businessId;
+      
+      // Map status filter to payoutStatus (backend param name)
       if (currentOptions.status) params.payoutStatus = currentOptions.status;
-      if (currentOptions.dateRange) {
-        // Convert dateRange to startDate/endDate
+      
+      // Convert dateRange shortcuts to ISO startDate/endDate
+      if (currentOptions.startDate) {
+        params.startDate = currentOptions.startDate;
+      } else if (currentOptions.dateRange) {
         if (currentOptions.dateRange === 'week') {
           const weekAgo = new Date();
           weekAgo.setDate(weekAgo.getDate() - 7);
@@ -51,6 +58,8 @@ export const useVendorTransactions = (token, options = {}) => {
           params.startDate = monthAgo.toISOString();
         }
       }
+      
+      if (currentOptions.endDate) params.endDate = currentOptions.endDate;
       if (currentOptions.page) params.skip = (currentOptions.page - 1) * (currentOptions.limit || 20);
       if (currentOptions.limit) params.take = currentOptions.limit;
 
@@ -92,63 +101,11 @@ export const useVendorTransactions = (token, options = {}) => {
       });
       const uniqueTxns = Array.from(map.values());
 
-      // If we have a business in context, filter transactions down to those
-      // that belong to the current business/vendor. This prevents showing
-      // transactions for other businesses when the API returns broader results.
-      let filteredTxns = uniqueTxns;
+      // Backend now handles businessId filtering - no client-side filtering needed
+      // Trust the backend response since we pass businessId in query params
+      console.debug('[useVendorTransactions] fetched', uniqueTxns.length, 'transactions from backend');
 
-      // Build a set of candidate ids that could represent this business
-      const businessIdCandidates = new Set([
-        business?.id,
-        business?._id,
-        business?.businessId,
-        business?.vendorId,
-        business?.ownerId,
-      ].filter(Boolean));
-
-      const businessNameNormalized = (business?.businessName || business?.name || '').toString().toLowerCase().trim();
-
-      if (businessIdCandidates.size > 0 || businessNameNormalized) {
-        // collect transaction-side identifiers for debugging
-        const txnBizIds = uniqueTxns.map((t) => t?.businessId || t?.business?.id || t?.business?._id || null);
-
-        console.debug('[useVendorTransactions] business filter candidates:', Array.from(businessIdCandidates), 'businessName:', businessNameNormalized, 'txnBizIds sample:', txnBizIds.slice(0,5));
-
-        filteredTxns = uniqueTxns.filter((t) => {
-          const txnBizId = t?.businessId || t?.business?.id || t?.business?._id || null;
-          const txnVendorId = t?.vendorId || t?.vendor?.id || t?.vendor?._id || null;
-          const txnBizName = (t?.business?.businessName || t?.businessName || '').toString().toLowerCase().trim();
-
-          const idMatch = (txnBizId && businessIdCandidates.has(txnBizId)) || (txnVendorId && businessIdCandidates.has(txnVendorId));
-          const nameMatch = businessNameNormalized && txnBizName && businessNameNormalized === txnBizName;
-
-          return idMatch || nameMatch;
-        });
-      }
-
-      // Fallback: if filtering by business produced zero results but there are
-      // transactions returned that belong to the current vendor, accept those
-      // (useful when BusinessContext is not yet fully populated or the backend
-      // returns vendor-scoped transactions without explicit business scoping).
-      if ((filteredTxns.length === 0) && uniqueTxns.length > 0) {
-        try {
-          const currentUser = authService.getUser();
-          const currentUserId = currentUser?.id || currentUser?.userId || null;
-          if (currentUserId) {
-            const vendorMatches = uniqueTxns.filter((t) => (t?.vendorId === currentUserId || t?.vendor?.id === currentUserId));
-            if (vendorMatches.length > 0) {
-              console.debug('[useVendorTransactions] business filter yielded 0; falling back to vendorId match', currentUserId, 'matched', vendorMatches.length);
-              filteredTxns = vendorMatches;
-            }
-          }
-        } catch (e) {
-          console.debug('[useVendorTransactions] vendor fallback threw', e?.message || e);
-        }
-      }
-
-      console.debug('[useVendorTransactions] fetched', (transactionsResponse && (Array.isArray(transactionsResponse) ? transactionsResponse.length : 1)), 'returned,', uniqueTxns.length, 'unique,', filteredTxns.length, 'filtered for business');
-
-      setTransactions(filteredTxns);
+      setTransactions(uniqueTxns);
       setStats(statsResponse || null);
     } catch (err) {
       console.error("Failed to fetch transactions:", err);
@@ -156,12 +113,10 @@ export const useVendorTransactions = (token, options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [business]);
+  }, []);
 
   useEffect(() => {
-    // Do not attempt to fetch until we have a token and the business context
-    // has finished loading and a business is available. This avoids fetching
-    // global or unrelated transactions before we can filter them.
+    // Wait for token and business context to load
     if (!token) {
       setLoading(false);
       setTransactions([]);
@@ -180,6 +135,12 @@ export const useVendorTransactions = (token, options = {}) => {
       setTransactions([]);
       setStats(null);
       return;
+    }
+
+    // Inject businessId into options for backend filtering
+    const businessId = business?.id || business?._id || business?.businessId;
+    if (businessId && !optionsRef.current.businessId) {
+      optionsRef.current = { ...optionsRef.current, businessId };
     }
 
     // business is present and ready

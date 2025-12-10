@@ -361,11 +361,11 @@ function BusinessProfileContent() {
             <BusinessProfileProgress
               progress={progress}
               profileProgress={profileProgress}
+              business={businessData}
               onEdit={() => setShowEdit(true)}
               onSaveInfo={handleSaveInfo}
               onGetBookings={handleGetBookings}
               onVerify={() => {
-                // Redirect to account settings where verification is managed
                 const target = '/dashboard/business/settings';
                 if (router && router.push) router.push(target);
                 else window.location.href = target;
