@@ -1,4 +1,4 @@
-const BASE = process.env.NEXT_PUBLIC_API_BASE || "https://synkkafrica-backend-core.onrender.com";
+const BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_BASE_URL || '';
 const API_BASE = `${BASE}/api/auth`;
 
 function _getToken() {
