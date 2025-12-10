@@ -1,5 +1,6 @@
 import { api } from '../lib/fetchClient';
 import businessService from './business.service';
+import { parseApiError } from '../utils/errorParser';
 
 class VerificationService {
   // Get verification status for a business
@@ -61,7 +62,9 @@ class VerificationService {
         throw err;
       }
     } catch (error) {
-      console.warn('Verification status check failed:', error);
+      const message = parseApiError(error);
+      console.error('[verification.service] getStatus error:', message);
+      // Return safe default instead of throwing to maintain UI stability
       return {
         status: 'not_started',
         progress: 0,
@@ -117,8 +120,9 @@ class VerificationService {
         throw err;
       }
     } catch (error) {
-      console.error('Verification submission failed:', error);
-      throw error;
+      const message = parseApiError(error);
+      console.error('[verification.service] submit error:', message);
+      throw new Error(message);
     }
   }
 
@@ -131,7 +135,9 @@ class VerificationService {
   async getDetails(businessId) {
     try {
       return await api.get(`/api/business/${businessId}/verification/details`, { auth: true });
-    } catch {
+    } catch (err) {
+      const message = parseApiError(err);
+      console.error('[verification.service] getDetails error:', message);
       return null;
     }
   }
@@ -140,8 +146,10 @@ class VerificationService {
   async cancel(businessId) {
     try {
       return await api.del(`/api/business/${businessId}/verification`, { auth: true });
-    } catch {
-      return null;
+    } catch (err) {
+      const message = parseApiError(err);
+      console.error('[verification.service] cancel error:', message);
+      throw new Error(message);
     }
   }
 
@@ -149,7 +157,9 @@ class VerificationService {
   async getHistory(businessId) {
     try {
       return await api.get(`/api/business/${businessId}/verification/history`, { auth: true });
-    } catch {
+    } catch (err) {
+      const message = parseApiError(err);
+      console.error('[verification.service] getHistory error:', message);
       return [];
     }
   }
@@ -159,7 +169,9 @@ class VerificationService {
     try {
       const status = await this.getStatus(businessId);
       return status.status === 'verified';
-    } catch {
+    } catch (err) {
+      const message = parseApiError(err);
+      console.error('[verification.service] isVerified error:', message);
       return false;
     }
   }

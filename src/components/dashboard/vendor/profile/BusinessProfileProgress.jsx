@@ -7,14 +7,15 @@ import Link from "next/link";
 function BusinessProfileProgress({
   progress = 0,
   profileProgress = null,
-  verificationState = "not_started",
-  verificationPercent = 0,
+  business = null,
   onEdit,
   onSaveInfo,
   onGetBookings,
   onVerify,
 }) {
   const toast = useToast();
+  const verificationState = business?.verificationStatus || "not_started";
+  const verificationPercent = business?.verificationProgress || 0;
 
   return (
     <div className="bg-white rounded-2xl shadow p-4 sm:p-6 flex flex-col gap-4 w-full">
@@ -43,10 +44,8 @@ function BusinessProfileProgress({
         </div>
       </div>
 
-      {/* Detailed Progress Breakdown */}
       {profileProgress && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-          {/* Personal Info: hide when fully completed */}
           {profileProgress.user.percentage < 100 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -70,7 +69,6 @@ function BusinessProfileProgress({
             </div>
           )}
 
-          {/* Business Info: always show (you can change to hide when 100% similarly) */}
           {profileProgress.business.percentage < 100 ? (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -98,20 +96,21 @@ function BusinessProfileProgress({
         </div>
       )}
 
-      {/* If both completed, show single complete message */}
       {profileProgress && profileProgress.user.percentage === 100 && profileProgress.business.percentage === 100 && (
-        <div className="p-4 text-center text-sm text-green-600 font-medium">Profile complete ✅</div>
+        <div className="p-4 text-center text-sm text-green-600 font-medium">Profile complete</div>
       )}
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="text-sm text-gray-600">
-            Verification status: <span className={`font-medium ${
+            Verification: <span className={`font-medium ${
               verificationState === 'verified' ? 'text-green-600' : 
-              verificationState === 'pending' ? 'text-yellow-600' : 'text-gray-600'
+              verificationState === 'pending' ? 'text-yellow-600' : 
+              verificationState === 'rejected' ? 'text-red-600' : 'text-gray-600'
             }`}>
               {verificationState === 'verified' ? 'Verified' : 
-               verificationState === 'pending' ? 'Pending Review' : 'Not Started'}
+               verificationState === 'pending' ? 'Pending Review' :
+               verificationState === 'rejected' ? 'Action Required' : 'Not Started'}
             </span>
             {verificationPercent > 0 && verificationState !== 'verified' && (
               <span className="ml-1">({verificationPercent}%)</span>
@@ -125,16 +124,14 @@ function BusinessProfileProgress({
               onClick={onEdit}
               className="w-full sm:w-auto px-3 py-2 rounded bg-gray-100 text-gray-700 font-medium text-sm text-center flex items-center justify-center hover:bg-gray-200 transition-colors"
             >
-              <span className="mr-1">✏️</span>
-              <span className="hidden xs:inline">Edit Profile</span>
-              <span className="inline xs:hidden">Edit</span>
+              <span className="mr-1">Edit</span>
+              <span className="hidden xs:inline">Profile</span>
             </button>
           )}
 
           <Link href="/dashboard/business/settings" className="w-full sm:w-auto px-3 py-2 rounded bg-primary-500 text-white font-medium text-sm text-center flex items-center justify-center hover:bg-primary-600 transition-colors">
-            <span className="mr-1">{verificationState === "verified" ? "🔍" : "✅"}</span>
-            <span className="hidden xs:inline">{verificationState === "verified" ? "View verification" : "Manage verification"}</span>
-            <span className="inline xs:hidden">{verificationState === "verified" ? "View" : "Verify"}</span>
+            <span className="mr-1">{verificationState === "verified" ? "View" : "Manage"}</span>
+            <span className="hidden xs:inline">verification</span>
           </Link>
         </div>
       </div>

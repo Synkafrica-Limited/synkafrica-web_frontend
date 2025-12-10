@@ -4,6 +4,7 @@ class TransactionsService {
   /**
    * Get vendor transactions with filters
    * @param {Object} params - Query parameters
+   * @param {string} params.businessId - Filter by businessId
    * @param {string} params.status - Filter by status (PENDING, COMPLETED, FAILED, REFUNDED)
    * @param {string} params.payoutStatus - Filter by payout status (PENDING, REQUESTED, APPROVED, PROCESSING, PAID, REJECTED)
    * @param {string} params.startDate - Filter by start date (ISO string)
@@ -14,6 +15,8 @@ class TransactionsService {
   async getVendorTransactions(params = {}) {
     const queryParams = new URLSearchParams();
     
+    // Only append parameters that are explicitly provided
+    if (params.businessId) queryParams.append('businessId', params.businessId);
     if (params.status) queryParams.append('status', params.status);
     if (params.payoutStatus) queryParams.append('payoutStatus', params.payoutStatus);
     if (params.startDate) queryParams.append('startDate', params.startDate);

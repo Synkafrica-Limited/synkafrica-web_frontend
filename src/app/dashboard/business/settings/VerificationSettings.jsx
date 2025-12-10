@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import verificationService from "@/services/verification.service";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useBusiness } from '@/context/BusinessContext';
+import ngBanks from 'ng-banks';
 import {
     Building2,
     FileText,
@@ -58,6 +59,21 @@ export default function VerificationSettings() {
     const toast = useToast();
     const { business } = useBusiness();
 
+    const banks = useMemo(() => {
+        try {
+            const bankList = ngBanks.getBanks();
+            if (!bankList || bankList.length === 0) {
+                toast?.danger?.('Failed to load bank list');
+                return [];
+            }
+            return bankList.sort((a, b) => a.name.localeCompare(b.name));
+        } catch (error) {
+            console.error('Error loading banks:', error);
+            toast?.danger?.('Failed to load bank list');
+            return [];
+        }
+    }, [toast]);
+
     const [form, setForm] = useState({
         businessType: "",
         companyName: "",
@@ -74,20 +90,35 @@ export default function VerificationSettings() {
     useEffect(() => {
         if (business?.id) {
             loadVerificationStatus();
-            // Pre-fill form with business data if available
-            setForm(prev => ({
-                ...prev,
-                companyName: business.businessName || prev.companyName,
-                businessType: business.businessType || prev.businessType,
-                registrationNumber: business.registrationNumber || prev.registrationNumber,
-                bankName: business.bankName || prev.bankName,
-                accountName: business.accountName || prev.accountName,
-                accountNumber: business.accountNumber || prev.accountNumber,
-            }));
+            const savedForm = localStorage.getItem(`verification_form_${business.id}`);
+            if (savedForm) {
+                try {
+                    const parsed = JSON.parse(savedForm);
+                    setForm(prev => ({ ...prev, ...parsed }));
+                } catch (e) {
+                    console.error('Failed to parse saved form:', e);
+                }
+            } else {
+                setForm(prev => ({
+                    ...prev,
+                    companyName: business.businessName || prev.companyName,
+                    businessType: business.businessType || prev.businessType,
+                    registrationNumber: business.registrationNumber || prev.registrationNumber,
+                    bankName: business.bankName || prev.bankName,
+                    accountName: business.accountName || prev.accountName,
+                    accountNumber: business.accountNumber || prev.accountNumber,
+                }));
+            }
         } else {
             setLoading(false);
         }
     }, [business?.id]);
+
+    useEffect(() => {
+        if (business?.id && (form.companyName || form.registrationNumber)) {
+            localStorage.setItem(`verification_form_${business.id}`, JSON.stringify(form));
+        }
+    }, [form, business?.id]);
 
     const loadVerificationStatus = async () => {
         try {
@@ -193,10 +224,14 @@ export default function VerificationSettings() {
 
             toast?.success?.("Verification submitted successfully!");
             setSubmitted(true);
+            localStorage.removeItem(`verification_form_${business.id}`);
 
-            // Reload verification status after a short delay
-            setTimeout(() => {
-                loadVerificationStatus();
+            setTimeout(async () => {
+                const status = await verificationService.getStatus(business.id);
+                setVerificationStatus(status);
+                if (window.__BUSINESS_CONTEXT_REFRESH__) {
+                    window.__BUSINESS_CONTEXT_REFRESH__();
+                }
             }, 1000);
         } catch (err) {
             console.error("Verification submission error:", err);
@@ -437,6 +472,17 @@ export default function VerificationSettings() {
                                 <option>Car Rental</option>
                                 <option>Resort</option>
                                 <option>Convenience Store</option>
+                                <optgroup label="Convenience Services">
+                                  <option value="makeup">Makeup & Beauty</option>
+                                  <option value="laundry">Laundry & Dry Cleaning</option>
+                                  <option value="photography">Photography & Videography</option>
+                                  <option value="cleaning">Home & Office Cleaning</option>
+                                  <option value="styling">Fashion Styling</option>
+                                  <option value="tailoring">Tailoring & Stitching</option>
+                                  <option value="events">Event Services (MC, DJ, Decorators)</option>
+                                  <option value="fitness">Fitness Training</option>
+                                  <option value="spa">Spa & Wellness</option>
+                                </optgroup>
                                 <option>Other</option>
                             </select>
                             {errors.businessType && <p className="text-red-500 text-xs mt-1">{errors.businessType}</p>}
@@ -502,13 +548,17 @@ export default function VerificationSettings() {
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name *</label>
-                            <input
+                            <select
                                 value={form.bankName}
                                 onChange={(e) => setForm((p) => ({ ...p, bankName: e.target.value }))}
                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${errors.bankName ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                     }`}
-                                placeholder="Bank Name"
-                            />
+                            >
+                                <option value="">Select Bank</option>
+                                {banks.map((bank) => (
+                                    <option key={bank.code} value={bank.name}>{bank.name}</option>
+                                ))}
+                            </select>
                             {errors.bankName && <p className="text-red-500 text-xs mt-1">{errors.bankName}</p>}
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -39,7 +39,7 @@ export default function NotificationsPage() {
         filter === "all"
           ? true
           : filter === "unread"
-            ? !n.read
+            ? !n.isRead
             : n.type === filter;
 
       return matchesQuery && matchesFilter;
@@ -169,7 +169,7 @@ function NotificationGroup({ title, items, markRead }) {
 }
 
 function NotificationItem({ notification, onMarkRead }) {
-  const { id, type, title, message, createdAt, read } = notification;
+  const { id, type, title, message, createdAt, isRead } = notification;
 
   const getIcon = (type) => {
     switch (type) {
@@ -192,7 +192,7 @@ function NotificationItem({ notification, onMarkRead }) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
-      className={`group relative flex items-start gap-4 p-5 rounded-xl border transition-all duration-200 ${read
+      className={`group relative flex items-start gap-4 p-5 rounded-xl border transition-all duration-200 ${isRead
         ? "bg-white border-gray-100 hover:border-gray-200"
         : "bg-primary-50/40 border-primary-100 hover:border-primary-200 shadow-sm"
         }`}
@@ -205,7 +205,7 @@ function NotificationItem({ notification, onMarkRead }) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <h3 className={`text-base font-semibold ${read ? "text-gray-900" : "text-primary-900"}`}>
+          <h3 className={`text-base font-semibold ${isRead ? "text-gray-900" : "text-primary-900"}`}>
             {title}
           </h3>
           <span className="flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap mt-1">
@@ -213,13 +213,13 @@ function NotificationItem({ notification, onMarkRead }) {
             {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
           </span>
         </div>
-        <p className={`mt-1 text-sm leading-relaxed ${read ? "text-gray-600" : "text-gray-700"}`}>
+        <p className={`mt-1 text-sm leading-relaxed ${isRead ? "text-gray-600" : "text-gray-700"}`}>
           {message}
         </p>
       </div>
 
       {/* Actions */}
-      {!read && (
+      {!isRead && (
         <button
           onClick={() => onMarkRead(id)}
           className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-primary-600 hover:bg-primary-50 rounded-full"
@@ -230,7 +230,7 @@ function NotificationItem({ notification, onMarkRead }) {
       )}
 
       {/* Unread Indicator (Mobile/Always visible) */}
-      {!read && (
+      {!isRead && (
         <div className="absolute right-4 top-4 w-2 h-2 bg-primary-500 rounded-full group-hover:hidden" />
       )}
     </motion.div>

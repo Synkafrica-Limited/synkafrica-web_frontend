@@ -44,6 +44,9 @@ export function BusinessProvider({ children }) {
             serviceLicense: res.serviceLicense || null,
             availability: res.availability || '',
             profileImage: res.profileImage || res.logo || null,
+            verificationStatus: res.verificationStatus || 'not_started',
+            verificationProgress: res.verificationProgress || 0,
+            isVerified: res.isVerified || false,
           }
         : null;
 
@@ -61,6 +64,9 @@ export function BusinessProvider({ children }) {
 
   useEffect(() => {
     fetchBusiness();
+    if (typeof window !== 'undefined') {
+      window.__BUSINESS_CONTEXT_REFRESH__ = fetchBusiness;
+    }
   }, [fetchBusiness]);
 
   const value = {

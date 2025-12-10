@@ -13,13 +13,19 @@ export default function FilterTabs({ tabs, activeTab, onTabChange, layout = 'scr
                 <button
                     key={tab.id}
                     onClick={() => onTabChange(tab.id)}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
+                    className={`relative flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
                             ? "bg-primary-500 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                 >
-                    {tab.label}
-                    {tab.count !== undefined && ` (${tab.count})`}
+                    <span>{tab.label}</span>
+                    {tab.count !== undefined && tab.count > 0 && (
+                        <span className={`flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-semibold rounded-full ${
+                            activeTab === tab.id ? "bg-white text-primary-600" : "bg-primary-100 text-primary-700"
+                        }`}>
+                            {tab.count}
+                        </span>
+                    )}
                 </button>
             ))}
         </div>
