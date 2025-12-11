@@ -43,18 +43,20 @@ export default function OrdersPage() {
   const [declineReason, setDeclineReason] = useState("");
   const { toasts, addToast, removeToast } = useToast();
 
-  const { bookings, loading, error, refetch } = useVendorBookings({
-    status: selectedStatus !== "all" ? selectedStatus : undefined
-  });
+  const { bookings, loading, error, refetch } = useVendorBookings({});
 
   const filteredBookings = bookings.filter((booking) => {
+    // Status filter
+    const matchesStatus = selectedStatus === "all" || booking.status === selectedStatus;
+    
+    // Search filter
     const query = searchQuery.toLowerCase();
     const matchesSearch =
       booking.customer?.name?.toLowerCase().includes(query) ||
       booking.id?.toLowerCase().includes(query) ||
       booking.orderId?.toLowerCase().includes(query) ||
       booking.listing?.title?.toLowerCase().includes(query);
-    return matchesSearch;
+    return matchesStatus && matchesSearch;
   });
 
   const getStatusCount = (status) => {

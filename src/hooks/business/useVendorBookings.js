@@ -62,11 +62,15 @@ export const useVendorBookings = (options = {}) => {
         if (!duration && booking.startDate && booking.endDate) {
           const start = new Date(booking.startDate);
           const end = new Date(booking.endDate);
-          if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && end > start) {
+          if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && end >= start) {
             const msPerDay = 1000 * 60 * 60 * 24;
             const diffDays = Math.round((end.getTime() - start.getTime()) / msPerDay);
-            if (diffDays > 0) {
-              duration = diffDays === 1 ? '1 day' : `${diffDays} days`;
+            if (diffDays === 0) {
+              duration = 'Same day';
+            } else if (diffDays === 1) {
+              duration = '1 day';
+            } else {
+              duration = `${diffDays} days`;
             }
           }
         }
