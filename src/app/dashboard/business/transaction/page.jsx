@@ -87,6 +87,9 @@ export default function TransactionsPage() {
     dateRange: timeFilter !== "all" ? timeFilter : undefined
   });
 
+  // Normalize status helper (must be declared before use)
+  const normalizeStatus = (s) => (s || '').toString().toLowerCase();
+
   // Filter transactions (backend handles most filtering, this is for local search only)
   const filteredTransactions = transactions.filter((txn) => {
     const matchesStatus =
@@ -111,9 +114,6 @@ export default function TransactionsPage() {
 
     return matchesStatus && matchesSearch && matchesTime;
   });
-
-  // Normalize status helper
-  const normalizeStatus = (s) => (s || '').toString().toLowerCase();
 
   // Derive stats from the filtered transactions so we reflect business-scoped values
   const derived = (() => {
