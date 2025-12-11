@@ -5,6 +5,8 @@ import RequireAuth from "@/components/auth/business/RequireAuth";
 import { useSession } from "@/hooks/business/useSession";
 import { DashboardLoadingScreen } from "@/components/ui/LoadingScreen";
 import { BusinessProvider } from '@/context/BusinessContext';
+import { VendorNotificationProvider } from '@/context/VendorNotificationContext';
+import VendorSocketProvider from '@/components/vendor/VendorSocketProvider';
 
 export default function BusinessDashboardLayout({ children }) {
   const { loading, isLoggedIn } = useSession();
@@ -17,16 +19,20 @@ export default function BusinessDashboardLayout({ children }) {
   return (
     <RequireAuth>
       <BusinessProvider>
-        <div className="flex h-screen overflow-hidden bg-[#FAF8F6]">
-          {/* Sidebar */}
-          <BusinessSidebar />
+        <VendorNotificationProvider>
+          <VendorSocketProvider>
+            <div className="flex h-screen overflow-hidden bg-[#FAF8F6]">
+              {/* Sidebar */}
+              <BusinessSidebar />
 
-          {/* Main Content */}
-          <main className="flex-1 overflow-y-auto flex flex-col lg:pt-0">
-            {/* Page Content */}
-            <div className="flex-1">{children}</div>
-          </main>
-        </div>
+              {/* Main Content */}
+              <main className="flex-1 overflow-y-auto flex flex-col lg:pt-0">
+                {/* Page Content */}
+                <div className="flex-1">{children}</div>
+              </main>
+            </div>
+          </VendorSocketProvider>
+        </VendorNotificationProvider>
       </BusinessProvider>
     </RequireAuth>
   );

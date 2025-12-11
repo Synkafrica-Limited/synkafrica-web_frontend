@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import NotificationBell from '@/components/vendor/NotificationBell';
 
 /**
  * DashboardHeader
@@ -43,6 +44,9 @@ export default function DashboardHeader({ title, subtitle, rightActions, showBac
                 {rightActions}
               </div>
             )}
+
+            {/* Notification Bell - Always visible */}
+            <NotificationBell />
           </div>
         </div>
       </div>
