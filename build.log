@@ -1,0 +1,31 @@
+
+> synkkafrica-web-frontend@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.7
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 14.6s
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/app/sitemap.xml/route.js
+27:5  Warning: Unused eslint-disable directive (no problems were reported from 'no-console').
+
+./src/hooks/useVendorSocketEvents.js
+13:11  Error: 'notification' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+38:16  Error: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+109:9  Error: 'handleBookingAccepted' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/cloudinary.js
+34:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/services/dashboardService.js
+20:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./src/utils/authUpdateProbe.js
+70:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules

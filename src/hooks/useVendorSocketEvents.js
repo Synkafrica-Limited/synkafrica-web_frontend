@@ -10,7 +10,7 @@ export const useVendorSocketEvents = () => {
   const { addToast } = useToast();
 
   const handleBookingNew = useCallback((data) => {
-    const notification = addNotification({
+    addNotification({
       type: "booking_request",
       title: "New Booking Request",
       message: `${data.customerName || "A customer"} requested ${data.listingTitle || "a service"}`,
@@ -35,7 +35,9 @@ export const useVendorSocketEvents = () => {
         const audio = new Audio("/sounds/notification.mp3");
         audio.volume = 0.5;
         audio.play().catch(() => {});
-      } catch (e) {}
+      } catch {
+        // Ignore audio errors
+      }
     }
   }, [addNotification, addToast]);
 
@@ -106,21 +108,22 @@ export const useVendorSocketEvents = () => {
     });
   }, [addNotification, addToast]);
 
-  const handleBookingAccepted = useCallback((data) => {
-    addNotification({
-      type: "booking_accepted",
-      title: "Booking Confirmed",
-      message: `Booking #${data.bookingId || data.id} has been confirmed`,
-      data,
-      priority: "medium",
-    });
-
-    addToast({
-      message: "Booking confirmed successfully",
-      type: "success",
-      duration: 3000,
-    });
-  }, [addNotification, addToast]);
+  // Removed - not used in current socket event setup
+  // const handleBookingAccepted = useCallback((data) => {
+  //   addNotification({
+  //     type: "booking_accepted",
+  //     title: "Booking Confirmed",
+  //     message: `Booking #${data.bookingId || data.id} has been confirmed`,
+  //     data,
+  //     priority: "medium",
+  //   });
+  //
+  //   addToast({
+  //     message: "Booking confirmed successfully",
+  //     type: "success",
+  //     duration: 3000,
+  //   });
+  // }, [addNotification, addToast]);
 
   const handleBookingCancelled = useCallback((data) => {
     addNotification({
