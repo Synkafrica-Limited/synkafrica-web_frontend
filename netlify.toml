@@ -1,0 +1,13 @@
+# Netlify configuration
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Build settings are configured in the Netlify UI
+  # This file only contains additional configuration
+
+[build.environment]
+  # Omit NEXT_PUBLIC_* environment variables from secrets scanning.
+  # These variables are intentionally exposed to the client-side in Next.js builds
+  # (that's the purpose of the NEXT_PUBLIC_ prefix), so they should not be
+  # flagged as leaked secrets in the build output.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_API_BASE,NEXT_PUBLIC_API_BASE_URL,NEXT_PUBLIC_GOOGLE_MAPS_API_KEY"

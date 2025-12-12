@@ -29,7 +29,7 @@ export const useVendorSignup = () => {
     phoneNumber = phoneNumber.trim();
 
     try {
-      const data = await authService.signupVendor(firstName, lastName, email, password, phoneNumber);
+      await authService.signupVendor(firstName, lastName, email, password, phoneNumber);
       // authService.signupVendor persists tokens and user data by default on success
       router.push(`/business/validate?email=${encodeURIComponent(email)}`);
       return true;

@@ -1,111 +1,167 @@
 import { api } from '../lib/fetchClient';
-import { uploadFiles } from '@/lib/cloudinary';
+import businessService from './business.service';
+import { parseApiError } from '../utils/errorParser';
 
 class VerificationService {
   // Get verification status for a business
   async getStatus(businessId) {
     try {
-      const response = await api.get(`/api/business/${businessId}/verification`, { auth: true });
-      return {
-        status: response?.status || 'not_started',
-        progress: response?.progress || 0,
-        submittedAt: response?.submittedAt,
-        reviewedAt: response?.reviewedAt,
-        rejectionReason: response?.rejectionReason,
-        documents: response?.documents || []
-      };
-    } catch (error) {
-      // If verification not found or API not available, return default state
-      if (error?.status === 404 || error?.status === 500) {
-        console.log('Verification API not available, using default state');
+      // Try dedicated endpoint first
+      try {
+        const response = await api.get(`/api/business/${businessId}/verification`, { auth: true });
         return {
-          status: 'not_started',
-          progress: 0,
-          submittedAt: null,
-          reviewedAt: null,
-          rejectionReason: null,
-          documents: []
+          status: response?.status || 'not_started',
+          progress: response?.progress || 0,
+          submittedAt: response?.submittedAt,
+          reviewedAt: response?.reviewedAt,
+          rejectionReason: response?.rejectionReason,
+          documents: response?.documents || []
         };
+      } catch (err) {
+        if (err.status === 404) {
+          // Fallback: check business profile directly
+          const business = await businessService.getBusinessById(businessId);
+          
+          // Determine status from business profile fields
+          let status = 'not_started';
+          let progress = 0;
+          
+          if (business?.verificationStatus) {
+            status = business.verificationStatus;
+          } else if (business?.isVerified) {
+            status = 'verified';
+          }
+
+          // Calculate progress based on filled fields
+          const requiredFields = ['businessName', 'registrationNumber', 'bankName', 'accountNumber'];
+          // Check if certificate exists (could be businessCertificate or certificate)
+          const hasCert = business?.certificate || business?.businessCertificate;
+          
+          let filled = requiredFields.filter(f => business?.[f]).length;
+          if (hasCert) filled += 1;
+          
+          const totalRequired = requiredFields.length + 1;
+
+          if (status === 'not_started' && filled > 0) {
+            progress = Math.round((filled / totalRequired) * 100);
+          } else if (status === 'verified') {
+            progress = 100;
+          } else if (status === 'pending') {
+            progress = 50;
+          }
+
+          return {
+            status: status || 'not_started',
+            progress: progress,
+            submittedAt: business?.updatedAt,
+            reviewedAt: null,
+            rejectionReason: null,
+            documents: hasCert ? [{ url: hasCert }] : []
+          };
+        }
+        throw err;
       }
-      throw error;
+    } catch (error) {
+      const message = parseApiError(error);
+      console.error('[verification.service] getStatus error:', message);
+      // Return safe default instead of throwing to maintain UI stability
+      return {
+        status: 'not_started',
+        progress: 0,
+        submittedAt: null,
+        reviewedAt: null,
+        rejectionReason: null,
+        documents: []
+      };
     }
   }
 
-  // Submit verification documents
+  // Submit verification documents - backend handles file upload
   async submit(businessId, formData) {
     try {
-      // If the caller provided a plain object containing `files` (Array<File>) we'll upload them
-      if (!(formData instanceof FormData) && formData && Array.isArray(formData.files)) {
-        if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || !process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) {
-          throw new Error('Cloudinary not configured. Cannot upload files.');
-        }
+      // Backend handles Cloudinary upload, so we just send the FormData directly
+      let submissionPayload;
 
-        // Upload files directly to Cloudinary
-        const uploadedUrls = await uploadFiles(formData.files);
-
-        // Prepare payload: send document URLs to backend
-        const payload = {
-          businessId,
-          documents: uploadedUrls.map(u => ({ url: u }))
-        };
-
-        // Prefer the documents endpoint if available
-        try {
-          const resp = await api.post(`/api/business/${businessId}/documents`, payload, { auth: true });
-          return resp;
-        } catch (err) {
-          // fallback to verification endpoint expecting JSON with document URLs
-          const resp = await api.post(`/api/business/${businessId}/verification`, payload, { auth: true });
-          return resp;
-        }
+      if (formData instanceof FormData) {
+        // FormData is already prepared, send as-is
+        submissionPayload = formData;
+      } else {
+        // Convert plain object to FormData
+        submissionPayload = new FormData();
+        
+        Object.keys(formData).forEach(key => {
+          if (formData[key] !== null && formData[key] !== undefined) {
+            if (key === 'files' && Array.isArray(formData[key])) {
+              // Handle file array
+              formData[key].forEach(file => {
+                if (file instanceof File) {
+                  submissionPayload.append('business_certificate', file);
+                }
+              });
+            } else if (key === 'business_certificate' && formData[key] instanceof File) {
+              submissionPayload.append('business_certificate', formData[key]);
+            } else if (key !== 'files') {
+              submissionPayload.append(key, formData[key]);
+            }
+          }
+        });
       }
 
-      if (!(formData instanceof FormData)) {
-        throw new Error('FormData is required for verification submission');
+      // Try dedicated verification endpoint
+      try {
+        return await api.post(`/api/business/${businessId}/verification`, submissionPayload, { auth: true });
+      } catch (err) {
+        if (err.status === 404) {
+          console.log('Verification endpoint not found, updating business profile instead...');
+          // Fallback: Update Business Profile
+          // Backend will handle the file upload via the business update endpoint
+          return await api.patch(`/api/business/${businessId}`, submissionPayload, { auth: true });
+        }
+        throw err;
       }
-
-      const response = await api.post(`/api/business/${businessId}/verification`, formData, { auth: true });
-      return response;
     } catch (error) {
-      // For development, provide mock success response
-      if (process.env.NODE_ENV === 'development' && (error?.status === 404 || error?.status === 500)) {
-        console.log('Development mode: Mock verification submission success');
-        return {
-          success: true,
-          message: 'Verification submitted successfully (mock response)',
-          status: 'pending'
-        };
-      }
-      throw error;
+      const message = parseApiError(error);
+      console.error('[verification.service] submit error:', message);
+      throw new Error(message);
     }
   }
 
   // Update verification (for resubmission or updates)
   async update(businessId, formData) {
-    if (!(formData instanceof FormData)) {
-      throw new Error('FormData is required for verification update');
-    }
-
-    const response = await api.put(`/api/business/${businessId}/verification`, formData, { auth: true });
-    return response;
+    return this.submit(businessId, formData);
   }
 
   // Get detailed verification information
   async getDetails(businessId) {
-    const response = await api.get(`/api/business/${businessId}/verification/details`, { auth: true });
-    return response;
+    try {
+      return await api.get(`/api/business/${businessId}/verification/details`, { auth: true });
+    } catch (err) {
+      const message = parseApiError(err);
+      console.error('[verification.service] getDetails error:', message);
+      return null;
+    }
   }
 
   // Cancel pending verification
   async cancel(businessId) {
-    const response = await api.del(`/api/business/${businessId}/verification`, { auth: true });
-    return response;
+    try {
+      return await api.del(`/api/business/${businessId}/verification`, { auth: true });
+    } catch (err) {
+      const message = parseApiError(err);
+      console.error('[verification.service] cancel error:', message);
+      throw new Error(message);
+    }
   }
 
   // Get verification history
   async getHistory(businessId) {
-    const response = await api.get(`/api/business/${businessId}/verification/history`, { auth: true });
-    return response;
+    try {
+      return await api.get(`/api/business/${businessId}/verification/history`, { auth: true });
+    } catch (err) {
+      const message = parseApiError(err);
+      console.error('[verification.service] getHistory error:', message);
+      return [];
+    }
   }
 
   // Check if business is verified
@@ -113,7 +169,9 @@ class VerificationService {
     try {
       const status = await this.getStatus(businessId);
       return status.status === 'verified';
-    } catch {
+    } catch (err) {
+      const message = parseApiError(err);
+      console.error('[verification.service] isVerified error:', message);
       return false;
     }
   }
@@ -121,19 +179,7 @@ class VerificationService {
   // Get verification progress with detailed information
   async getProgress(businessId) {
     const status = await this.getStatus(businessId);
-
-    // Calculate progress based on status
-    const progressMap = {
-      'not_started': 0,
-      'pending': 50,
-      'verified': 100,
-      'rejected': 25
-    };
-
-    return {
-      ...status,
-      progress: Math.max(status.progress || 0, progressMap[status.status] || 0)
-    };
+    return status;
   }
 
   // Validate verification form data
@@ -168,9 +214,12 @@ class VerificationService {
     }
 
     // File validation
-    if (!formData.business_certificate) {
+    // If we have existing documents (passed as string/url), skip file check
+    const hasExistingCert = typeof formData.business_certificate === 'string' || formData.business_certificate === 'existing';
+    
+    if (!formData.business_certificate && !hasExistingCert) {
       errors.certificate = 'Registration certificate is required';
-    } else {
+    } else if (formData.business_certificate instanceof File) {
       const file = formData.business_certificate;
       const maxSize = 5 * 1024 * 1024; // 5MB
       const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
@@ -200,7 +249,7 @@ class VerificationService {
     });
 
     // Add certificate file
-    if (formData.business_certificate) {
+    if (formData.business_certificate instanceof File) {
       fd.append('business_certificate', formData.business_certificate);
     }
 

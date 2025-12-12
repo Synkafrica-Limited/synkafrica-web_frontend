@@ -14,13 +14,49 @@ export function BusinessProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await businessService.getMyBusinesses();
+      let res = await businessService.getMyBusinesses();
       console.debug('[BusinessContext] fetchBusiness response:', res);
-      setBusiness(res || null);
+
+      // Normalize responses: backend may return an array of businesses or a single object
+      if (Array.isArray(res)) {
+        res = res.length > 0 ? res[0] : null;
+      }
+
+      // If the response wraps user/business ({ user, business }) extract business
+      if (res && res.business) {
+        res = res.business;
+      }
+
+      // Normalize fields into a consistent business object
+      const normalized = res
+        ? {
+            id: res.id || res._id || res.businessId || null,
+            businessName: res.businessName || res.name || '',
+            businessLocation: res.businessLocation || res.location || '',
+            businessDescription: res.description || res.businessDescription || '',
+            phoneNumber: res.phoneNumber || res.businessPhone || '',
+            secondaryPhone: res.secondaryPhone || res.phoneNumber2 || '',
+            url: res.url || res.businessURL || '',
+            bankName: res.bankName || '',
+            bankAccountName: res.bankAccountName || res.accountName || '',
+            bankAccountNumber: res.bankAccountNumber || res.accountNumber || '',
+            faqs: res.faqs || null,
+            serviceLicense: res.serviceLicense || null,
+            availability: res.availability || '',
+            profileImage: res.profileImage || res.logo || null,
+            verificationStatus: res.verificationStatus || 'not_started',
+            verificationProgress: res.verificationProgress || 0,
+            isVerified: res.isVerified || false,
+          }
+        : null;
+
+      setBusiness(normalized);
+      return normalized;
     } catch (err) {
       console.error('[BusinessContext] fetchBusiness error:', err);
       setError(err);
       setBusiness(null);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -28,6 +64,9 @@ export function BusinessProvider({ children }) {
 
   useEffect(() => {
     fetchBusiness();
+    if (typeof window !== 'undefined') {
+      window.__BUSINESS_CONTEXT_REFRESH__ = fetchBusiness;
+    }
   }, [fetchBusiness]);
 
   const value = {
@@ -43,8 +82,11 @@ export function BusinessProvider({ children }) {
 
 export function useBusiness() {
   const ctx = useContext(BusinessContext);
+  // Return context if available; allow callers to handle null when provider is not present
   if (!ctx) {
-    throw new Error('useBusiness must be used within BusinessProvider');
+    // eslint-disable-next-line no-console
+    console.debug('useBusiness called outside BusinessProvider - returning null');
+    return null;
   }
   return ctx;
 }

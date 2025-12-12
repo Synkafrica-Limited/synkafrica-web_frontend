@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
 import { Toast } from "@/components/ui/Toast";
 import { useCreateCarListing } from "@/hooks/business/useCreateCarListing";
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
@@ -13,10 +13,10 @@ import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 export default function NewCarRentalListing() {
   const router = useRouter();
   const { toasts, removeToast } = useToast();
-  
+
   // Use the custom hook for creating car listings - UPDATED: now uses business data
   const { createCarListing, isSubmitting, businessLoading, businessError } = useCreateCarListing();
-  
+
   const [form, setForm] = useState({
     vehicleName: "",
     vehicleType: "",

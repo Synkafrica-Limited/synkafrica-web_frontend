@@ -1,6 +1,8 @@
 import authService from '@/services/authService';
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://api.synkkafrica.com';
+const RAW_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_BASE_URL || '';
+// Normalize so BASE never includes trailing /api to avoid /api/api/... URLs
+const BASE = RAW_BASE.replace(/\/api\/?$/, '');
 
 function buildUrl(path) {
   if (!path) return BASE;
@@ -30,10 +32,16 @@ async function request(method, path, body = null, opts = {}) {
   });
 
   let data = null;
+  const contentType = res.headers.get('content-type');
   try {
-    data = await res.json();
-  } catch (e) {
-    // ignore non-json responses
+    if (contentType && contentType.includes('application/json')) {
+      const text = await res.text();
+      if (text && text.trim().length > 0) {
+        data = JSON.parse(text);
+      }
+    }
+  } catch {
+    // ignore non-json or empty responses
   }
 
   // If we get a 401 and this request requires auth, try to refresh the token
@@ -57,10 +65,16 @@ async function request(method, path, body = null, opts = {}) {
         
         // Re-parse the response
         data = null;
+        const contentType = res.headers.get('content-type');
         try {
-          data = await res.json();
-        } catch (e) {
-          // ignore non-json responses
+          if (contentType && contentType.includes('application/json')) {
+            const text = await res.text();
+            if (text && text.trim().length > 0) {
+              data = JSON.parse(text);
+            }
+          }
+        } catch {
+          // ignore non-json or empty responses
         }
       }
     } catch (refreshError) {
@@ -68,7 +82,7 @@ async function request(method, path, body = null, opts = {}) {
       // If refresh fails, clear tokens and redirect to login
       authService.clearTokens();
       if (typeof window !== 'undefined') {
-        window.location.href = '/auth/login?expired=true';
+        window.location.href = '/business/login?expired=true';
       }
       throw new Error('Authentication expired. Please log in again.');
     }
@@ -83,17 +97,43 @@ async function request(method, path, body = null, opts = {}) {
     err.method = method;
 
   // Only log errors in development or for non-auth errors
-  if (process.env.NODE_ENV === 'development' || (res.status !== 401 && res.status !== 404)) {
+  // Skip logging for expected 404s on verification endpoints (we use fallback)
+  const isVerificationEndpoint = fullUrl.includes('/verification');
+  const shouldSkipLog = (res.status === 404 && isVerificationEndpoint);
+  
+  if (!shouldSkipLog && (process.env.NODE_ENV === 'development' || (res.status !== 401 && res.status !== 404))) {
+    let headersObj = {};
+    try {
+      if (res && res.headers) {
+        if (typeof res.headers.entries === 'function') {
+          headersObj = Object.fromEntries(res.headers.entries());
+        } else if (typeof res.headers.forEach === 'function') {
+          // Some environments expose headers with forEach
+          const tmp = {};
+          res.headers.forEach((value, key) => {
+            tmp[key] = value;
+          });
+          headersObj = tmp;
+        }
+      }
+    } catch (hdrErr) {
+      headersObj = { error: 'failed to read headers', message: String(hdrErr) };
+    }
+
     console.error(`API Error ${method} ${fullUrl}:`, {
-      status: res.status,
-      statusText: res.statusText,
+      status: res && res.status,
+      statusText: res && res.statusText,
       response: data,
-      headers: Object.fromEntries(res.headers.entries())
+      headers: headersObj,
     });
-  }    throw err;
   }
 
-  console.log(`API Success ${method} ${fullUrl}:`, data);
+  throw err;
+  }
+
+  if (data !== null && data !== undefined) {
+    console.log(`API Success ${method} ${fullUrl}:`, data);
+  }
   return data;
 }
 

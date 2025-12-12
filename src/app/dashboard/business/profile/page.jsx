@@ -4,16 +4,16 @@ import { useState, useEffect } from "react";
 import BusinessProfileCard from "@/components/dashboard/vendor/profile/BusinessProfileCard";
 import BusinessProfileProgress from "@/components/dashboard/vendor/profile/BusinessProfileProgress";
 import BusinessProfileDetails from "@/components/dashboard/vendor/profile/BusinessProfileDetails";
-import BusinessVerificationCard from "@/components/dashboard/vendor/profile/BusinessVerificationCard";
 import { BusinessEditProfileModal } from "@/components/dashboard/vendor/profile/BusinessEditProfileModal";
 import { useUserProfile } from "@/hooks/business/useUserProfileVendor";
 import { useBusiness } from '@/context/BusinessContext';
 import authService from '@/services/authService';
 import businessService from '@/services/business.service';
-import verificationService from '@/services/verification.service';
+// verification moved to Account Settings (VerificationSettings)
 import { useRouter } from 'next/navigation';
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 import { useToast } from "@/components/ui/ToastProvider";
+import DashboardHeader from '@/components/layout/DashboardHeader';
 import { ProtectedPage } from "@/components/ui/PageWrapper";
 import { useDataLoader } from "@/hooks/useDataLoader";
 
@@ -29,10 +29,7 @@ function BusinessProfileContent() {
   // State management
   const [showEdit, setShowEdit] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState({
-    state: 'not_started',
-    percent: 0
-  });
+  // Verification status is managed in Account Settings
 
   // Load business data using the simplified hook
   const {
@@ -44,13 +41,22 @@ function BusinessProfileContent() {
     async () => {
       if (!user) return null;
 
-      const business = await businessService.getMyBusinesses();
+      let business = await businessService.getMyBusinesses();
+
+      // Normalize backend shapes: array, wrapped object { user, business }, or direct object
+      if (Array.isArray(business)) {
+        business = business.length > 0 ? business[0] : null;
+      }
+      if (business && business.business) {
+        business = business.business;
+      }
+
       if (!business) {
         throw new Error('No business found. Please complete your business onboarding first.');
       }
 
       return {
-        id: business.id || business._id,
+        id: business.id || business._id || business.businessId,
         initials: business.businessName
           ?.split(" ")
           .map((word) => word[0])
@@ -59,19 +65,20 @@ function BusinessProfileContent() {
           .toUpperCase() || "SA",
         name: business.businessName || "Business Name",
         email: user?.email || business.email || "",
-        businessName: business.businessName || "",
-        businessLocation: business.businessLocation || "",
-        businessDescription: business.businessDescription || "",
-        phoneNumber: business.phoneNumber || user?.phoneNumber || "",
-        phoneNumber2: business.phoneNumber2 || "",
-        businessURL: business.businessURL || "",
+        businessName: business.businessName || business.name || "",
+        businessLocation: business.businessLocation || business.location || "",
+        // use backend-aligned keys
+        description: business.description || business.businessDescription || "",
+        phoneNumber: business.phoneNumber || business.businessPhone || user?.phoneNumber || "",
+        secondaryPhone: business.secondaryPhone || business.phoneNumber2 || "",
+        url: business.url || business.businessURL || "",
         bankName: business.bankName || "",
-        accountName: business.accountName || "",
-        accountNumber: business.accountNumber || "",
+        bankAccountName: business.bankAccountName || business.accountName || "",
+        bankAccountNumber: business.bankAccountNumber || business.accountNumber || "",
         faqs: business.faqs || null,
         serviceLicense: business.serviceLicense || null,
         availability: business.availability || "",
-        profileImage: business.profileImage || user?.avatar || null,
+        profileImage: business.profileImage || business.logo || user?.avatar || null,
       };
     },
     [user],
@@ -98,25 +105,7 @@ function BusinessProfileContent() {
     }
   }, [businessData, setContextBusiness]);
 
-  // Load verification status when business data is available
-  useEffect(() => {
-    const loadVerification = async () => {
-      if (!businessData?.id) return;
-
-      try {
-        const verificationData = await verificationService.getProgress(businessData.id);
-        setVerificationStatus({
-          state: verificationData.status,
-          percent: verificationData.progress
-        });
-      } catch (verificationError) {
-        console.warn('Could not load verification status:', verificationError);
-        setVerificationStatus({ state: 'not_started', percent: 0 });
-      }
-    };
-
-    loadVerification();
-  }, [businessData?.id]);
+  // Verification moved to settings; no local verification fetch here
 
   // Show loading only when actively fetching data
   if (profileLoading || businessLoading) {
@@ -185,11 +174,11 @@ function BusinessProfileContent() {
   const businessRequiredFields = [
     "businessName",
     "businessLocation",
-    "businessDescription",
-    "businessURL", // Business-specific URL
+    "description",
+    "url", // Business-specific URL
     "bankName",
-    "accountName",
-    "accountNumber",
+    "bankAccountName",
+    "bankAccountNumber",
     "faqs",
     "serviceLicense",
     "availability",
@@ -243,8 +232,8 @@ function BusinessProfileContent() {
 
   // Payment details formatted
   const paymentDetails =
-    businessData.bankName && businessData.accountNumber
-      ? `${businessData.accountNumber} - ${businessData.bankName}`
+    businessData.bankName && (businessData.bankAccountNumber || businessData.accountNumber)
+      ? `${businessData.bankAccountNumber || businessData.accountNumber} - ${businessData.bankName}`
       : null;
 
   const businessWithFormattedDetails = {
@@ -267,37 +256,47 @@ function BusinessProfileContent() {
       }
 
       // Update business profile
-      if (businessData.id || Object.keys(businessData).length > 0) {
-        // Create FormData to handle both regular fields and files
-        const formData = new FormData();
+      if (businessData && (businessData.id || Object.keys(businessData).length > 0)) {
+        const hasFile = (businessData.profileImage instanceof File) || (businessData.faqs instanceof File) || (businessData.serviceLicense instanceof File);
+        if (hasFile) {
+          const formData = new FormData();
+          Object.keys(businessData).forEach(key => {
+            const val = businessData[key];
+            if (val === null || val === undefined) return;
+            if (val instanceof File) {
+              formData.append(key, val);
+            } else if (typeof val === 'string' && val.trim() === '') {
+              // skip blank strings
+            } else {
+              formData.append(key, String(val));
+            }
+          });
 
-        // Add regular fields
-        Object.keys(businessData).forEach(key => {
-          if (businessData[key] !== null && businessData[key] !== undefined && 
-              businessData[key] !== '' && 
-              !(businessData[key] instanceof File)) {
-            formData.append(key, businessData[key]);
-          }
-        });
-
-        // Add files
-        if (businessData.profileImage instanceof File) {
-          formData.append('profileImage', businessData.profileImage);
+          await businessService.updateBusiness(businessData.id || businessData.businessId, formData);
+        } else {
+          const payload = { ...businessData };
+          Object.keys(payload).forEach(k => {
+            if (payload[k] === null || payload[k] === undefined || (typeof payload[k] === 'string' && payload[k].trim() === '')) {
+              delete payload[k];
+            }
+          });
+          await businessService.updateBusiness(businessData.id || businessData.businessId, payload);
         }
-        if (businessData.faqs instanceof File) {
-          formData.append('faqs', businessData.faqs);
-        }
-        if (businessData.serviceLicense instanceof File) {
-          formData.append('serviceLicense', businessData.serviceLicense);
-        }
-
-        // Update business with FormData
-        await businessService.updateBusiness(businessData.id || businessData.businessId, formData);
       }
 
-      // Update local state by refetching
-      refetchProfile();
-      refetchBusiness();
+      // Update local state by refetching core endpoints
+      await refetchProfile();
+      await refetchBusiness();
+
+      // Also refetch verification status for the business so UI reflects any verification-related changes
+      try {
+        const bizId = businessData.id || businessData.businessId || (businessData && businessData.id) || businessData;
+        if (bizId) {
+          await businessService.getVerificationStatus(bizId);
+        }
+      } catch (vErr) {
+        console.debug('verification refetch failed', vErr);
+      }
 
       toast?.success?.('Profile updated successfully');
       setShowEdit(false);
@@ -328,30 +327,23 @@ function BusinessProfileContent() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F6]">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Business Profile</h1>
-                <p className="mt-1 text-sm text-gray-600">Manage your business information and verification status</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowEdit(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  Edit Profile
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DashboardHeader
+        title="Business Profile"
+        subtitle="Manage your business information and verification status"
+        rightActions={(
+          <>
+            <button
+              onClick={() => setShowEdit(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit Profile
+            </button>
+          </>
+        )}
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -369,24 +361,12 @@ function BusinessProfileContent() {
             <BusinessProfileProgress
               progress={progress}
               profileProgress={profileProgress}
-              verificationState={verificationStatus.state}
-              verificationPercent={verificationStatus.percent}
+              business={businessData}
               onEdit={() => setShowEdit(true)}
               onSaveInfo={handleSaveInfo}
               onGetBookings={handleGetBookings}
-                  onVerify={() => {
-                    const target = businessData?.id ? `/dashboard/business/verification?businessId=${businessData.id}` : '/dashboard/business/verification';
-                    if (router && router.push) router.push(target);
-                    else window.location.href = target;
-                  }}
-            />
-
-            {/* Verification Card */}
-            <BusinessVerificationCard
-              verificationState={verificationStatus.state}
-              verificationPercent={verificationStatus.percent}
               onVerify={() => {
-                const target = businessData?.id ? `/dashboard/business/verification?businessId=${businessData.id}` : '/dashboard/business/verification';
+                const target = '/dashboard/business/settings';
                 if (router && router.push) router.push(target);
                 else window.location.href = target;
               }}

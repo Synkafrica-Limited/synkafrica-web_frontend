@@ -16,7 +16,7 @@ import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 export default function SimplePageWrapper({
   children,
   requireAuth = false,
-  redirectTo = "/auth/login",
+  redirectTo = "/business/login",
   loadingMessage = "Loading..."
 }) {
   const router = useRouter();
@@ -73,7 +73,7 @@ export function AuthPage({ children, redirectTo = "/dashboard/business" }) {
   );
 }
 
-export function ProtectedPage({ children, redirectTo = "/auth/login" }) {
+export function ProtectedPage({ children, redirectTo = "/business/login" }) {
   return (
     <SimplePageWrapper
       requireAuth={true}

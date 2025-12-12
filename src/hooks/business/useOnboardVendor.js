@@ -7,20 +7,17 @@ import authService from '@/services/authService';
 import { api } from '@/lib/fetchClient';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useBusiness } from '@/context/BusinessContext';
+import { handleApiError } from '@/utils/errorParser';
 
 export function useOnboardVendor() {
   const router = useRouter();
-  const toast = useToast();
+  const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Try to get BusinessContext if available (may not be present during onboarding pages)
-  let businessCtx = null;
-  try {
-    businessCtx = useBusiness();
-  } catch (e) {
-    businessCtx = null;
-  }
+  // Try to get BusinessContext if available (may not be present during onboarding pages)
+  const businessCtx = useBusiness();
 
   // split out fields for creating a business vs additional onboarding metadata
   const pickCreateFields = (data) => {
@@ -70,8 +67,9 @@ export function useOnboardVendor() {
       if (!token) {
         const msg = 'Authentication required. Please log in again.';
         console.error('[useOnboardVendor] No access token');
-        toast?.danger?.(msg);
+        addToast({ message: msg, type: 'error' });
         setError(msg);
+        setLoading(false);
         return null;
       }
 
@@ -137,6 +135,7 @@ export function useOnboardVendor() {
         console.error('[useOnboardVendor] create failed:', created);
         toast?.danger?.(msg);
         setError(msg);
+        setLoading(false);
         return null;
       }
 
@@ -185,17 +184,12 @@ export function useOnboardVendor() {
         console.warn('[useOnboardVendor] could not merge profile into BusinessContext:', err?.message || err);
       }
 
-      toast?.success?.('Business created and profile saved.');
-      router.replace('/dashboard/vendor');
+      addToast({ message: 'Business created and profile saved.', type: 'success' });
+      router.replace('/dashboard/business/home');
       return created;
     } catch (err) {
-      console.error('[useOnboardVendor] Error during onboarding:', err);
-      const msg = err?.message || 'Onboarding failed. Please try again.';
-      toast?.danger?.(msg);
-      setError(msg);
+      handleApiError(err, { addToast: (msg, type) => addToast({ message: msg, type: type || 'error' }) }, { setLoading, setError });
       return null;
-    } finally {
-      setLoading(false);
     }
   };
 

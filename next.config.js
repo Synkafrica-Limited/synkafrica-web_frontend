@@ -5,7 +5,10 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['your-image-domain.com'], // Replace or remove as needed
+    // Add remote image hosts you plan to use in production (CDNs, Cloudinary, etc.)
+    domains: ['res.cloudinary.com', 'images.unsplash.com', 'assets.vercel.com'],
+    // Allow local static images in /public by default; fine-tune sizes if needed
+    formats: ['image/avif', 'image/webp'],
   },
 }
 

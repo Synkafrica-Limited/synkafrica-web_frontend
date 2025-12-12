@@ -16,6 +16,7 @@ import {
   User,
   Bell,
   Settings,
+  MessageSquare,
 } from "lucide-react";
 
 import { useSignOut } from "@/hooks/business/useSignOut";
@@ -86,10 +87,10 @@ export default function BusinessSidebar() {
       active: pathname.startsWith("/dashboard/business/settings"),
     },
     {
-      label: "Dispute",
-      icon: AlertCircle,
-      href: "/dashboard/business/dispute",
-      active: pathname.startsWith("/dashboard/business/dispute"),
+      label: "Support",
+      icon: MessageSquare,
+      href: "/dashboard/business/support",
+      active: pathname.startsWith("/dashboard/business/support"),
     },
   ];
 
@@ -100,7 +101,7 @@ export default function BusinessSidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-40 p-2 bg-white rounded-lg shadow-lg border border-gray-200"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border border-gray-200"
       >
         <Menu className="w-6 h-6 text-gray-600" />
       </button>
@@ -120,10 +121,9 @@ export default function BusinessSidebar() {
           bg-white border-r border-gray-200 
           transition-all duration-300 flex flex-col
           w-64 z-50
-          ${
-            isMobileOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
+          ${isMobileOpen
+            ? "translate-x-0"
+            : "-translate-x-full lg:translate-x-0"
           }
         `}
       >
@@ -158,6 +158,20 @@ export default function BusinessSidebar() {
         {/* Navigation Menu */}
         <nav className="flex-1 py-6 px-3 overflow-y-auto">
           <ul className="space-y-1">
+            {/* Back to Vendor Homepage Link */}
+            <li className="mb-4 pb-4 border-b border-gray-200">
+              <Link
+                href="/business"
+                onClick={closeMobile}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group text-gray-700 hover:bg-gray-50 hover:text-primary-600"
+              >
+                <svg className="w-5 h-5 shrink-0 text-gray-500 group-hover:text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span className="font-medium text-sm">Back to Vendor Homepage</span>
+              </Link>
+            </li>
+
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -165,18 +179,16 @@ export default function BusinessSidebar() {
                   <Link
                     href={item.href}
                     onClick={closeMobile}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
-                      item.active
-                        ? "bg-primary-50 text-primary-600 border-l-4 border-primary-600"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${item.active
+                      ? "bg-primary-50 text-primary-600 border-l-4 border-primary-600"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
                   >
                     <Icon
-                      className={`w-5 h-5 shrink-0 ${
-                        item.active
-                          ? "text-primary-600"
-                          : "text-gray-500 group-hover:text-gray-900"
-                      }`}
+                      className={`w-5 h-5 shrink-0 ${item.active
+                        ? "text-primary-600"
+                        : "text-gray-500 group-hover:text-gray-900"
+                        }`}
                     />
                     <span className="font-medium text-sm">{item.label}</span>
                   </Link>

@@ -166,7 +166,7 @@ function BusinessProfileDetails({ business, user, onEdit }) {
               <div>
                 <label className="block text-xs text-gray-500 font-medium mb-1">Business Description</label>
                 <div className="text-sm text-gray-700 line-clamp-3">
-                  {business.businessDescription || <span className="text-gray-400 italic">Not set</span>}
+                  {business.description || business.businessDescription || <span className="text-gray-400 italic">Not set</span>}
                 </div>
               </div>
             </div>
@@ -186,11 +186,18 @@ function BusinessProfileDetails({ business, user, onEdit }) {
               </div>
 
               <div>
+                <label className="block text-xs text-gray-500 font-medium mb-1">Secondary Phone</label>
+                <div className="text-sm font-medium text-gray-900">
+                  {business.secondaryPhone || business.phoneNumber2 || <span className="text-gray-400 italic">Not set</span>}
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-xs text-gray-500 font-medium mb-1">Business URL</label>
                 <div className="text-sm text-blue-600 break-all">
-                  {business.businessURL ? (
-                    <a href={business.businessURL} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                      {business.businessURL}
+                  {business.url || business.businessURL ? (
+                    <a href={business.url || business.businessURL} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                      {business.url || business.businessURL}
                     </a>
                   ) : (
                     <span className="text-gray-400 italic">Not set</span>
@@ -201,7 +208,7 @@ function BusinessProfileDetails({ business, user, onEdit }) {
               <div>
                 <label className="block text-xs text-gray-500 font-medium mb-1">Email Address</label>
                 <div className="text-sm font-medium text-gray-900 break-all">
-                  {business.email}
+                  {business.businessEmail || business.email || <span className="text-gray-400 italic">Not set</span>}
                 </div>
               </div>
             </div>
@@ -216,24 +223,23 @@ function BusinessProfileDetails({ business, user, onEdit }) {
               <div>
                 <label className="block text-xs text-gray-500 font-medium mb-1">Payment Details</label>
                 <div className="text-sm font-medium text-gray-900">
-                  {business.paymentDetails || <span className="text-gray-400 italic">Not set</span>}
+                  {business.bankAccountNumber && business.bankName ? (
+                    `${business.bankAccountNumber} - ${business.bankName}`
+                  ) : business.paymentDetails || <span className="text-gray-400 italic">Not set</span>}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs text-gray-500 font-medium mb-1">Business FAQs</label>
-                <div className="flex items-center gap-2">
-                  {business.faqs ? (
-                    <>
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-green-700 font-medium">Uploaded</span>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                      <span className="text-sm text-gray-400 italic">Not uploaded</span>
-                    </>
-                  )}
+                <label className="block text-xs text-gray-500 font-medium mb-1">Account Holder</label>
+                <div className="text-sm font-medium text-gray-900">
+                  {business.bankAccountName || business.accountName || <span className="text-gray-400 italic">Not set</span>}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-500 font-medium mb-1">Account Number</label>
+                <div className="text-sm font-medium text-gray-900">
+                  {business.bankAccountNumber || business.accountNumber || <span className="text-gray-400 italic">Not set</span>}
                 </div>
               </div>
 

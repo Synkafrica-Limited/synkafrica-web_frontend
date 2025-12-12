@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useCreateFineDiningListing } from '@/hooks/business/useCreateFineDiningListing';
 import { Toast } from "@/components/ui/Toast";
 
 export default function NewFineDiningListing() {
   const router = useRouter();
   const { toasts, addToast, removeToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { createFineDiningListing, isSubmitting: creating } = useCreateFineDiningListing();
   const [form, setForm] = useState({
     restaurantName: "",
     cuisineType: [],
@@ -62,14 +64,11 @@ export default function NewFineDiningListing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Fine dining listing:", form, images, menuPDF);
-      addToast("Fine dining listing created successfully!", "success");
-      setTimeout(() => router.push("/dashboard/business/listings"), 1000);
-    } catch {
-      addToast("Failed to create listing. Please try again.", "error");
+      await createFineDiningListing(form, images, menuPDF);
+    } catch (err) {
+      // handled in hook
+    } finally {
       setIsSubmitting(false);
     }
   };

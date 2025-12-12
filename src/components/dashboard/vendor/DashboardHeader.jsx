@@ -77,7 +77,7 @@ export default function DashboardHeader({ title = "Overview" }) {
 
           {/* User Profile */}
           {/* Quick verify CTA */}
-          <Link href="/dashboard/business/verification" className="hidden lg:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-primary-500 text-primary-600 hover:bg-primary-50 transition-colors text-sm">
+          <Link href="/dashboard/business/settings?tab=verification" className="hidden lg:inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-primary-500 text-primary-600 hover:bg-primary-50 transition-colors text-sm">
             Verify business
           </Link>
           <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-primary-500 transition-colors shrink-0">

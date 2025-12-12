@@ -1,95 +1,118 @@
-// hooks/business/useVendorBookings.js
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useBusiness } from "@/hooks/business/useBusiness";
+import { useState, useEffect, useCallback } from "react";
+import bookingsService from "@/services/bookings.service";
 
-const API_URL = "https://synkkafrica-backend-core.onrender.com/api/bookings/business";
-
-export const useVendorBookings = (token, options = {}) => {
+export const useVendorBookings = (options = {}) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Use refs to prevent unnecessary re-renders
-  const optionsRef = useRef(options);
-  const tokenRef = useRef(token);
 
-  // Update refs when dependencies change
-  useEffect(() => {
-    optionsRef.current = options;
-    tokenRef.current = token;
-  }, [options, token]);
-
-  // Fetch business data to get businessId
-  const { business, loading: businessLoading, error: businessError } = useBusiness(token);
+  // Extract status to avoid object dependency issues
+  const status = options.status;
 
   const fetchBookings = useCallback(async () => {
-    const currentToken = tokenRef.current;
-    const currentOptions = optionsRef.current;
-
-    if (!currentToken || !business) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
+    // Map UI status (e.g. "pending") to backend enum (e.g. "PENDING")
+    const backendStatus = status ? status.toString().toUpperCase() : undefined;
 
     try {
-      // Build query parameters
-      const queryParams = new URLSearchParams();
-      if (currentOptions.status) queryParams.append('status', currentOptions.status);
-      if (currentOptions.dateRange) queryParams.append('dateRange', currentOptions.dateRange);
-      
-      const queryString = queryParams.toString();
-      const url = `${API_URL}/${business.id}${queryString ? `?${queryString}` : ''}`;
+      setLoading(true);
+      setError(null);
 
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${currentToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const params = {};
+      if (backendStatus) params.status = backendStatus;
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      console.log("Fetching vendor bookings with params:", params);
+
+      const data = await bookingsService.getVendorBookings(params);
+
+      // Normalize various possible response shapes to a flat array
+      let normalized = [];
+
+      if (Array.isArray(data)) {
+        normalized = data;
+      } else if (data?.bookings && Array.isArray(data.bookings)) {
+        normalized = data.bookings;
+      } else if (Array.isArray(data?.items)) {
+        normalized = data.items;
+      } else if (Array.isArray(data?.data)) {
+        normalized = data.data;
+      } else if (Array.isArray(data?.data?.items)) {
+        normalized = data.data.items;
       }
 
-      const data = await response.json();
-      setBookings(data || []);
+      // Adapt backend shape to what the UI expects
+      const adapted = normalized.map((booking) => {
+        const statusLower = booking.status ? booking.status.toString().toLowerCase() : undefined;
+
+        // Build a customer object if only flat fields are present
+        const hasUserNames = booking.user?.firstName || booking.user?.lastName;
+        const fullNameFromUser = hasUserNames
+          ? [booking.user?.firstName, booking.user?.lastName].filter(Boolean).join(" ")
+          : null;
+
+        const customer = booking.customer || {
+          name: booking.customerName || fullNameFromUser || 'N/A',
+          email: booking.customerEmail || booking.user?.email || null,
+          phone: booking.customerPhone || booking.user?.phoneNumber || null,
+        };
+
+        // Derive a human-friendly duration if not provided
+        let duration = booking.duration;
+        if (!duration && booking.startDate && booking.endDate) {
+          const start = new Date(booking.startDate);
+          const end = new Date(booking.endDate);
+          if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && end >= start) {
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const diffDays = Math.round((end.getTime() - start.getTime()) / msPerDay);
+            if (diffDays === 0) {
+              duration = 'Same day';
+            } else if (diffDays === 1) {
+              duration = '1 day';
+            } else {
+              duration = `${diffDays} days`;
+            }
+          }
+        }
+
+        // Pick a best-effort location
+        const location = booking.pickupLocation
+          || booking.location
+          || booking.listing?.location
+          || null;
+
+        return {
+          ...booking,
+          status: statusLower || booking.status,
+          customer,
+          duration,
+          totalAmount: booking.totalAmount ?? booking.totalPrice ?? 0,
+          pickupLocation: location,
+        };
+      });
+
+      setBookings(adapted);
     } catch (err) {
-      console.error("Failed to fetch bookings:", err);
-      setError(err.message || "Failed to load bookings");
+      console.error("Failed to fetch vendor bookings:", {
+        error: err,
+        message: err?.message,
+        status,
+      });
+      setError(err?.message || "Failed to load bookings");
+      setBookings([]);
     } finally {
       setLoading(false);
     }
-  }, [business]); // Only depend on business
+  }, [status]); // Only depend on status, not the entire options object
 
   useEffect(() => {
-    if (!businessLoading && business) {
-      fetchBookings();
-    } else if (!businessLoading && !business) {
-      // If business loading is done but no business found
-      setLoading(false);
-      setBookings([]);
-    }
-  }, [fetchBookings, business, businessLoading]);
+    fetchBookings();
+  }, [fetchBookings]);
 
-  // Combined loading state
-  const combinedLoading = loading || businessLoading;
-  // Combined error state (prioritize business errors first)
-  const combinedError = businessError || error;
-
-  return { 
-    bookings, 
-    loading: combinedLoading, 
-    error: combinedError, 
+  return {
+    bookings,
+    loading,
+    error,
     refetch: fetchBookings,
-    businessLoading,
-    businessError
   };
 };
-
-export default useVendorBookings;

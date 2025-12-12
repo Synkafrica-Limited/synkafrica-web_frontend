@@ -1,0 +1,21 @@
+{
+  "name": "SynKKafrica",
+  "short_name": "SynKK",
+  "description": "Empowering mobility across Africa — discover and book services and transport.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b5cff",
+  "icons": [
+    {
+      "src": "/icons/Group 287.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/Vector.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,8 +1,15 @@
 import { api } from '../lib/fetchClient';
 import authService from './authService';
+import { parseApiError } from '@/utils/errorParser';
 
-export function onboardBusiness(payload) {
-  return api.post('/api/business', payload, { auth: true });
+export async function onboardBusiness(payload) {
+  try {
+    return await api.post('/api/business', payload, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] onboardBusiness error:', message);
+    throw new Error(message);
+  }
 }
 
 export async function getMyBusinesses() {
@@ -13,61 +20,142 @@ export async function getMyBusinesses() {
     console.debug('[business.service] getMyBusinesses - token present:', !!token, token ? `${String(token).slice(0, 8)}...` : null);
     const res = await api.get('/api/business', { auth: true });
     console.debug('[business.service] getMyBusinesses response:', res);
-    return res;
+    // Normalize backend payloads: some backends return an array, others return { business } or a single object
+    let business = res;
+    if (Array.isArray(res)) {
+      business = res.length > 0 ? res[0] : null;
+    }
+    if (business && business.business) {
+      business = business.business;
+    }
+
+    return business;
   } catch (err) {
-    console.error('[business.service] getMyBusinesses error:', err);
-    throw err;
+    const message = parseApiError(err);
+    console.error('[business.service] getMyBusinesses error:', message);
+    throw new Error(message);
   }
 }
 
-export function getBusinessById(id) {
-  return api.get(`/api/business/${id}`, { auth: true });
+export async function getBusinessById(id) {
+  try {
+    return await api.get(`/api/business/${id}`, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] getBusinessById error:', message);
+    throw new Error(message);
+  }
 }
 
-export function updateBusiness(id, payload) {
-  return api.patch(`/api/business/${id}`, payload, { auth: true });
+export async function updateBusiness(id, payload) {
+  try {
+    return await api.patch(`/api/business/${id}`, payload, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] updateBusiness error:', message);
+    throw new Error(message);
+  }
 }
 
-export function deleteBusiness(id) {
-  return api.del(`/api/business/${id}`, { auth: true });
+export async function deleteBusiness(id) {
+  try {
+    return await api.del(`/api/business/${id}`, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] deleteBusiness error:', message);
+    throw new Error(message);
+  }
 }
 
-export function addStaff(businessId, payload) {
-  return api.post(`/api/business/${businessId}/staff`, payload, { auth: true });
+export async function addStaff(businessId, payload) {
+  try {
+    return await api.post(`/api/business/${businessId}/staff`, payload, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] addStaff error:', message);
+    throw new Error(message);
+  }
 }
 
-export function removeStaff(businessId, staffId) {
-  return api.del(`/api/business/${businessId}/staff/${staffId}`, { auth: true });
+export async function removeStaff(businessId, staffId) {
+  try {
+    return await api.del(`/api/business/${businessId}/staff/${staffId}`, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] removeStaff error:', message);
+    throw new Error(message);
+  }
 }
 
-export function uploadVerification(businessId, formData) {
-  // formData should be an instance of FormData
-  return api.post(`/api/business/${businessId}/verification`, formData, { auth: true });
+export async function uploadVerification(businessId, formData) {
+  try {
+    return await api.post(`/api/business/${businessId}/verification`, formData, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] uploadVerification error:', message);
+    throw new Error(message);
+  }
 }
 
-export function updateVerification(businessId, payload) {
-  return api.patch(`/api/business/${businessId}/verification`, payload, { auth: true });
+export async function updateVerification(businessId, payload) {
+  try {
+    return await api.patch(`/api/business/${businessId}/verification`, payload, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] updateVerification error:', message);
+    throw new Error(message);
+  }
 }
 
-export function getVerificationStatus(businessId) {
-  return api.get(`/api/business/${businessId}/verification`, { auth: true });
+export async function getVerificationStatus(businessId) {
+  try {
+    return await api.get(`/api/business/${businessId}/verification`, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] getVerificationStatus error:', message);
+    throw new Error(message);
+  }
 }
 
-export function getVerificationDetails(businessId) {
-  return api.get(`/api/business/${businessId}/verification/details`, { auth: true });
+export async function getVerificationDetails(businessId) {
+  try {
+    return await api.get(`/api/business/${businessId}/verification/details`, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] getVerificationDetails error:', message);
+    throw new Error(message);
+  }
 }
 
-export function resubmitVerification(businessId, formData) {
-  // formData should be an instance of FormData
-  return api.put(`/api/business/${businessId}/verification`, formData, { auth: true });
+export async function resubmitVerification(businessId, formData) {
+  try {
+    // formData should be an instance of FormData
+    return await api.put(`/api/business/${businessId}/verification`, formData, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] resubmitVerification error:', message);
+    throw new Error(message);
+  }
 }
 
-export function cancelVerification(businessId) {
-  return api.del(`/api/business/${businessId}/verification`, { auth: true });
+export async function cancelVerification(businessId) {
+  try {
+    return await api.del(`/api/business/${businessId}/verification`, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] cancelVerification error:', message);
+    throw new Error(message);
+  }
 }
 
-export function getVerificationHistory(businessId) {
-  return api.get(`/api/business/${businessId}/verification/history`, { auth: true });
+export async function getVerificationHistory(businessId) {
+  try {
+    return await api.get(`/api/business/${businessId}/verification/history`, { auth: true });
+  } catch (err) {
+    const message = parseApiError(err);
+    console.error('[business.service] getVerificationHistory error:', message);
+    throw new Error(message);
+  }
 }
 
 // Helper function to check if business is verified

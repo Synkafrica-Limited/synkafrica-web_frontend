@@ -53,16 +53,15 @@ export default function FilterBar({
 
         {/* Button Filters */}
         {filters.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
             {filters.map((filter) => (
               <button
                 key={filter.value}
                 onClick={() => onFilterChange(filter.value)}
-                className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                  activeFilter === filter.value
+                className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${activeFilter === filter.value
                     ? filter.activeClass || "bg-primary-500 text-white"
                     : filter.inactiveClass || "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {filter.label} {filter.count !== undefined && `(${filter.count})`}
               </button>

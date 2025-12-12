@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
-import { useToast } from "@/hooks/useNotifications";
+import { useToast } from "@/components/ui/ToastProvider";
+import { useCreateConvenienceListing } from '@/hooks/business/useCreateConvenienceListing';
 import { Toast } from "@/components/ui/Toast";
 
 export default function NewCont4venienceListing() {
   const router = useRouter();
   const { toasts, addToast, removeToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { createConvenienceListing, isSubmitting: creating } = useCreateConvenienceListing();
   const [form, setForm] = useState({
     serviceName: "",
     serviceType: "",
@@ -54,14 +56,11 @@ export default function NewCont4venienceListing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Convenience service listing:", form, images);
-      addToast("Convenience service listing created successfully!", "success");
-      setTimeout(() => router.push("/dashboard/business/listings"), 1000);
-    } catch {
-      addToast("Failed to create listing. Please try again.", "error");
+      await createConvenienceListing(form, images);
+    } catch (err) {
+      // handled in hook
+    } finally {
       setIsSubmitting(false);
     }
   };
