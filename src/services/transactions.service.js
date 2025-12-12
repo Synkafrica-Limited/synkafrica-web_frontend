@@ -17,7 +17,11 @@ export function requestPayoutForTransactions(payload) {
 }
 
 export function getCustomerTransactions() {
-  return api.get('/api/transactions/me', { auth: true });
+  return api.get('/api/transactions/customer/my-transactions', { auth: true });
+}
+
+export function getTransactionDetails(transactionId) {
+  return api.get(`/api/transactions/${transactionId}`, { auth: true });
 }
 
 const transactionsService = {
@@ -26,6 +30,7 @@ const transactionsService = {
   requestPayout,
   requestPayoutForTransactions,
   getCustomerTransactions,
+  getTransactionDetails,
 };
 
 export default transactionsService;

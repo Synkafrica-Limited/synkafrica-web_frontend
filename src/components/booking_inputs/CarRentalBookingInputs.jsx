@@ -110,30 +110,28 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
 
   return (
     <div
-      className={`mt-4 sm:mt-6 p-4 sm:p-6 bg-white rounded-3xl relative ${
-        showBorder
-          ? 'shadow-[0_20px_60px_-15px_rgba(223,93,61,0.4),0_10px_30px_-10px_rgba(223,93,61,0.3)] border border-orange-50'
-          : ''
+      className={`mt-4 bg-white rounded-lg relative ${
+        showBorder ? 'shadow-xl' : 'shadow-lg'
       }`}
     >
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4">
+      <div className="p-2 grid grid-cols-1 md:grid-cols-4 gap-2">
         {/* Pickup Location */}
         <div className="flex flex-col relative" ref={dropdownRef}>
           <div className={`relative transition-all duration-200 ${
             focusedField === 'location' 
-              ? 'ring-2 ring-[#DF5D3D]/20 rounded-xl' 
+              ? 'z-20' 
               : ''
           }`}>
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
               <MapPin className={`w-5 h-5 transition-colors ${
                 focusedField === 'location' || pickupLocation
-                  ? 'text-[#DF5D3D]'
+                  ? 'text-gray-800'
                   : 'text-gray-400'
               }`} />
             </div>
             <input
               type="text"
-              placeholder="Pickup location"
+              placeholder="Where are you going?"
               value={pickupLocation}
               onChange={(e) => handleLocationChange(e.target.value)}
               onFocus={() => {
@@ -143,53 +141,49 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
                 }
               }}
               onBlur={() => setFocusedField(null)}
-              className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder:text-gray-400 ${
+              className={`w-full pl-10 pr-4 py-3.5 border-2 rounded-md focus:outline-none transition-all duration-200 placeholder:text-gray-500 font-medium text-gray-900 ${
                 errors.pickupLocation 
-                  ? 'border-red-400 bg-red-50/30' 
+                  ? 'border-red-500' 
                   : focusedField === 'location'
-                  ? 'border-[#DF5D3D] bg-orange-50/30'
-                  : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
+                  ? 'border-primary-500'
+                  : 'border-transparent hover:bg-gray-50'
               }`}
             />
           </div>
           
           {showSuggestions && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-100 rounded-xl shadow-xl max-h-64 overflow-y-auto z-20">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-64 overflow-y-auto z-50">
               {filteredLocations.length > 0 ? (
                 filteredLocations.map((location, index) => (
                   <div
                     key={index}
                     onClick={() => handleLocationSelect(location)}
-                    className="px-4 py-3 hover:bg-orange-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 group"
+                    className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 group"
                   >
-                    <MapPin className="w-4 h-4 text-gray-400 group-hover:text-[#DF5D3D] transition-colors" />
-                    <span className="text-sm text-gray-700 group-hover:text-gray-900">{location}</span>
+                    <MapPin className="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" />
+                    <span className="text-sm text-gray-700 font-medium group-hover:text-gray-900">{location}</span>
                   </div>
                 ))
               ) : (
                 <div className="px-4 py-4 text-gray-500 text-sm text-center">
-                  Sorry, our service is not available in this location yet.
+                  Location not found
                 </div>
               )}
             </div>
           )}
-          
-          {errors.pickupLocation && (
-            <span className="text-red-500 text-xs mt-1.5 ml-1 font-medium">{errors.pickupLocation}</span>
-          )}
         </div>
 
         {/* Pickup Date */}
-        <div className="flex flex-col relative">
+        <div className="flex flex-col relative border-l-0 md:border-l-2 border-gray-100">
           <div className={`relative transition-all duration-200 ${
             focusedField === 'date' 
-              ? 'ring-2 ring-[#DF5D3D]/20 rounded-xl' 
+              ? 'z-20' 
               : ''
           }`}>
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
               <Calendar className={`w-5 h-5 transition-colors ${
                 focusedField === 'date' || pickupDate
-                  ? 'text-[#DF5D3D]'
+                  ? 'text-gray-800'
                   : 'text-gray-400'
               }`} />
             </div>
@@ -205,38 +199,34 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
               onFocus={() => setFocusedField('date')}
               onBlur={() => setFocusedField(null)}
               min={new Date().toISOString().split('T')[0]}
-              className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl focus:outline-none transition-all duration-200 ${
+              className={`w-full pl-10 pr-4 py-3.5 border-2 rounded-md focus:outline-none transition-all duration-200 font-medium cursor-pointer ${
                 errors.pickupDate 
-                  ? 'border-red-400 bg-red-50/30' 
+                  ? 'border-red-500' 
                   : focusedField === 'date'
-                  ? 'border-[#DF5D3D] bg-orange-50/30'
-                  : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
+                  ? 'border-primary-500'
+                  : 'border-transparent hover:bg-gray-50'
               } ${pickupDate || focusedField === 'date' ? 'text-gray-900' : 'text-transparent'}`}
               style={{ colorScheme: 'light' }}
             />
             {!pickupDate && focusedField !== 'date' && (
-              <span className="absolute left-12 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[15px] z-0">
-                Pickup date
+              <span className="absolute left-10 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none text-[15px] font-medium z-0">
+                Check-in Date
               </span>
             )}
           </div>
-          
-          {errors.pickupDate && (
-            <span className="text-red-500 text-xs mt-1.5 ml-1 font-medium">{errors.pickupDate}</span>
-          )}
         </div>
 
         {/* Pickup Time */}
-        <div className="flex flex-col relative">
+        <div className="flex flex-col relative border-l-0 md:border-l-2 border-gray-100">
           <div className={`relative transition-all duration-200 ${
             focusedField === 'time' 
-              ? 'ring-2 ring-[#DF5D3D]/20 rounded-xl' 
+              ? 'z-20' 
               : ''
           }`}>
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
               <Clock className={`w-5 h-5 transition-colors ${
                 focusedField === 'time' || pickupTime
-                  ? 'text-[#DF5D3D]'
+                  ? 'text-gray-800'
                   : 'text-gray-400'
               }`} />
             </div>
@@ -251,41 +241,37 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
               }}
               onFocus={() => setFocusedField('time')}
               onBlur={() => setFocusedField(null)}
-              className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl focus:outline-none transition-all duration-200 [&::-webkit-calendar-picker-indicator]:cursor-pointer ${
+              className={`w-full pl-10 pr-4 py-3.5 border-2 rounded-md focus:outline-none transition-all duration-200 font-medium cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer ${
                 errors.pickupTime 
-                  ? 'border-red-400 bg-red-50/30' 
+                  ? 'border-red-500' 
                   : focusedField === 'time'
-                  ? 'border-[#DF5D3D] bg-orange-50/30'
-                  : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
+                  ? 'border-primary-500'
+                  : 'border-transparent hover:bg-gray-50'
               } ${pickupTime || focusedField === 'time' ? 'text-gray-900' : 'text-transparent'}`}
               style={{ colorScheme: 'light' }}
             />
             {!pickupTime && focusedField !== 'time' && (
-              <span className="absolute left-12 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[15px] z-0">
-                Pickup time
+              <span className="absolute left-10 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none text-[15px] font-medium z-0">
+                Time
               </span>
             )}
           </div>
-          
-          {errors.pickupTime && (
-            <span className="text-red-500 text-xs mt-1.5 ml-1 font-medium">{errors.pickupTime}</span>
-          )}
         </div>
 
         {/* Search Button */}
-        <button
-          onClick={handleSearch}
-          disabled={!isFormValid}
-          className={`px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-            isFormValid
-              ? 'bg-[#DF5D3D] hover:bg-[#c94e30] active:bg-[#b33d20] text-white shadow-lg shadow-[#DF5D3D]/30 hover:shadow-xl hover:shadow-[#DF5D3D]/40 hover:-translate-y-0.5'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          <Search className="w-5 h-5" />
-          <span className="hidden sm:inline">Search Cars</span>
-          <span className="sm:hidden">Search</span>
-        </button>
+        <div className="p-1">
+          <button
+            onClick={handleSearch}
+            className={`w-full h-full min-h-[50px] rounded-md font-bold text-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+              isFormValid
+                ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-none'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <span className="hidden sm:inline">Search</span>
+            <span className="sm:hidden">Search</span>
+          </button>
+        </div>
       </div>
     </div>
   );

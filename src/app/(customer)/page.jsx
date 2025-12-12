@@ -196,39 +196,43 @@ export default function HomePage() {
     <main className="min-h-screen">
       <div className="space-y-5">
         {/* Hero Section */}
-        <div className="p-4 sm:p-6 md:p-8 mt-[30px] sm:mt-[20px]">
+        <div className="bg-[#E05D3D] pt-8 pb-16 sm:pb-24 px-4 sm:px-6 md:px-8 -mt-5">
           <div className="max-w-6xl mx-auto">
-            {/* Service Navigation */}
-            <div className="flex flex-wrap gap-1 sm:gap-2 mb-0 sm:mb-0">
-              {services.map((service) => (
-                <button
-                  key={service.id}
-                  onClick={() => setActiveService(service.id)}
-                  className={`flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
-                    activeService === service.id
-                      ? "bg-[#1F2937] text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-                  }`}
-                >
-                  <service.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="whitespace-nowrap">{service.label}</span>
-                </button>
-              ))}
-            </div>
-
+            
             {/* Hero Content */}
-            <div className="mb-0 sm:mb-0 mt-[40px]">
-              <h1 className="text-[50px] font-bold text-gray-900 mb-0 leading-tight whitespace-pre-line">
+            <div className="mb-8 sm:mb-10 text-center sm:text-left">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 leading-tight whitespace-pre-line">
                 {content.heading}
               </h1>
+              <p className="text-xl text-white/90 mb-8 max-w-2xl">
+                 Search low prices on hotels, homes and much more...
+              </p>
+
+              {/* Service Navigation */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {services.map((service) => (
+                  <button
+                    key={service.id}
+                    onClick={() => setActiveService(service.id)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
+                      activeService === service.id
+                        ? "bg-white text-primary-600 shadow-sm"
+                        : "bg-primary-600/30 text-white hover:bg-primary-600/50 backdrop-blur-sm"
+                    }`}
+                  >
+                    <service.icon className="w-4 h-4" />
+                    <span className="whitespace-nowrap">{service.label}</span>
+                  </button>
+                ))}
+              </div>
 
               {/* Features */}
-              <div className="relative mt-[20px]">
-                <div className="flex overflow-x-auto gap-24 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+              <div className="relative mt-4 hidden sm:block">
+                <div className="flex flex-wrap gap-x-8 gap-y-2">
                   {content.features.map((feature, index) => (
                     <div
                       key={index}
-                      className="text-gray-600 text-[14px] whitespace-nowrap flex-shrink-0 flex items-center gap-2"
+                      className="text-white/90 text-sm flex items-center gap-2"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -237,10 +241,10 @@ export default function HomePage() {
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="3"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="text-green-600"
+                        className="text-white"
                       >
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
@@ -251,36 +255,22 @@ export default function HomePage() {
               </div>
 
               {/* Dynamic booking inputs */}
-              {activeService === "car" && (
-                <CarRentalBookingInputs onSearch={handleSearch} />
-              )}
-              {activeService === "dining" && (
-                <DiningBookingInputs onSearch={handleSearch} />
-              )}
-              {activeService === "resort" && (
-                <ResortHouseBookingInputs onSearch={handleSearch} />
-              )}
-              {activeService === "water" && (
-                <WaterRecreationBookingInputs onSearch={handleSearch} />
-              )}
-              {activeService === "other" && (
-                <OtherServicesBookingInputs onSearch={handleSearch} />
-              )}
-
-              {/* Stats Component */}
-              <div className="mt-6 sm:mt-8 bg-[#FFF] rounded-2xl border border-[#EAEAEA] p-4 sm:p-6">
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-                  {content.stats.map((stat, index) => (
-                    <div key={index} className="text-center">
-                      <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1">
-                        {stat.value}
-                      </div>
-                      <div className="text-xs sm:text-sm text-gray-600">
-                        {stat.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className="mt-8">
+                {activeService === "car" && (
+                  <CarRentalBookingInputs onSearch={handleSearch} showBorder={false} />
+                )}
+                {activeService === "dining" && (
+                  <DiningBookingInputs onSearch={handleSearch} showBorder={false} />
+                )}
+                {activeService === "resort" && (
+                  <ResortHouseBookingInputs onSearch={handleSearch} showBorder={false} />
+                )}
+                {activeService === "water" && (
+                  <WaterRecreationBookingInputs onSearch={handleSearch} showBorder={false} />
+                )}
+                {activeService === "other" && (
+                  <OtherServicesBookingInputs onSearch={handleSearch} showBorder={false} />
+                )}
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import authService from '@/services/authService';
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://synkkafrica-backend-core.onrender.com';
+const BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://api.synkkafrica.com';
 
 function buildUrl(path) {
   if (!path) return BASE;

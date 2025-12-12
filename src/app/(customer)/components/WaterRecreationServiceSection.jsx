@@ -1,81 +1,93 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProductCard from "@/components/cards/ProductCard";
+import { getListings } from "@/services/listings.service";
 
 const WaterRecreation = () => {
-  const activityCategories = [
-    "Jet Ski",
-    "Boat Ride",
-    "Yacht",
-    "Cruise",
-    "Boat Party",
-    "Kayaking",
-    "Banana Ride",
-    "Fishing Tour",
-  ];
-
-  const activities = [
-    {
-      id: 1,
-      image:
-        "https://images.unsplash.com/photo-1600431521340-491eca880813?w=500&h=300&fit=crop",
-      name: "Jet Ski Adventure",
-      price: 75000,
-      location: "Lekki, Lagos",
-      category: "Jet Ski",
-    },
-    {
-      id: 2,
-      image:
-        "https://images.unsplash.com/photo-1570284613060-766c3508f6a2?w=500&h=300&fit=crop",
-      name: "Luxury Yacht Experience",
-      price: 320000,
-      location: "Victoria Island, Lagos",
-      category: "Yacht",
-    },
-    {
-      id: 3,
-      image:
-        "https://images.unsplash.com/photo-1590080875831-f8a2d3d6b6d8?w=500&h=300&fit=crop",
-      name: "Sunset Boat Cruise",
-      price: 150000,
-      location: "Ikoyi, Lagos",
-      category: "Cruise",
-    },
-    {
-      id: 4,
-      image:
-        "https://images.unsplash.com/photo-1590080875831-f8a2d3d6b6d8?w=500&h=300&fit=crop",
-      name: "Private Boat Party",
-      price: 270000,
-      location: "Banana Island, Lagos",
-      category: "Boat Party",
-    },
-    {
-      id: 5,
-      image:
-        "https://images.unsplash.com/photo-1561473880-3b1e04b9e28a?w=500&h=300&fit=crop",
-      name: "Kayaking Experience",
-      price: 50000,
-      location: "Tarkwa Bay, Lagos",
-      category: "Kayaking",
-    },
-    {
-      id: 6,
-      image:
-        "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=500&h=300&fit=crop",
-      name: "Deep Sea Fishing Tour",
-      price: 180000,
-      location: "Port Harcourt, Rivers",
-      category: "Fishing Tour",
-    },
-  ];
-
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [activityCategories, setActivityCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        setLoading(true);
+        const response = await getListings({ serviceType: 'WATER_RECREATION' });
+        
+        // Handle different response formats
+        let apiListings = [];
+        if (Array.isArray(response)) {
+          apiListings = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          apiListings = response.data;
+        } else if (response.listings && Array.isArray(response.listings)) {
+          apiListings = response.listings;
+        }
+
+        // Explicitly filter by category to ensure data integrity
+        apiListings = apiListings.filter(listing => listing.category === 'WATER_RECREATION');
+
+        // Transform data
+        const transformedActivities = apiListings.map(listing => {
+          // Image handling
+          let imageUrl = 'https://via.placeholder.com/500x300';
+          if (listing.images && listing.images.length > 0) {
+            const img = listing.images[0];
+            if (typeof img === 'string') imageUrl = img;
+            else if (typeof img === 'object') imageUrl = img.secure_url || img.url || imageUrl;
+          }
+
+          // Location handling
+          let locationStr = 'Lagos';
+          if (typeof listing.location === 'string') {
+            try {
+              const loc = JSON.parse(listing.location);
+              locationStr = loc.city || listing.location;
+            } catch (e) { locationStr = listing.location; }
+          } else if (listing.location?.city) {
+            locationStr = listing.location.city;
+          }
+
+          return {
+            id: listing.id || listing._id,
+            image: imageUrl,
+            name: listing.title || listing.name || 'Water Adventure',
+            price: listing.pricing?.basePrice || listing.basePrice || 0,
+            location: locationStr,
+            category: listing.category || 'Adventure'
+          };
+        });
+
+        setActivities(transformedActivities);
+
+        // Extract unique categories
+        const categories = [...new Set(transformedActivities.map(a => a.category))].filter(Boolean).sort();
+        setActivityCategories(categories);
+
+      } catch (err) {
+        console.error("Failed to fetch water activities:", err);
+        setError("Failed to load activities");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchActivities();
+  }, []);
 
   const filteredActivities =
     activeCategory === "All"
       ? activities
       : activities.filter((act) => act.category === activeCategory);
+
+  if (loading) {
+    return <div className="py-20 text-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div></div>;
+  }
+
+  if (error) {
+    return <div className="py-20 text-center text-red-500">Failed to load water activities. Please try again later.</div>;
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12">
@@ -103,34 +115,43 @@ const WaterRecreation = () => {
         </div>
 
         {/* Activity Filters */}
-        <div className="flex items-center gap-3 mb-8 overflow-x-auto pb-3">
-          {["All", ...activityCategories].map((category, index) => (
-            <button
-              key={index}
-              onClick={() => setActiveCategory(category)}
-              className={`flex-shrink-0 px-5 py-2 rounded-full border text-sm font-medium transition-colors duration-200 ${
-                activeCategory === category
-                  ? "bg-primary-500 text-white border-primary-500"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
+        {activityCategories.length > 0 && (
+          <div className="flex items-center gap-3 mb-8 overflow-x-auto pb-3">
+            {["All", ...activityCategories].map((category, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveCategory(category)}
+                className={`flex-shrink-0 px-5 py-2 rounded-full border text-sm font-medium transition-colors duration-200 ${
+                  activeCategory === category
+                    ? "bg-primary-500 text-white border-primary-500"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Activity Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredActivities.map((activity) => (
-            <ProductCard
-              key={activity.id}
-              type="recreation"
-              image={activity.image}
-              name={activity.name}
-              price={activity.price}
-              location={activity.location}
-            />
-          ))}
+          {filteredActivities.length > 0 ? (
+            filteredActivities.slice(0, 6).map((activity) => (
+              <ProductCard
+                key={activity.id}
+                type="recreation"
+                id={activity.id}
+                image={activity.image}
+                name={activity.name}
+                price={activity.price}
+                location={activity.location}
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center text-gray-500 py-10">
+              No activities found{activeCategory !== "All" && <> for <span className="font-semibold">{activeCategory}</span></>}.
+            </div>
+          )}
         </div>
       </div>
     </div>

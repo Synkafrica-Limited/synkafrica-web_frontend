@@ -1,4 +1,4 @@
-const BASE = process.env.NEXT_PUBLIC_API_BASE || "https://synkkafrica-backend-core.onrender.com";
+const BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.synkkafrica.com";
 const API_BASE = `${BASE}/api/auth`;
 
 function setTokens({ accessToken, refreshToken }, remember = false) {
@@ -54,6 +54,11 @@ function clearTokens() {
 
 function getRefreshToken() {
   try {
+    // Check for customer refresh token first
+    const customerRefreshToken = localStorage.getItem("customerRefreshToken");
+    if (customerRefreshToken) return customerRefreshToken;
+    
+    // Fall back to vendor refresh token
     return localStorage.getItem("vendorRefreshToken") || sessionStorage.getItem("vendorRefreshToken") || null;
   } catch {
     return null;
@@ -62,6 +67,11 @@ function getRefreshToken() {
 
 function getAccessToken() {
   try {
+    // Check for customer token first (customers use localStorage)
+    const customerToken = localStorage.getItem("customerToken");
+    if (customerToken) return customerToken;
+    
+    // Fall back to vendor token
     return localStorage.getItem("vendorToken") || sessionStorage.getItem("vendorToken") || null;
   } catch {
     return null;
