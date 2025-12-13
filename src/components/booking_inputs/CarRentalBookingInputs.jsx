@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MapPin, Calendar, Clock, Search } from 'lucide-react';
 
-const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
+const CarRentalBookingInputs = ({ onSearch, onQuickSearch, showBorder = true }) => {
   const [pickupLocation, setPickupLocation] = useState('');
   const [pickupDate, setPickupDate] = useState('');
   const [pickupTime, setPickupTime] = useState('');
@@ -10,6 +10,7 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
   const [filteredLocations, setFilteredLocations] = useState([]);
   const [focusedField, setFocusedField] = useState(null);
   const dropdownRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
 
   const locations = [
     'Lagos Island, Lagos',
@@ -41,6 +42,32 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Cleaning up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, []);
+
+  const triggerQuickSearch = (loc) => {
+    if (!onQuickSearch) return;
+    
+    // Clear existing timeout
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    // Set new timeout for debounce
+    searchTimeoutRef.current = setTimeout(() => {
+      if (loc && loc.length >= 3) {
+        onQuickSearch({
+          service: 'car',
+          location: loc,
+          date: pickupDate,
+          time: pickupTime
+        });
+      }
+    }, 400); // 400ms debounce
+  };
 
   const validateInputs = () => {
     const newErrors = {};
@@ -75,6 +102,9 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
       setErrors({ ...errors, pickupLocation: '' });
     }
 
+    // Trigger quick search
+    triggerQuickSearch(value);
+
     if (value.trim()) {
       const filtered = locations.filter(location =>
         location.toLowerCase().includes(value.toLowerCase())
@@ -92,6 +122,15 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
     setShowSuggestions(false);
     if (errors.pickupLocation) {
       setErrors({ ...errors, pickupLocation: '' });
+    }
+    // Trigger immediate search on selection
+    if (onQuickSearch) {
+       onQuickSearch({
+        service: 'car',
+        location: location,
+        date: pickupDate,
+        time: pickupTime
+      });
     }
   };
 
@@ -191,9 +230,19 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
               type="date"
               value={pickupDate}
               onChange={(e) => {
-                setPickupDate(e.target.value);
+                const newVal = e.target.value;
+                setPickupDate(newVal);
                 if (errors.pickupDate) {
                   setErrors({ ...errors, pickupDate: '' });
+                }
+                // Trigger quick search if location exists
+                if (onQuickSearch && pickupLocation) {
+                  onQuickSearch({
+                    service: 'car',
+                    location: pickupLocation,
+                    date: newVal,
+                    time: pickupTime
+                  });
                 }
               }}
               onFocus={() => setFocusedField('date')}
@@ -234,9 +283,19 @@ const CarRentalBookingInputs = ({ onSearch, showBorder = true }) => {
               type="time"
               value={pickupTime}
               onChange={(e) => {
-                setPickupTime(e.target.value);
+                const newVal = e.target.value;
+                setPickupTime(newVal);
                 if (errors.pickupTime) {
                   setErrors({ ...errors, pickupTime: '' });
+                }
+                // Trigger quick search if location exists
+                if (onQuickSearch && pickupLocation) {
+                  onQuickSearch({
+                    service: 'car',
+                    location: pickupLocation,
+                    date: pickupDate,
+                    time: newVal
+                  });
                 }
               }}
               onFocus={() => setFocusedField('time')}

@@ -422,19 +422,24 @@ const CheckoutPage = () => {
   const [paymentIntentId, setPaymentIntentId] = useState(null);
   const [isInitializingPayment, setIsInitializingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-
-  // Redirect home if no order
-  useEffect(() => {
-    if (!isLoading && !currentOrder) {
-      router.push('/');
-    }
-  }, [currentOrder, isLoading, router]);
-
+  
   const [isWaitingForVendor, setIsWaitingForVendor] = useState(false);
   const [vendorResponseTime, setVendorResponseTime] = useState(0);
   const [bookingSuccess, setBookingSuccess] = useState(false); // Added this state
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes for payment
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
+
+  // Redirect home if no order
+  useEffect(() => {
+    // Don't redirect if we just had a successful booking/payment, as we're navigating to confirmation
+    if (bookingSuccess && paymentIntentId) return;
+    
+    if (!isLoading && !currentOrder) {
+      router.push('/');
+    }
+  }, [currentOrder, isLoading, router, bookingSuccess, paymentIntentId]);
+
+
 
   // Polling logic for vendor acceptance
   useEffect(() => {
@@ -700,6 +705,7 @@ const CheckoutPage = () => {
         console.log('Checkout initialized:', checkoutResponse);
         setClientSecret(checkoutResponse.clientSecret);
         setPaymentIntentId(checkoutResponse.paymentIntentId);
+        setIsInitializingPayment(false);
       });
 
     } catch (error) {
@@ -791,9 +797,6 @@ const CheckoutPage = () => {
    */
   const handlePaymentSuccess = async (paymentResult) => {
     console.log('Payment confirmed by Stripe:', paymentResult);
-    
-    // Clear order from context and storage
-    clearOrder();
     
     // Redirect to confirmation page
     // Core will update booking status via webhook from Payments MS

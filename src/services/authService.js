@@ -45,6 +45,8 @@ function clearTokens() {
   try {
     localStorage.removeItem("vendorToken");
     localStorage.removeItem("vendorRefreshToken");
+    localStorage.removeItem("customerToken");
+    localStorage.removeItem("customerRefreshToken");
     localStorage.removeItem("rememberMe");
     sessionStorage.removeItem("vendorToken");
     sessionStorage.removeItem("vendorRefreshToken");

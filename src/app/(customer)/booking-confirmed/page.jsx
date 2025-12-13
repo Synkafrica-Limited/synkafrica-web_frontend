@@ -9,7 +9,7 @@ import { getBooking } from '@/services/bookings.service';
 const BookingConfirmedPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { currentOrder } = useOrder();
+  const { currentOrder, clearOrder } = useOrder();
   
   const bookingIdParam = searchParams.get('bookingId');
   const orderId = searchParams.get('orderId');
@@ -50,6 +50,17 @@ const BookingConfirmedPage = () => {
 
     fetchBooking();
   }, [bookingIdParam, orderId, currentOrder]);
+
+  // Clear global order context once booking is confirmed/loaded
+  useEffect(() => {
+    if (booking || (currentOrder && (bookingIdParam || orderId) && paymentIntentId)) {
+      // Small delay to ensure UI doesn't flicker if it was relying on currentOrder during loading
+      const timer = setTimeout(() => {
+        if (currentOrder) clearOrder();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [booking, currentOrder, bookingIdParam, orderId, paymentIntentId, clearOrder]);
 
   // Use fallback reference if booking fetch failed
   useEffect(() => {

@@ -129,7 +129,26 @@ const listingsService = {
 	deleteListing,
 	toggleListingAvailability,
 	updateListingStatus,
+	quickSearchListings,
 };
+
+export function quickSearchListings(params = {}) {
+	const search = new URLSearchParams();
+	Object.keys(params).forEach((k) => {
+		const v = params[k];
+		if (v == null) return;
+		if (Array.isArray(v)) {
+			v.forEach((val) => search.append(k, String(val)));
+		} else if (typeof v === 'object') {
+			search.append(k, JSON.stringify(v));
+		} else {
+			search.append(k, String(v));
+		}
+	});
+
+	const path = `/api/listings/quick-search${search.toString() ? `?${search.toString()}` : ''}`;
+	return api.get(path);
+}
 
 export default listingsService;
 
