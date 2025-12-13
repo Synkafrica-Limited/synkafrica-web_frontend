@@ -4,11 +4,31 @@ import { useEffect, useState } from "react";
 import { useVendorSocketEvents } from "@/hooks/useVendorSocketEvents";
 import { useVendorNotifications } from "@/context/VendorNotificationContext";
 import BookingRequestModal from "./BookingRequestModal";
+import { authServiceWrapper } from "@/services/auth";
+import { initializeSocket, disconnectSocket } from "@/lib/socket";
 
 export default function VendorSocketProvider({ children }) {
-    useVendorSocketEvents();
     const { notifications } = useVendorNotifications();
     const [activeBookingRequest, setActiveBookingRequest] = useState(null);
+
+    // Initialize socket connection
+    useEffect(() => {
+        const connectSocket = async () => {
+            const token = authServiceWrapper.getStoredToken();
+            if (token) {
+                initializeSocket(token);
+            }
+        };
+
+        connectSocket();
+
+        return () => {
+            disconnectSocket();
+        };
+    }, []);
+
+    // Setup event listeners
+    useVendorSocketEvents();
 
     useEffect(() => {
         const latestBookingRequest = notifications.find(
