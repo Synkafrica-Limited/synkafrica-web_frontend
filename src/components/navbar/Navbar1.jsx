@@ -28,6 +28,10 @@ const Navbar1 = ({ onBecomeVendor }) => {
 
 
 
+  // Get current path to determine navbar style
+  const pathname = usePathname();
+  const isLandingPage = pathname === "/";
+
   // Handle scroll
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +41,8 @@ const Navbar1 = ({ onBecomeVendor }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // ... (keep handleLogout, navigateToLogin, navigateToRegister functions same)
 
   // Handle user logout
   const handleLogout = async () => {
@@ -135,16 +141,22 @@ const Navbar1 = ({ onBecomeVendor }) => {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-[#E05D3D] transition-all duration-300">
+      <nav 
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          isLandingPage 
+            ? 'bg-[#E05D3D]' 
+            : 'bg-white shadow-sm border-b border-gray-100'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Brand Logo */}
             <div className="flex items-center">
               <Link href="/" className="flex items-center space-x-2 group">
                 <Image
-                  src="/images/brand/synkafrica-logo-w-text.png"
+                  src={isLandingPage ? "/images/brand/synkafrica-logo-w-text.png" : "/images/brand/synkafrica-logo-single.png"} 
                   alt="Synkkafrica Logo"
-                  width={150}
+                  width={isLandingPage ? 150 : 40}
                   height={40}
                   className="transition-transform duration-300 group-hover:scale-105"
                 />
@@ -160,7 +172,11 @@ const Navbar1 = ({ onBecomeVendor }) => {
             <div className="hidden md:flex items-center space-x-3">
               {/* Become a vendor button */}
               <Link href="/business">
-                <button className="px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 rounded-md transition-colors duration-200 whitespace-nowrap">
+                <button className={`px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 whitespace-nowrap ${
+                  isLandingPage 
+                    ? 'text-white hover:bg-primary-600' 
+                    : 'text-gray-600 hover:text-[#E05D3D] hover:bg-gray-50'
+                }`}>
                   Become a vendor
                 </button>
               </Link>
@@ -169,13 +185,21 @@ const Navbar1 = ({ onBecomeVendor }) => {
                 /* Register and Sign In Buttons */
                 <div className="flex items-center space-x-2">
                   <button 
-                    className="px-4 py-2 text-sm font-medium text-white border border-white hover:bg-primary-600 rounded-md transition-colors duration-200" 
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                      isLandingPage
+                        ? 'text-white border border-white hover:bg-primary-600'
+                        : 'text-[#E05D3D] border border-[#E05D3D] hover:bg-orange-50'
+                    }`} 
                     onClick={navigateToRegister}
                   >
                     Sign up
                   </button>
                   <button 
-                    className="px-4 py-2 text-sm font-medium text-primary-500 bg-white hover:bg-gray-100 rounded-md transition-colors duration-200" 
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                      isLandingPage
+                        ? 'text-primary-500 bg-white hover:bg-gray-100'
+                        : 'text-white bg-[#E05D3D] hover:bg-[#c54a2a]'
+                    }`} 
                     onClick={navigateToLogin}
                   >
                     Sign in
@@ -186,7 +210,11 @@ const Navbar1 = ({ onBecomeVendor }) => {
                 <div className="relative group">
                   <button
                     onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                    className="w-9 h-9 rounded-full overflow-hidden border-2 border-white hover:border-gray-200 transition-colors duration-200"
+                    className={`w-9 h-9 rounded-full overflow-hidden border-2 transition-colors duration-200 ${
+                      isLandingPage
+                        ? 'border-white hover:border-gray-200'
+                        : 'border-[#E05D3D] hover:border-[#c54a2a]'
+                    }`}
                   >
                     <img
                       src={user?.avatar || "/images/default-avatar.png"}
@@ -246,7 +274,11 @@ const Navbar1 = ({ onBecomeVendor }) => {
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 text-white hover:text-gray-200 hover:bg-primary-600 rounded-full transition-all duration-200"
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  isLandingPage
+                    ? 'text-white hover:text-gray-200 hover:bg-primary-600'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
               >
                 <svg
                   className="h-6 w-6"
@@ -330,90 +362,54 @@ const Navbar1 = ({ onBecomeVendor }) => {
 
           {/* Sidebar Content */}
           <div className="flex-1 overflow-y-auto">
-            <div className="p-6 space-y-1">
-              <Link
-                href="/car-rental"
-                className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Car rental
-              </Link>
-              <Link
-                href="/dining-reservations"
-                className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Dining
-              </Link>
-              <Link
-                href="/beach-resorts"
-                className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Beach & Resorts
-              </Link>
-              <Link
-                href="/laundry-service"
-                className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Convenience Services
-              </Link>
-              {isLoggedIn && (
+            <div className="p-6 space-y-3">
+              {!isLoggedIn ? (
                 <>
-                  <Link
-                    href="/dashboard/feedback"
-                    className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                  <button
+                    onClick={() => {
+                      navigateToLogin();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-3 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
                   >
-                    Write a review
-                  </Link>
-                  <Link
-                    href="/dashboard/bookings"
-                    className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigateToRegister();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-3 text-sm font-medium text-primary-600 border border-primary-600 hover:bg-primary-50 rounded-lg transition-colors duration-200"
                   >
-                    Bookings
-                  </Link>
-                  <Link
-                    href="/dashboard/profile"
-                    className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
+                    Sign Up
+                  </button>
                   <Link
                     href="/business"
-                    className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      if (typeof onBecomeVendor === "function") onBecomeVendor();
-                    }}
+                    className="block w-full px-4 py-3 text-sm font-medium text-center text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Become a vendor
+                    Become a Vendor
                   </Link>
                 </>
-              )}
-              {!isLoggedIn ? (
-                <button
-                  onClick={() => {
-                    navigateToLogin();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full mt-6 px-4 py-3 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors duration-200"
-                >
-                  Sign In
-                </button>
               ) : (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full mt-6 px-4 py-3 text-sm font-medium text-red-600 border border-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                >
-                  Sign Out
-                </button>
+                <>
+                  <Link
+                    href="/business"
+                    className="block w-full px-4 py-3 text-sm font-medium text-center text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Become a Vendor
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-3 text-sm font-medium text-red-600 border border-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                  >
+                    Sign Out
+                  </button>
+                </>
               )}
             </div>
           </div>
