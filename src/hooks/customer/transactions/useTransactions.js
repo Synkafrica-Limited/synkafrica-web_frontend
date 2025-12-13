@@ -1,96 +1,125 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import transactionsService from "@/services/transactions.service";
 
-export const useTransactions = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+/**
+ * useTransactions Hook
+ * Fetches customer transactions with filtering and pagination
+ * @param {Object} options - Fetch options (status, dateRange, startDate, endDate, page, limit)
+ */
+export const useTransactions = (options = {}) => {
   const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [meta, setMeta] = useState(null); // Pagination metadata if provided
 
-  /**
-   * fetchTransactions
-   * Fetches all transactions for the authenticated user
-   * @returns {Promise<Array|null>}
-   */
+  // Use refs to prevent unnecessary re-renders loop
+  const optionsRef = useRef(options);
+
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
+
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
-    setError("");
+    setError(null);
+
+    const currentOptions = optionsRef.current;
 
     try {
-      const response = await transactionsService.getCustomerTransactions();
-      
-      // The API might return the array directly or wrapped in an object
-      // Adjust based on actual API response structure if needed
-      const data = response.data || response;
+      const params = {};
 
-      if (Array.isArray(data)) {
-        setTransactions(data);
-        return data;
-      } else {
-        // If data is not an array, it might be empty or in a different format
-        // For now, default to empty array if not an array
-        console.warn("Transactions data is not an array:", data);
-        setTransactions([]);
-        return [];
+      if (currentOptions.status) params.status = currentOptions.status;
+
+      // Handle Date Ranges
+      if (currentOptions.startDate) {
+        params.startDate = currentOptions.startDate;
+      } else if (currentOptions.dateRange) {
+        if (currentOptions.dateRange === 'week') {
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          params.startDate = weekAgo.toISOString();
+        } else if (currentOptions.dateRange === 'month') {
+          const monthAgo = new Date();
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          params.startDate = monthAgo.toISOString();
+        }
       }
+
+      if (currentOptions.endDate) params.endDate = currentOptions.endDate;
+      if (currentOptions.page) params.skip = (currentOptions.page - 1) * (currentOptions.limit || 20);
+      if (currentOptions.limit) params.take = currentOptions.limit;
+
+      const response = await transactionsService.getCustomerTransactions(params);
+
+      // Normalize response
+      const normalizeToArray = (resp) => {
+        if (!resp && resp !== 0) return [];
+        if (Array.isArray(resp)) return resp;
+        if (resp.data && Array.isArray(resp.data)) return resp.data;
+        if (resp.transactions && Array.isArray(resp.transactions)) return resp.transactions;
+        if (resp.items && Array.isArray(resp.items)) return resp.items;
+        if (resp.results && Array.isArray(resp.results)) return resp.results;
+        return [resp];
+      };
+
+      const txns = normalizeToArray(response || []);
+
+      // Deduplicate
+      const idCandidates = (t) => t?.id || t?._id || t?.transactionId || t?.txnId || t?.reference || t?.ref || null;
+      const map = new Map();
+      txns.forEach((t) => {
+        const id = idCandidates(t) || JSON.stringify(t);
+        if (!map.has(id)) map.set(id, t);
+      });
+
+      setTransactions(Array.from(map.values()));
+      
+      // Capture pagination meta if available
+      if (response && response.meta) {
+         setMeta(response.meta);
+      }
+
     } catch (err) {
       console.error("Transactions fetch error:", err);
-      setError(
-        err.message || "Unable to fetch transactions. Please try again later."
-      );
-      return null;
+      setError(err.message || "Unable to fetch transactions.");
+      setTransactions([]);
     } finally {
       setLoading(false);
     }
   }, []);
-
-  /**
-   * refreshTransactions
-   * Force refresh the transactions from server
-   */
-  const refreshTransactions = useCallback(async () => {
-    return await fetchTransactions();
-  }, [fetchTransactions]);
 
   /**
    * fetchTransactionDetails
-   * Fetches details for a specific transaction
-   * @param {string} transactionId - The ID of the transaction
-   * @returns {Promise<Object|null>}
    */
   const fetchTransactionDetails = useCallback(async (transactionId) => {
-    if (!transactionId) {
-      setError("Transaction ID is required");
-      return null;
-    }
-
+    if (!transactionId) return null;
     setLoading(true);
-    setError("");
-
     try {
       const response = await transactionsService.getTransactionDetails(transactionId);
-      
-      // The API might return the transaction directly or wrapped in an object
-      const data = response.data || response;
-      return data;
+      return response.data || response;
     } catch (err) {
-      console.error("Transaction details fetch error:", err);
-      setError(
-        err.message || "Unable to fetch transaction details. Please try again later."
-      );
+      console.error("Transaction details error:", err);
+      setError(err.message);
       return null;
     } finally {
       setLoading(false);
     }
   }, []);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   return {
     transactions,
     loading,
     error,
+    meta,
+    refetch: fetchTransactions,
     fetchTransactions,
-    refreshTransactions,
     fetchTransactionDetails,
   };
 };
