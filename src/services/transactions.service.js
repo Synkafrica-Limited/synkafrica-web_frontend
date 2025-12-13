@@ -31,6 +31,31 @@ class TransactionsService {
   }
 
   /**
+   * Get customer transactions with filters
+   * @param {Object} params - Query parameters
+   * @param {string} params.status - Filter by status (PENDING, COMPLETED, FAILED, REFUNDED)
+   * @param {string} params.startDate - Filter by start date (ISO string)
+   * @param {string} params.endDate - Filter by end date (ISO string)
+   * @param {number} params.skip - Pagination skip
+   * @param {number} params.take - Pagination take
+   */
+  async getCustomerTransactions(params = {}) {
+    const queryParams = new URLSearchParams();
+    
+    // Only append parameters that are explicitly provided
+    if (params.status) queryParams.append('status', params.status);
+    if (params.startDate) queryParams.append('startDate', params.startDate);
+    if (params.endDate) queryParams.append('endDate', params.endDate);
+    if (params.skip !== undefined) queryParams.append('skip', params.skip);
+    if (params.take !== undefined) queryParams.append('take', params.take);
+
+    const queryString = queryParams.toString();
+    const url = `/api/transactions/customer/my-transactions${queryString ? `?${queryString}` : ''}`;
+    
+    return await api.get(url, { auth: true });
+  }
+
+  /**
    * Get vendor transaction statistics
    * Returns: { totalEarnings, availableForPayout, pendingPayouts, paidOut, transactionCount }
    */

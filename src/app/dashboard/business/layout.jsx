@@ -11,7 +11,6 @@ import VendorSocketProvider from '@/components/vendor/VendorSocketProvider';
 export default function BusinessDashboardLayout({ children }) {
   const { loading, isLoggedIn } = useSession();
 
-  // While validating session, render a modern loading screen
   if (loading) {
     return <DashboardLoadingScreen message="Loading Dashboard..." />;
   }

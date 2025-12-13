@@ -45,6 +45,8 @@ function clearTokens() {
   try {
     localStorage.removeItem("vendorToken");
     localStorage.removeItem("vendorRefreshToken");
+    localStorage.removeItem("customerToken");
+    localStorage.removeItem("customerRefreshToken");
     localStorage.removeItem("rememberMe");
     sessionStorage.removeItem("vendorToken");
     sessionStorage.removeItem("vendorRefreshToken");
@@ -56,6 +58,11 @@ function clearTokens() {
 
 function getRefreshToken() {
   try {
+    // Check for customer refresh token first
+    const customerRefreshToken = localStorage.getItem("customerRefreshToken");
+    if (customerRefreshToken) return customerRefreshToken;
+    
+    // Fall back to vendor refresh token
     return localStorage.getItem("vendorRefreshToken") || sessionStorage.getItem("vendorRefreshToken") || null;
   } catch {
     return null;
@@ -64,6 +71,11 @@ function getRefreshToken() {
 
 function getAccessToken() {
   try {
+    // Check for customer token first (customers use localStorage)
+    const customerToken = localStorage.getItem("customerToken");
+    if (customerToken) return customerToken;
+    
+    // Fall back to vendor token
     return localStorage.getItem("vendorToken") || sessionStorage.getItem("vendorToken") || null;
   } catch {
     return null;

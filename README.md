@@ -86,12 +86,29 @@ npm run test        # Run unit tests
 
 ## 🔐 Environment Variables
 
-Create a `.env.local` file using the `.env.example` template. Variables include:
+Create a `.env.local` file in the project root (copy from `.env.example`). Required variables:
 
+```bash
+# API Configuration
+NEXT_PUBLIC_API_BASE=https://synkkafrica-backend-core.onrender.com
+
+# Stripe Payment Configuration (Required for payments)
+# Get your publishable key from: https://dashboard.stripe.com/apikeys
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
+
+# Mapbox Configuration (Optional)
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
 ```
-NEXT_PUBLIC_API_BASE_URL=
-NEXT_PUBLIC_MAPBOX_TOKEN=
-```
+
+### Setting up Stripe
+
+1. **Create a Stripe account** at [https://stripe.com](https://stripe.com)
+2. **Get your API keys** from [Stripe Dashboard](https://dashboard.stripe.com/apikeys)
+3. **Copy your Publishable Key** (starts with `pk_test_` for testing or `pk_live_` for production)
+4. **Add it to `.env.local`** as `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+5. **Restart your development server** after adding the key
+
+> ⚠️ **Important**: Never commit your `.env.local` file. It's already in `.gitignore`.
 
 ---
 

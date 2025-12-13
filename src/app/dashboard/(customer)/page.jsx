@@ -1,104 +1,274 @@
 "use client";
-import { useState } from "react";
-import ProfileCard from "@/components/dashboard/customer/profile/ProfileCard";
-import ProfileProgress from "@/components/dashboard/customer/profile/ProfileProgress";
-import ProfileDetails from "@/components/dashboard/customer/profile/ProfileDetails";
-import {EditProfileModal} from "@/components/dashboard/customer/profile/EditProfileModal";
-import { useToast } from '@/components/ui/ToastProvider';
 
-// --- Main Profile Page ---
-const initialUser = {
-  initials: "TM",
-  name: "Temi Femi",
-  email: "emmanuelmobalaji01@gmail.com",
-  title: "",
-  travelerType: "",
-  firstName: "Temi",
-  lastName: "Femi",
-  middleName: "",
-  gender: "",
-  dob: "",
-  phone: "",
-  nationality: "",
-  national_identity: "",
-  expiry: "",
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useUserProfile } from "@/hooks/customer/details/useUserProfileDetails";
+import { useBookings } from "@/hooks/customer/bookings/useBookings";
+import {
+  Car,
+  UtensilsCrossed,
+  Waves,
+  Package,
+  Calendar,
+  CreditCard,
+  MapPin,
+  ArrowRight,
+  Clock,
+  CheckCircle,
+  XCircle,
+  TrendingUp,
+} from "lucide-react";
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+
+const QUICK_ACTIONS = [
+  {
+    label: "Rent a Car",
+    icon: Car,
+    href: "/dashboard/services/car-rental",
+    bgColor: "bg-blue-50",
+    iconColor: "text-blue-600",
+    description: "Find the perfect ride",
+  },
+  {
+    label: "Book a Resort",
+    icon: Waves,
+    href: "/dashboard/services/resorts",
+    bgColor: "bg-cyan-50",
+    iconColor: "text-cyan-600",
+    description: "Relax and unwind",
+  },
+  {
+    label: "Fine Dining",
+    icon: UtensilsCrossed,
+    href: "/dashboard/services/dining",
+    bgColor: "bg-orange-50",
+    iconColor: "text-orange-600",
+    description: "Experience gourmet food",
+  },
+  {
+    label: "Convenience",
+    icon: Package,
+    href: "/dashboard/services/convenience",
+    bgColor: "bg-purple-50",
+    iconColor: "text-purple-600",
+    description: "Everyday essentials",
+  },
+];
+
+const STATUS_CONFIG = {
+  pending: {
+    label: "Pending",
+    color: "bg-yellow-100 text-yellow-800",
+    icon: Clock,
+  },
+  confirmed: {
+    label: "Confirmed",
+    color: "bg-blue-100 text-blue-800",
+    icon: CheckCircle,
+  },
+  upcoming: {
+    label: "Upcoming",
+    color: "bg-blue-100 text-blue-800",
+    icon: Calendar,
+  },
+  completed: {
+    label: "Completed",
+    color: "bg-green-100 text-green-800",
+    icon: CheckCircle,
+  },
+  cancelled: {
+    label: "Cancelled",
+    color: "bg-red-100 text-red-800",
+    icon: XCircle,
+  },
+  ongoing: {
+    label: "Ongoing",
+    color: "bg-orange-100 text-orange-800",
+    icon: Clock,
+  },
+  active: {
+    label: "Active",
+    color: "bg-orange-100 text-orange-800",
+    icon: Clock,
+  },
 };
 
-export default function ProfilePage() {
-  const [user, setUser] = useState(initialUser);
-  const [showEdit, setShowEdit] = useState(false);
-  const toast = useToast();
+export default function DashboardOverview() {
+  const { userProfile, loading: profileLoading, fetchUserProfile } = useUserProfile();
+  const { bookings, loading: bookingsLoading, fetchBookings } = useBookings();
 
-  // Calculate profile completion (simple logic, adjust as needed)
-  const requiredFields = [
-    "title", "travelerType", "firstName", "lastName", "gender", "dob", "email", "phone", "nationality", "national_identity", "expiry"
-  ];
-  const completed = requiredFields.filter((f) => user[f] && user[f].toString().trim() !== "").length;
-  const progress = Math.round((completed / requiredFields.length) * 100);
+  useEffect(() => {
+    fetchUserProfile();
+    fetchBookings();
+  }, [fetchUserProfile, fetchBookings]);
 
-  // For ProfileCard initials and name
-  const cardUser = {
-    initials: (user.firstName?.[0] || "") + (user.lastName?.[0] || ""),
-    name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
-    email: user.email,
-    profileImage: user.profileImage, // ensure profile image is passed
+  // Calculate Stats
+  const activeBookingsCount = bookings.filter(b => 
+    ['upcoming', 'confirmed', 'pending', 'active', 'ongoing'].includes(b.status?.toLowerCase())
+  ).length;
+
+  const totalSpent = bookings
+    .filter(b => ['completed', 'paid'].includes(b.status?.toLowerCase()))
+    .reduce((sum, b) => {
+      // Extract numeric value from amount string (e.g., "₦50,000" -> 50000)
+      const amount = parseFloat(b.amount?.replace(/[^0-9.-]+/g, "") || 0);
+      return sum + amount;
+    }, 0);
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
-  // Example handlers for the other buttons
-  const handleSaveBookingInfo = () => {
-    // Navigate to or open booking info section/modal
-    toast?.info?.("Navigate to Save Booking Information page or modal.");
-  };
-  const handleCompleteBooking = () => {
-    // Navigate to or open booking completion section/modal
-    toast?.info?.("Navigate to Complete a Booking page or modal.");
-  };
+  const recentBookings = bookings.slice(0, 3); // Top 3 recent bookings
+
+  if (profileLoading || bookingsLoading) {
+    return <PageLoadingScreen message="Loading dashboard..." />;
+  }
+
+  const userName = userProfile?.firstName || "Customer";
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F6]">
-      {/* Navbar */}
-      {/* <Navbar1 /> */}
-      {/* Dashboard Main Content */}
-      <div className="flex-1 flex flex-col w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Dashboard Content */}
-        <section className="flex-1 flex flex-col gap-6 py-6 px-2 sm:px-4 md:px-8 lg:px-16">
-          <div className="flex flex-col md:flex-row gap-6 w-full">
-            {/* Stack ProfileCard and ProfileProgress vertically on mobile, side by side on md+ */}
-            <div className="flex flex-col gap-4 w-full md:w-auto md:max-w-xs">
-              <ProfileCard user={cardUser} />
-            </div>
-            <div className="flex-1">
-              <ProfileProgress
-                progress={progress}
-                onEdit={() => setShowEdit(true)}
-                onSaveBookingInfo={handleSaveBookingInfo}
-                onCompleteBooking={handleCompleteBooking}
-              />
-            </div>
-          </div>
-          <div className="w-full">
-            <ProfileDetails user={user} onEdit={() => setShowEdit(true)} />
-          </div>
-        </section>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      {/* Welcome Section */}
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          Welcome back, {userName}
+        </h1>
+        <p className="mt-1 text-gray-600">
+          Here's what's happening with your bookings today.
+        </p>
       </div>
-      {/* Edit Profile Modal */}
-      {showEdit && (
-        <EditProfileModal
-          user={user}
-          onClose={() => setShowEdit(false)}
-          onSave={(updated) => setUser((prev) => ({ ...prev, ...updated }))}
-        />
-      )}
-      {/* Footer */}
-      {/* <Footer /> */}
-      <style jsx global>{`
-        @media (max-width: 768px) {
-          section {
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
-          }
-        }
-      `}</style>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2 bg-gray-100 rounded-md">
+              <Calendar className="w-5 h-5 text-gray-700" />
+            </div>
+            <span className="text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded-full border border-green-100">
+              Active
+            </span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">{activeBookingsCount}</h3>
+          <p className="text-sm text-gray-500">Active Bookings</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2 bg-gray-100 rounded-md">
+              <Package className="w-5 h-5 text-gray-700" />
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">{bookings.length}</h3>
+          <p className="text-sm text-gray-500">Total Bookings</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2 bg-gray-100 rounded-md">
+              <TrendingUp className="w-5 h-5 text-gray-700" />
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(totalSpent)}</h3>
+          <p className="text-sm text-gray-500">Total Spent</p>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mb-8">
+        <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {QUICK_ACTIONS.map((action) => {
+            const Icon = action.icon;
+            return (
+              <Link
+                key={action.label}
+                href={action.href}
+                className="group bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-md transition-all duration-200"
+              >
+                <div className={`${action.bgColor} w-10 h-10 rounded-md flex items-center justify-center ${action.iconColor} mb-3`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-1">{action.label}</h3>
+                <p className="text-xs text-gray-500">{action.description}</p>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-gray-900">Recent Activity</h2>
+          <Link 
+            href="/dashboard/bookings" 
+            className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-1"
+          >
+            View All <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {recentBookings.length === 0 ? (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+            <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Calendar className="w-6 h-6 text-gray-400" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-900">No recent activity</h3>
+            <p className="text-xs text-gray-500 mt-1">Your recent bookings will appear here</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentBookings.map((booking) => {
+              const statusKey = booking.status?.toLowerCase() || 'pending';
+              const statusConfig = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pending;
+              const StatusIcon = statusConfig.icon;
+
+              return (
+                <div
+                  key={booking.id}
+                  className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{booking.service}</h4>
+                          <p className="text-xs text-gray-500 mt-0.5 font-mono">ID: {booking.id}</p>
+                        </div>
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 border ${statusConfig.color.replace('text-', 'border-').replace('800', '200')} ${statusConfig.color}`}>
+                          <StatusIcon className="w-3 h-3" />
+                          {statusConfig.label}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-6 text-xs text-gray-600">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                          {booking.startDate}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                          {booking.location}
+                        </div>
+                        <div className="flex items-center gap-1.5 font-medium text-gray-900 ml-auto sm:ml-0">
+                          <CreditCard className="w-3.5 h-3.5 text-gray-400" />
+                          {booking.amount}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

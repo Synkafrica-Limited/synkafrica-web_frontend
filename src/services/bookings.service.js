@@ -142,9 +142,29 @@ class BookingsService {
   async markNotificationAsRead(notificationId) {
     return await api.patch(`/api/notifications/${notificationId}/read`, {}, { auth: true });
   }
+  /**
+   * Create a new booking
+   * @param {Object} data - Booking data
+   */
+  async createBooking(data) {
+    return await api.post('/api/bookings', data, { auth: true });
+  }
 }
 
 // Create and export singleton instance
 const bookingsService = new BookingsService();
+
+export const getVendorBookings = bookingsService.getVendorBookings.bind(bookingsService);
+export const getBusinessBookings = bookingsService.getBusinessBookings.bind(bookingsService);
+export const getBooking = bookingsService.getBooking.bind(bookingsService);
+export const createBooking = bookingsService.createBooking.bind(bookingsService);
+export const acceptBooking = bookingsService.acceptBooking.bind(bookingsService);
+export const rejectBooking = bookingsService.rejectBooking.bind(bookingsService);
+export const cancelBooking = bookingsService.cancelBooking.bind(bookingsService);
+export const markAsPaid = bookingsService.markAsPaid.bind(bookingsService);
+export const getVendorStats = bookingsService.getVendorStats.bind(bookingsService);
+export const getTransactionStats = bookingsService.getTransactionStats.bind(bookingsService);
+export const getNotifications = bookingsService.getNotifications.bind(bookingsService);
+export const markNotificationAsRead = bookingsService.markNotificationAsRead.bind(bookingsService);
 
 export default bookingsService;
