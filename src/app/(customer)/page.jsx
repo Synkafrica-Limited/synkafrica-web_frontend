@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Car, Sailboat, Home, Utensils, MoreHorizontal } from "lucide-react";
 
 import CarRentalBookingInputs from "../../components/booking_inputs/CarRentalBookingInputs";
@@ -241,7 +242,39 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="space-y-0">
-        {/* Hero Section - Sleek Booking.com inspired */}
+        {/* Top Hero Section - Large Logo */}
+        <div className="relative bg-gradient-to-br from-[#E05D3D] via-[#D85438] to-[#C14A32] py-16 sm:py-20 px-4 sm:px-6 md:px-8 overflow-hidden">
+          {/* Decorative background elements */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+          </div>
+
+          <div className="max-w-4xl mx-auto relative z-10">
+            <div className="flex flex-col items-center justify-center text-center">
+              {/* Large Logo */}
+              <div className="flex items-center gap-4 mb-6">
+                <Image
+                  src="/images/brand/synkafrica-logo-single.png"
+                  alt="SynkkAfrica Icon"
+                  width={80}
+                  height={80}
+                  className="drop-shadow-2xl"
+                />
+                <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight drop-shadow-lg">
+                  ynkkAfrica
+                </h1>
+              </div>
+              
+              {/* Optional tagline */}
+              <p className="text-lg sm:text-xl text-white/90 font-light max-w-2xl">
+                Empowering mobility across Africa
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Search Hero Section - Sleek Booking.com inspired */}
         <div className="relative bg-gradient-to-br from-[#E05D3D] via-[#D85438] to-[#C14A32] pt-8 pb-24 sm:pb-36 px-4 sm:px-6 md:px-8 overflow-hidden">
           {/* Decorative background elements */}
           <div className="absolute inset-0 opacity-10">
