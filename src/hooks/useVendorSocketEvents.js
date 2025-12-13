@@ -3,7 +3,7 @@
 import { useEffect, useCallback } from "react";
 import { useVendorNotifications } from "@/context/VendorNotificationContext";
 import { useToast } from "@/components/ui/ToastProvider";
-import { vendorSocket, setupVendorSocketListeners, removeVendorSocketListeners } from "@/lib/vendorSocket";
+import { getSocket } from "@/lib/socket";
 
 export const useVendorSocketEvents = () => {
   const { addNotification } = useVendorNotifications();
@@ -108,22 +108,21 @@ export const useVendorSocketEvents = () => {
     });
   }, [addNotification, addToast]);
 
-  // Removed - not used in current socket event setup
-  // const handleBookingAccepted = useCallback((data) => {
-  //   addNotification({
-  //     type: "booking_accepted",
-  //     title: "Booking Confirmed",
-  //     message: `Booking #${data.bookingId || data.id} has been confirmed`,
-  //     data,
-  //     priority: "medium",
-  //   });
-  //
-  //   addToast({
-  //     message: "Booking confirmed successfully",
-  //     type: "success",
-  //     duration: 3000,
-  //   });
-  // }, [addNotification, addToast]);
+  const handleBookingAccepted = useCallback((data) => {
+    addNotification({
+      type: "booking_accepted",
+      title: "Booking Confirmed",
+      message: `Booking #${data.bookingId || data.id} has been confirmed`,
+      data,
+      priority: "medium",
+    });
+
+    addToast({
+      message: "Booking confirmed successfully",
+      type: "success",
+      duration: 3000,
+    });
+  }, [addNotification, addToast]);
 
   const handleBookingCancelled = useCallback((data) => {
     addNotification({
@@ -142,23 +141,36 @@ export const useVendorSocketEvents = () => {
   }, [addNotification, addToast]);
 
   useEffect(() => {
-    if (!vendorSocket) {
-      console.warn("[useVendorSocketEvents] Socket not available");
-      return;
+    const socket = getSocket();
+
+    if (!socket) {
+        // Socket might not be available if provider hasn't initialized it yet
+        // In a real app we might want to listen to a context or event for "socket ready"
+        // But the provider initializes it pretty quickly.
+        return; 
     }
 
-    const handlers = {
-      onBookingNew: handleBookingNew,
-      onBookingExpired: handleBookingExpired,
-      onBookingCancelled: handleBookingCancelled,
-      onSupportMessage: handleSupportMessage,
-      onVerificationUpdate: handleVerificationUpdate,
-    };
+    const onBookingNew = (data) => handleBookingNew(data);
+    const onBookingExpired = (data) => handleBookingExpired(data);
+    const onBookingCancelled = (data) => handleBookingCancelled(data);
+    const onSupportMessage = (data) => handleSupportMessage(data);
+    const onVerificationUpdate = (data) => handleVerificationUpdate(data);
+    const onBookingAccepted = (data) => handleBookingAccepted(data);
 
-    setupVendorSocketListeners(handlers);
+    socket.on("booking:new", onBookingNew);
+    socket.on("booking:expired", onBookingExpired);
+    socket.on("booking:cancelled", onBookingCancelled);
+    socket.on("support:message", onSupportMessage);
+    socket.on("verification:update", onVerificationUpdate);
+    socket.on("booking:accepted", onBookingAccepted);
 
     return () => {
-      removeVendorSocketListeners(handlers);
+      socket.off("booking:new", onBookingNew);
+      socket.off("booking:expired", onBookingExpired);
+      socket.off("booking:cancelled", onBookingCancelled);
+      socket.off("support:message", onSupportMessage);
+      socket.off("verification:update", onVerificationUpdate);
+      socket.off("booking:accepted", onBookingAccepted);
     };
   }, [
     handleBookingNew,
@@ -166,5 +178,6 @@ export const useVendorSocketEvents = () => {
     handleBookingCancelled,
     handleSupportMessage,
     handleVerificationUpdate,
+    handleBookingAccepted
   ]);
 };
