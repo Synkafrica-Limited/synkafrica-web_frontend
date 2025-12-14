@@ -117,13 +117,11 @@ const DiningBookingInputs = ({ onSearch, showBorder = true }) => {
 
   return (
     <div
-      className={`mt-4 sm:mt-6 p-4 sm:p-6 bg-white rounded-3xl relative ${
-        showBorder
-          ? 'shadow-[0_20px_60px_-15px_rgba(223,93,61,0.4),0_10px_30px_-10px_rgba(223,93,61,0.3)] border border-orange-50'
-          : ''
+      className={`mt-4 bg-white rounded-lg relative ${
+        showBorder ? 'shadow-xl' : 'shadow-lg'
       }`}
     >
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4">
+      <div className="p-2 grid grid-cols-1 md:grid-cols-5 gap-2">
         {/* Restaurant/Cuisine */}
         <div className="flex flex-col relative" ref={dropdownRef}>
           <div className={`relative transition-all duration-200 ${
@@ -322,19 +320,21 @@ const DiningBookingInputs = ({ onSearch, showBorder = true }) => {
         </div>
 
         {/* Search Button */}
-        <button
-          onClick={handleSearch}
-          disabled={!isFormValid}
-          className={`px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-            isFormValid
-              ? 'bg-[#DF5D3D] hover:bg-[#c94e30] active:bg-[#b33d20] text-white shadow-lg shadow-[#DF5D3D]/30 hover:shadow-xl hover:shadow-[#DF5D3D]/40 hover:-translate-y-0.5'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          <Search className="w-5 h-5" />
-          <span className="hidden sm:inline">Book Table</span>
-          <span className="sm:hidden">Book</span>
-        </button>
+        <div className="p-1">
+          <button
+            onClick={handleSearch}
+            disabled={!isFormValid}
+            className={`w-full h-full min-h-[50px] rounded-md font-bold text-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+              isFormValid
+                ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-none'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <Search className="w-5 h-5" />
+            <span className="hidden sm:inline">Book Table</span>
+            <span className="sm:hidden">Book</span>
+          </button>
+        </div>
       </div>
     </div>
   );
