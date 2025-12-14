@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, Calendar, Clock, MapPin, Users, Download, Mail, ArrowRight, Navigation, Loader2, AlertCircle } from 'lucide-react';
 import { useOrder } from '@/context/OrderContext';
 import { getBooking } from '@/services/bookings.service';
 
-const BookingConfirmedPage = () => {
+const BookingConfirmedContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currentOrder, clearOrder } = useOrder();
@@ -432,6 +432,23 @@ const BookingConfirmedPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const BookingConfirmedFallback = () => (
+  <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
+    <div className="text-center">
+      <Loader2 className="w-12 h-12 text-[#DF5D3D] animate-spin mx-auto mb-4" />
+      <p className="text-gray-600">Loading your booking details...</p>
+    </div>
+  </div>
+);
+
+const BookingConfirmedPage = () => {
+  return (
+    <Suspense fallback={<BookingConfirmedFallback />}>
+      <BookingConfirmedContent />
+    </Suspense>
   );
 };
 
