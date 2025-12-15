@@ -117,10 +117,9 @@ class NotificationService {
 
   /**
    * Subscribe to real-time notifications (WebSocket/SSE)
-   * @param {Function} onNotification - Callback when notification received
    * @returns {Function} Cleanup function
    */
-  subscribeToNotifications(onNotification) {
+  subscribeToNotifications() {
     // TODO: Implement WebSocket or SSE subscription when backend supports it
     console.log('[notifications.service] Real-time notifications not yet implemented');
     return () => {}; // Return cleanup function

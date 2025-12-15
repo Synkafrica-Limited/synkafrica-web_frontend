@@ -10,31 +10,39 @@ class VerificationService {
       try {
         const response = await api.get(`/api/business/${businessId}/verification`, { auth: true });
         console.log('[verification.service] API response:', response);
-        console.log('[verification.service] API response.status:', response?.status);
+        
+        // Extract status from the correct field: response.data.verificationStatus
+        const rawStatus = response?.data?.verificationStatus || response?.verificationStatus || response?.status;
+        console.log('[verification.service] Raw status from API:', rawStatus);
         
         // Normalize status values
-        let normalizedStatus = response?.status || 'not_started';
-        console.log('[verification.service] Before normalization:', normalizedStatus);
-        
-        if (normalizedStatus === 'PENDING' || normalizedStatus === 'pending_review' || normalizedStatus === 'UNDER_REVIEW') {
-          normalizedStatus = 'pending';
-        } else if (normalizedStatus === 'VERIFIED' || normalizedStatus === 'approved' || normalizedStatus === 'APPROVED') {
-          normalizedStatus = 'verified';
-        } else if (normalizedStatus === 'REJECTED' || normalizedStatus === 'declined') {
-          normalizedStatus = 'rejected';
-        } else if (normalizedStatus === 'NOT_STARTED') {
-          normalizedStatus = 'not_started';
+        let normalizedStatus = 'not_started';
+        if (rawStatus) {
+          const statusLower = rawStatus.toLowerCase();
+          console.log('[verification.service] Before normalization:', rawStatus, '→', statusLower);
+          
+          if (statusLower === 'pending' || statusLower === 'pending_review' || statusLower === 'under_review') {
+            normalizedStatus = 'pending';
+          } else if (statusLower === 'verified' || statusLower === 'approved') {
+            normalizedStatus = 'verified';
+          } else if (statusLower === 'rejected' || statusLower === 'declined') {
+            normalizedStatus = 'rejected';
+          } else if (statusLower === 'not_started') {
+            normalizedStatus = 'not_started';
+          } else {
+            console.warn('[verification.service] Unknown status value:', rawStatus);
+          }
         }
         
         console.log('[verification.service] After normalization:', normalizedStatus);
         
         return {
           status: normalizedStatus,
-          progress: response?.progress || 0,
-          submittedAt: response?.submittedAt,
-          reviewedAt: response?.reviewedAt,
-          rejectionReason: response?.rejectionReason,
-          documents: response?.documents || []
+          progress: response?.data?.completionPercentage || response?.progress || 0,
+          submittedAt: response?.data?.submittedAt || response?.submittedAt,
+          reviewedAt: response?.data?.reviewedAt || response?.reviewedAt,
+          rejectionReason: response?.data?.rejectionReason || response?.rejectionReason,
+          documents: response?.data?.documents || response?.documents || []
         };
       } catch (err) {
         if (err.status === 404) {

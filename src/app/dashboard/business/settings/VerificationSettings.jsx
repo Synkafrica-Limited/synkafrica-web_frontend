@@ -466,17 +466,33 @@ export default function VerificationSettings() {
                                 <FileText className="w-4 h-4" />
                                 Submitted Documents
                             </h5>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {verificationStatus.documents.map((doc, idx) => (
                                     <a
                                         key={idx}
-                                        href={doc.url}
+                                        href={doc.documentUrl || doc.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 transition-colors shadow-sm hover:shadow"
+                                        className="flex items-start gap-3 p-3 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg text-sm transition-colors shadow-sm hover:shadow group"
                                     >
-                                        <FileText className="w-4 h-4 text-gray-500" />
-                                        View Certificate
+                                        <FileText className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5 group-hover:text-primary-600 transition-colors" />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-gray-900 truncate group-hover:text-primary-600 transition-colors">
+                                                {doc.documentName || doc.name || `Document ${idx + 1}`}
+                                            </p>
+                                            {doc.uploadedAt && (
+                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                    Uploaded {new Date(doc.uploadedAt).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric'
+                                                    })}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <svg className="w-4 h-4 text-gray-400 flex-shrink-0 mt-1 group-hover:text-primary-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
                                     </a>
                                 ))}
                             </div>
