@@ -7,149 +7,104 @@ import { IoLogoTwitter, IoLogoFacebook, IoArrowForward, IoLogoInstagram } from "
 
 const Footer = () => {
   return (
-    <footer
-      className="py-12 px-4 sm:px-6 lg:px-8"
-      style={{
-        backgroundImage: "url('/images/patterns/footer-bg.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* Logo and Navigation */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
-          {/* Logo */}
-          <Image
-            src="/images/brand/synkafrica-logo-single.png"
-            alt="Synk Africa Logo"
-            width={40}
-            height={20}
-          />
-
-          {/* Main Navigation */}
-          <nav className="hidden lg:flex space-x-8 mb-6 lg:mb-0">
-            <Link
-              href="/about"
-              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              About Us
-            </Link>
-            <Link
-              href="/careers"
-              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Careers
-            </Link>
-            <Link
-              href="/partner"
-              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Partner With Us
-            </Link>
-            <Link
-              href="/discover"
-              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Discover
-            </Link>
-            <Link
-              href="/support"
-              className="text-md text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Support
-            </Link>
-          </nav>
-
-          {/* Social Icons */}
-          <div className="flex space-x-3">
-            <a
-              href="#"
-              className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
-            >
-              <IoLogoFacebook className="w-5 h-5 text-white" />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 bg-black rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
-            >
-              <IoLogoTwitter className="w-5 h-5 text-white" />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 bg-linear-to-br from-purple-500 to-primary-500 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity"
-            >
-              <IoLogoInstagram className="w-5 h-5 text-white" />
-            </a>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-gray-200 mb-8"></div>
-
+    <footer className="bg-gray-50 border-t border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Footer Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
           {/* Services */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">
               Services
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               <li>
                 <Link
-                  href="/laundry-service"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Convenience Services
-                </Link>
-              </li>
-              <li>
-                <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Beach & Resorts
-                </Link>
-              </li>
-              <li>
-                
-              </li>
-              <li>
-                <Link
-                  href="/dining-reservations"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Dining & Restaurant Reservations
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/car-rental"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  href="/?service=car"
+                  className="text-sm text-gray-600 hover:text-[#E05D3D] transition-colors"
                 >
                   Car Rentals
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/?service=resort"
+                  className="text-sm text-gray-600 hover:text-[#E05D3D] transition-colors"
+                >
+                  Beach & Resorts
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/?service=dining"
+                  className="text-sm text-gray-600 hover:text-[#E05D3D] transition-colors"
+                >
+                  Dining
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/?service=water"
+                  className="text-sm text-gray-600 hover:text-[#E05D3D] transition-colors"
+                >
+                  Water Recreation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/?service=other"
+                  className="text-sm text-gray-600 hover:text-[#E05D3D] transition-colors"
+                >
+                  Other Services
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Become a vendor */}
+          {/* Company */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Become a vendor
+            <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">
+              Company
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               <li>
                 <Link
-                  href="/home/business"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  href="/business"
+                  className="text-sm text-gray-600 hover:text-[#E05D3D] transition-colors"
                 >
-                  List your cars
+                  Become a Vendor
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/home/business"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  href="/business"
+                  className="text-sm text-gray-600 hover:text-[#E05D3D] transition-colors"
                 >
-                  Showcase your services
+                  Partner with Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">
+              Support
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/privacy-policy"
+                  className="text-sm text-gray-600 hover:text-[#E05D3D] transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-sm text-gray-600 hover:text-[#E05D3D] transition-colors"
+                >
+                  Terms of Service
                 </Link>
               </li>
             </ul>
@@ -157,32 +112,24 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">
               Contact
             </h3>
-            <div className="space-y-3 text-gray-600">
-              <p>3 Adamo Street, Lekki Phase 1</p>
-              <p>Lagos State</p>
-              <p className="mt-4">
+            <div className="space-y-2 text-sm text-gray-600">
+              <p>3 Adamo Street</p>
+              <p>Lekki Phase 1, Lagos</p>
+              <p className="mt-3">
                 <a
-                  href="tel:+1 8573 032 9886"
-                  className="hover:text-gray-900 transition-colors"
+                  href="tel:+18573032988"
+                  className="hover:text-[#E05D3D] transition-colors"
                 >
-                  +1 8573 032 9886
+                  +1 857 303 2988
                 </a>
               </p>
               <p>
                 <a
-                  href="tel:+1 8573 032 9886"
-                  className="hover:text-gray-900 transition-colors"
-                >
-                  +1 8573 032 9886
-                </a>
-              </p>
-              <p className="mt-4">
-                <a
                   href="mailto:info@synkkafrica.com"
-                  className="hover:text-gray-900 transition-colors"
+                  className="hover:text-[#E05D3D] transition-colors"
                 >
                   info@synkkafrica.com
                 </a>
@@ -190,103 +137,62 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Site */}
+          {/* Social */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Site</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href="/about"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/careers"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Careers
-                </Link>
-              </li>
-
-              <li>
-                <Link
-                  href="/explore"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Explore
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/careers"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/support"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Support
-                </Link>
-              </li>
-            </ul>
+            <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">
+              Follow Us
+            </h3>
+            <div className="flex space-x-3">
+              <a
+                href="#"
+                className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
+                aria-label="Facebook"
+              >
+                <IoLogoFacebook className="w-4 h-4 text-white" />
+              </a>
+              <a
+                href="#"
+                className="w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
+                aria-label="Twitter"
+              >
+                <IoLogoTwitter className="w-4 h-4 text-white" />
+              </a>
+              <a
+                href="#"
+                className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity"
+                aria-label="Instagram"
+              >
+                <IoLogoInstagram className="w-4 h-4 text-white" />
+              </a>
+            </div>
           </div>
         </div>
 
         {/* Bottom Section */}
-        <div className="flex flex-col lg:flex-row justify-between items-center pt-8 border-t border-gray-200">
-          <p className="text-gray-600 text-sm mb-4 lg:mb-0">
-            Copyright © 2025 synKKafrica | All Right Reserved
-          </p>
-          <Link href="/signup">
-          <Buttons
-            variant="filled"
-            icon={
-              <IoArrowForward className="w-5 h-5" />
-            }
-            className="bg-[#E26A3D] text-white font-semibold rounded-md px-6 py-2 hover:bg-[#E26A3D]/90 transition-colors"
-            size="md"
-          >
-            Sign Up
-          </Buttons>
-          </Link>
-          
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className="lg:hidden mt-8 pt-8 border-t border-gray-200">
-          <nav className="grid grid-cols-2 gap-4">
-            <Link
-              href="/about"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              About Us
+        <div className="pt-8 border-t border-gray-200">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/images/brand/synkafrica-logo-single.png"
+                alt="Synk Africa Logo"
+                width={24}
+                height={24}
+              />
+              <p className="text-sm text-gray-600">
+                © 2025 SynkkAfrica. All rights reserved.
+              </p>
+            </div>
+            <Link href="/signup">
+              <Buttons
+                variant="filled"
+                icon={<IoArrowForward className="w-4 h-4" />}
+                className="bg-[#E05D3D] text-white font-semibold rounded-md px-6 py-2 hover:bg-[#c54a2a] transition-colors"
+                size="md"
+              >
+                Get Started
+              </Buttons>
             </Link>
-            <Link
-              href="/careers"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Careers
-            </Link>
-            <Link
-              href="/explore"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Explore
-            </Link>
-            <Link
-              href="/support"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Support
-            </Link>
-          </nav>
+          </div>
         </div>
       </div>
     </footer>

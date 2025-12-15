@@ -112,19 +112,10 @@ export async function getListings(params = {}) {
 		const path = `/api/listings${search.toString() ? `?${search.toString()}` : ''}`;
 		console.log('[listings.service] Fetching listings:', path);
 		const res = await api.get(path);
+		console.log('[listings.service] API response:', res);
 		
-		// Handle wrapped response
-		const data = res?.data || res;
-		
-		if (Array.isArray(data)) {
-			return data;
-		}
-		
-		if (data?.listings && Array.isArray(data.listings)) {
-			return data.listings;
-		}
-		
-		return [];
+		// Return the full response object {success, message, data}
+		return res;
 	} catch (err) {
 		console.error('[listings.service] getListings error:', err);
 		throw err;
@@ -320,6 +311,20 @@ const listingsService = {
 	quickSearchListings,
 };
 
+/**
+ * Quick search listings endpoint
+ * @param {Object} params - Search parameters
+ * @param {string} params.q - Search query (optional)
+ * @param {string} params.location - Location filter (optional)
+ * @param {string} params.serviceType - Service type: CAR_RENTAL | WATER_RECREATION | DINING | RESORT_STAY (optional)
+ * @param {string} params.date - Date filter (optional)
+ * @param {string} params.time - Time filter (optional)
+ * @param {string} params.startDate - Start date for stays (optional)
+ * @param {string} params.endDate - End date for stays (optional)
+ * @param {number} params.limit - Result limit (default: 20)
+ * @param {number} params.skip - Pagination offset (default: 0)
+ * @returns {Promise<{results: Array, meta: Object}>}
+ */
 export function quickSearchListings(params = {}) {
 	const search = new URLSearchParams();
 	Object.keys(params).forEach((k) => {
