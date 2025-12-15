@@ -66,7 +66,7 @@ class NotificationService {
   async markAllAsRead() {
     try {
       console.log('[notifications.service] Marking all notifications as read');
-      const response = await api.patch('/api/notifications/read-all', {}, { auth: true });
+      const response = await api.patch('/api/notifications/mark-all-read', {}, { auth: true });
       
       const data = response?.data || response;
       console.log('[notifications.service] All marked as read:', data);
@@ -85,7 +85,7 @@ class NotificationService {
   async deleteNotification(notificationId) {
     try {
       console.log('[notifications.service] Deleting notification:', notificationId);
-      const response = await api.delete(`/api/notifications/${notificationId}`, { auth: true });
+      const response = await api.del(`/api/notifications/${notificationId}`, { auth: true });
       
       const data = response?.data || response;
       console.log('[notifications.service] Deleted notification:', data);

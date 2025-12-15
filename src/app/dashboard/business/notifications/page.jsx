@@ -251,8 +251,8 @@ export default function NotificationsPage() {
     return (
       <div className="min-h-screen bg-[#FAF8F6]">
         <DashboardHeader
-          title="Manage Listings"
-          subtitle="Create and manage your service listings"
+          title="Notification"
+          subtitle="Latest Updates here"
 
         />
         <div className="p-4 sm:p-6 lg:p-8">
