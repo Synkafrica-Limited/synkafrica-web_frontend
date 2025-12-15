@@ -5,7 +5,7 @@ import { useBusiness } from './useBusiness';
 import { useCreateListing } from './useCreateListing';
 import authService from '@/services/authService';
 import { buildConveniencePayload } from '@/utils/listingPayloadBuilder';
-import { validateListingPayload, validateImages } from '@/utils/listingValidation';
+import { validateImages } from '@/utils/listingValidation';
 import { handleApiError } from '@/utils/errorParser';
 
 export const useCreateConvenienceListing = () => {

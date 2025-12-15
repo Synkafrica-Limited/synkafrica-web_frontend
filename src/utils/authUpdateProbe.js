@@ -67,4 +67,5 @@ export async function probeProfileUpdate(sampleBody = {}) {
   return attempts;
 }
 
-export default { probeProfileUpdate };
+const authProbeService = { probeProfileUpdate };
+export default authProbeService;

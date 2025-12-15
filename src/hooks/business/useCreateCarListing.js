@@ -9,7 +9,7 @@ import { useBusiness } from "@/hooks/business/useBusiness";
 import { useCreateListing } from "./useCreateListing";
 import authService from '@/services/authService';
 import { buildCarRentalPayload } from '@/utils/listingPayloadBuilder';
-import { validateListingPayload, validateImages } from '@/utils/listingValidation';
+import { validateImages } from '@/utils/listingValidation';
 import { handleApiError } from '@/utils/errorParser';
 
 export const useCreateCarListing = () => {

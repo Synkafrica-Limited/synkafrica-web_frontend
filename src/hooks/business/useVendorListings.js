@@ -8,7 +8,7 @@ import { handleApiError } from "@/utils/errorParser";
  * useVendorListings
  * Client-side hook to fetch listings for the authenticated vendor and provide helpers
  */
-export function useVendorListings(token, options = {}) {
+export function useVendorListings(token) {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -96,7 +96,6 @@ export function useVendorListings(token, options = {}) {
       // because the backend validates category fields on every update
       // Build a minimal payload that includes required category fields
       const category = currentListing.category;
-      const businessId = currentListing.businessId;
       
       // Build the payload based on category
       let payload = { status: newStatus };

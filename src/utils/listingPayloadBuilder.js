@@ -4,7 +4,7 @@
  */
 
 import { normalizeStatus } from './listingValidation';
-import { labelToEnum, getCategorySchema } from '../config/listingSchemas';
+import { labelToEnum } from '../config/listingSchemas';
 
 /**
  * Strip undefined, null, and empty string values from object recursively

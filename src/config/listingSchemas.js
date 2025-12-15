@@ -275,7 +275,7 @@ export function enumToLabel(category, field, enumValue) {
   }
   
   // Find label by enum value
-  const entry = Object.entries(mapping).find(([k, v]) => v === enumValue);
+  const entry = Object.entries(mapping).find(([, v]) => v === enumValue);
   return entry ? entry[0] : enumValue.replace(/_/g, ' ').replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
 }
 
