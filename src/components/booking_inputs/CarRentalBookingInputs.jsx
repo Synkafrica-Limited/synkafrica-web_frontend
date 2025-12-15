@@ -320,7 +320,7 @@ const CarRentalBookingInputs = ({ onSearch, onQuickSearch, showBorder = true }) 
             disabled={!isFormValid}
             className={`w-full h-[52px] rounded-lg font-semibold text-base transition-all duration-200 flex items-center justify-center gap-2 ${
               isFormValid
-                ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md hover:shadow-lg active:scale-95'
+                ? 'bg-[#E05D3D] hover:bg-[#c54a2a] text-white shadow-md hover:shadow-lg active:scale-95'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >

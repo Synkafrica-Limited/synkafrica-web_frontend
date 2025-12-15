@@ -38,7 +38,7 @@ export default function FAQComponent() {
       <div className="mb-12">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-2 sm:mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 sm:mb-4">
               Frequently Asked Questions
             </h1>
             <p className="text-gray-600">
@@ -59,7 +59,7 @@ export default function FAQComponent() {
               onClick={() => toggleFAQ(index)}
               className="w-full px-6 py-5 flex items-center justify-between text-left transition-colors hover:bg-gray-50"
             >
-              <span className="font-semibold text-gray-900 pr-8">
+              <span className="text-[15px] font-medium text-gray-900 pr-8">
                 {faq.question}
               </span>
               <ChevronDown

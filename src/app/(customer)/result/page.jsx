@@ -180,6 +180,7 @@ export default function ServiceResult() {
   const router = useRouter();
   const [activeService, setActiveService] = useState("car");
   const [viewMode, setViewMode] = useState("list");
+  const [sortBy, setSortBy] = useState("recommended");
   const [favorites, setFavorites] = useState([]);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -197,10 +198,10 @@ export default function ServiceResult() {
   });
 
   const services = [
+    { id: "resort", label: "All stays", icon: Home },
     { id: "car", label: "Car rental", icon: Car },
     { id: "dining", label: "Dining", icon: Utensils },
-    { id: "resort", label: "Resort house", icon: Home },
-    { id: "water", label: "Water recreation", icon: Sailboat },
+    { id: "water", label: "Activities", icon: Sailboat },
   ];
 
   const content = serviceContent[activeService];
@@ -505,6 +506,22 @@ export default function ServiceResult() {
       {/* Divider */}
       <div className="border-t border-gray-200 my-6"></div>
 
+      {/* Search by Property Name */}
+      <div className="mb-6">
+        <h4 className="font-semibold mb-3 text-gray-900">Search by property name</h4>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="e.g. Marriott"
+            className="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-300 focus:border-[#E05D3D] focus:ring-2 focus:ring-[#E05D3D]/20 transition-all text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-gray-200 my-6"></div>
+
       {/* Popular Filters Section */}
       <div className="mb-6">
         <button
@@ -657,8 +674,8 @@ export default function ServiceResult() {
         }
       `}</style>
 
-      <header className="bg-gray-800 text-white shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {services.map((service) => {
@@ -667,19 +684,12 @@ export default function ServiceResult() {
                   <button
                     key={service.id}
                     onClick={() => handleServiceChange(service.id)}
-                    className={`flex items-center gap-2 px-5 h-11 rounded-xl text-sm font-medium transition-all duration-200 flex-shrink-0 ${
+                    className={`flex items-center gap-2 px-4 pb-3 text-sm font-medium transition-colors border-b-2 ${
                       activeService === service.id
-                        ? "text-white shadow-lg"
-                        : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+                        ? "border-[#0071C2] text-[#0071C2]"
+                        : "border-transparent text-gray-600 hover:text-gray-900"
                     }`}
-                    style={
-                      activeService === service.id
-                        ? { 
-                            backgroundColor: "#DF5D3D",
-                            boxShadow: "0 4px 12px rgba(223, 93, 61, 0.3)"
-                          }
-                        : {}
-                    }
+                    style={{}}
                   >
                     <Icon size={18} />
                     <span>{service.label}</span>
@@ -893,13 +903,9 @@ export default function ServiceResult() {
                                 </div>
                               </div>
                               <div className="text-right shrink-0">
-                                <div className="flex items-center gap-1.5 mb-1 bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100">
-                                  <Star
-                                    size={16}
-                                    className="fill-yellow-400 text-yellow-400"
-                                  />
-                                  <span className="font-bold text-gray-900">
-                                    {listing.rating}
+                                <div className="flex items-center gap-1.5 mb-1 bg-green-700 px-3 py-1.5 rounded">
+                                  <span className="font-bold text-white text-sm">
+                                    {listing.rating.toFixed(1)}
                                   </span>
                                 </div>
                                 <div className="text-xs text-gray-500 font-medium">
