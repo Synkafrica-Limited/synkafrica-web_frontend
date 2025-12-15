@@ -25,10 +25,11 @@ class NotificationService {
       
       console.log('[notifications.service] Fetching notifications:', url);
       const response = await api.get(url, { auth: true });
+      console.log('[notifications.service] Full API response:', response);
       
-      // Handle wrapped response
+      // Handle wrapped response - API returns { data: { items: [...], unread: 40 } }
       const data = response?.data || response;
-      const notifications = data?.notifications || data || [];
+      const notifications = data?.items || data?.notifications || data || [];
       
       console.log('[notifications.service] Fetched notifications:', notifications.length);
       return Array.isArray(notifications) ? notifications : [];

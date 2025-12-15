@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import NotificationBell from '@/components/vendor/NotificationBell';
+import NotificationBell from '@/components/dashboard/vendor/NotificationBell';
 
 /**
  * DashboardHeader
@@ -39,15 +39,12 @@ export default function DashboardHeader({ title, subtitle, rightActions, showBac
               </div>
             </div>
 
-            {rightActions && (
-              <div className="flex flex-wrap items-end gap-2 sm:gap-3">
-                {rightActions}
-                
-            {/* Notification Bell - Always visible */}
-            <NotificationBell />
-              </div>
-            )}
-
+            {/* Right Actions and Notification Bell */}
+            <div className="flex flex-wrap items-end gap-2 sm:gap-3">
+              {rightActions}
+              {/* Notification Bell - Always visible */}
+              <NotificationBell />
+            </div>
           </div>
         </div>
       </div>

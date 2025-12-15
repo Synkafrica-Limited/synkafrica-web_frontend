@@ -336,8 +336,8 @@ export default function SupportPage() {
                                                 {/* Message bubble */}
                                                 <div className={`flex ${isVendor ? 'justify-end' : 'justify-start'}`}>
                                                     <div className={`max-w-[75%] sm:max-w-[65%] rounded-2xl px-4 py-2.5 shadow-sm relative ${isVendor
-                                                            ? 'bg-[#DCF8C6] dark:bg-[#005C4B] text-gray-900 dark:text-white rounded-tr-sm'
-                                                            : 'bg-white dark:bg-[#202C33] text-gray-900 dark:text-white rounded-tl-sm'
+                                                        ? 'bg-[#DCF8C6] dark:bg-[#005C4B] text-gray-900 dark:text-white rounded-tr-sm'
+                                                        : 'bg-white dark:bg-[#202C33] text-gray-900 dark:text-white rounded-tl-sm'
                                                         }`}>
                                                         {/* Message tail */}
                                                         <div className={`absolute top-0 ${isVendor ? 'right-0 -mr-2' : 'left-0 -ml-2'}`}>

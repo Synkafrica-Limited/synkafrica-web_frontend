@@ -48,7 +48,7 @@ export default function OrdersPage() {
   const filteredBookings = bookings.filter((booking) => {
     // Status filter
     const matchesStatus = selectedStatus === "all" || booking.status === selectedStatus;
-    
+
     // Search filter
     const query = searchQuery.toLowerCase();
     const matchesSearch =
@@ -175,7 +175,7 @@ export default function OrdersPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF8F6]">
       <DashboardHeader title="Manage Bookings" subtitle="View and manage all incoming booking requests" />
-      
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-5 mb-6 mt-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
@@ -304,11 +304,10 @@ export default function OrdersPage() {
               <div className="bg-primary-50 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-semibold text-gray-900 flex items-center gap-2"><DollarSign className="w-5 h-5 text-primary-600" />Payment Details</h4>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    selectedOrder.isPaid 
-                      ? 'bg-green-100 text-green-700' 
-                      : 'bg-yellow-100 text-yellow-700'
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${selectedOrder.isPaid
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-yellow-100 text-yellow-700'
+                    }`}>
                     <CreditCard className="w-3 h-3 inline mr-1" />
                     {selectedOrder.isPaid ? 'Paid' : 'Unpaid'}
                   </span>
@@ -422,19 +421,18 @@ export default function OrdersPage() {
                         <span>Created: {formatDate(booking.createdAt)}</span>
                       </div>
                       {booking.isPaid !== undefined && (
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                          booking.isPaid 
-                            ? 'bg-green-50 text-green-700' 
-                            : 'bg-yellow-50 text-yellow-700'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${booking.isPaid
+                          ? 'bg-green-50 text-green-700'
+                          : 'bg-yellow-50 text-yellow-700'
+                          }`}>
                           {booking.isPaid ? '✓ Paid' : 'Unpaid'}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="flex lg:flex-col gap-2 lg:min-w-[140px]">
-                    <button 
-                      onClick={() => viewDetails(booking)} 
+                    <button
+                      onClick={() => viewDetails(booking)}
                       className="flex-1 lg:flex-none px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-all text-sm flex items-center justify-center gap-2"
                     >
                       <Eye className="w-4 h-4" />
@@ -443,15 +441,15 @@ export default function OrdersPage() {
                     </button>
                     {booking.status === "pending" && (
                       <>
-                        <button 
-                          onClick={() => handleAccept(booking)} 
+                        <button
+                          onClick={() => handleAccept(booking)}
                           className="flex-1 lg:flex-none px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 hover:shadow-md transition-all text-sm flex items-center justify-center gap-2"
                         >
                           <CheckCircle className="w-4 h-4" />
                           <span className="hidden sm:inline">Accept</span>
                         </button>
-                        <button 
-                          onClick={() => handleDecline(booking)} 
+                        <button
+                          onClick={() => handleDecline(booking)}
                           className="flex-1 lg:flex-none px-4 py-2.5 border-2 border-red-300 text-red-700 rounded-lg font-medium hover:bg-red-50 hover:border-red-400 transition-all text-sm flex items-center justify-center gap-2"
                         >
                           <XCircle className="w-4 h-4" />
