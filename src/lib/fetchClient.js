@@ -94,6 +94,7 @@ async function request(method, path, body = null, opts = {}) {
     const err = new Error(errorMessage);
     err.status = res.status;
     err.response = data;
+    err.code = data?.code; // Extract backend error code
     err.url = fullUrl;
     err.method = method;
 

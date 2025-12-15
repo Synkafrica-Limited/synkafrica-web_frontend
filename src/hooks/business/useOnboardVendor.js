@@ -117,7 +117,14 @@ export function useOnboardVendor() {
             try {
               const patchRes = await api.patch(`/api/business/${businessIdRetry}`, profilePayload, { auth: true });
               // merge patched profile into created object for context
-              created = { ...(created || {}), ...(patchRes || {}) };
+              // If patchRes has data property, use it, otherwise use patchRes directly
+              const patchedData = patchRes?.data || patchRes;
+              // Update the data property of created if it exists, otherwise just merge
+              if (created.data) {
+                 created.data = { ...created.data, ...patchedData };
+              } else {
+                 created = { ...created, ...patchedData };
+              }
             } catch (patchErr) {
               console.warn('[useOnboardVendor] profile PATCH after retry failed:', patchErr);
             }
@@ -130,16 +137,20 @@ export function useOnboardVendor() {
         }
       }
 
-      if (!created || !(created.id || created._id)) {
+      // Unwrap response if wrapped in 'data'
+      const businessData = created?.data || created;
+
+      if (!businessData || !(businessData.id || businessData._id)) {
         const msg = 'Failed to create business. Check server response.';
         console.error('[useOnboardVendor] create failed:', created);
-        toast?.danger?.(msg);
+        // Removed undefined toast call
+        addToast({ message: msg, type: 'error' });
         setError(msg);
         setLoading(false);
         return null;
       }
 
-      const businessId = created.id || created._id;
+      const businessId = businessData.id || businessData._id;
 
       // If BusinessContext is available, update it so other pages see the new business immediately
       try {
@@ -148,13 +159,13 @@ export function useOnboardVendor() {
           // normalize created object to the context shape
           const normalized = {
             id: businessId,
-            businessName: created.businessName || created.name || '',
-            businessLocation: created.businessLocation || created.location || '',
-            businessDescription: created.businessDescription || created.description || '',
-            phoneNumber: created.phoneNumber || created.phone || '',
-            businessEmail: created.businessEmail || created.email || '',
-            website: created.website || '',
-            profileImage: created.profileImage || null,
+            businessName: businessData.businessName || businessData.name || '',
+            businessLocation: businessData.businessLocation || businessData.location || '',
+            businessDescription: businessData.businessDescription || businessData.description || '',
+            phoneNumber: businessData.phoneNumber || businessData.phone || '',
+            businessEmail: businessData.businessEmail || businessData.email || '',
+            website: businessData.website || '',
+            profileImage: businessData.profileImage || null,
           };
           ctx.setBusiness(normalized);
         }
@@ -169,14 +180,14 @@ export function useOnboardVendor() {
         const ctx = businessCtx;
         if (ctx && typeof ctx.setBusiness === 'function') {
           const merged = {
-            ...created,
-            address: formData.address || created.address || '',
-            city: formData.city || created.city || '',
-            state: formData.state || created.state || '',
-            country: formData.country || created.country || '',
-            postalCode: formData.postalCode || created.postalCode || '',
-            latitude: typeof formData.latitude !== 'undefined' ? formData.latitude : created.latitude,
-            longitude: typeof formData.longitude !== 'undefined' ? formData.longitude : created.longitude,
+            ...businessData,
+            address: formData.address || businessData.address || '',
+            city: formData.city || businessData.city || '',
+            state: formData.state || businessData.state || '',
+            country: formData.country || businessData.country || '',
+            postalCode: formData.postalCode || businessData.postalCode || '',
+            latitude: typeof formData.latitude !== 'undefined' ? formData.latitude : businessData.latitude,
+            longitude: typeof formData.longitude !== 'undefined' ? formData.longitude : businessData.longitude,
           };
           ctx.setBusiness(merged);
         }
@@ -188,7 +199,7 @@ export function useOnboardVendor() {
       router.replace('/dashboard/business/home');
       return created;
     } catch (err) {
-      handleApiError(err, { addToast: (msg, type) => addToast({ message: msg, type: type || 'error' }) }, { setLoading, setError });
+      handleApiError(err, { addToast }, { setLoading, setError });
       return null;
     }
   };
