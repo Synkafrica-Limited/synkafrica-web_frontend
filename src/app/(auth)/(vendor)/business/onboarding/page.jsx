@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronRight, ChevronLeft, Check, MapPin, Building2, Phone, Globe } from 'lucide-react';
 import { useOnboardVendor } from '@/hooks/business/useOnboardVendor';
 
-// Use an environment variable for the API key so it can be configured per-environment
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+// API key accessed inside component to avoid build-time static analysis issues
 
 const CONVENIENCE_TYPES = ['makeup', 'laundry', 'photography', 'cleaning', 'styling', 'tailoring', 'events', 'fitness', 'spa'];
 
@@ -46,13 +45,14 @@ const OnboardingFlow = () => {
   // Load Google Maps Script
   useEffect(() => {
     if (step === 3 && !mapLoaded) {
-      if (!GOOGLE_MAPS_API_KEY) {
+      const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (!googleMapsApiKey) {
         console.warn('[Onboarding] Google Maps API key not set. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in your .env.local to enable the map.');
         return;
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`;
       script.async = true;
       script.defer = true;
       script.onload = () => setMapLoaded(true);
@@ -245,7 +245,7 @@ const OnboardingFlow = () => {
   };
 
   const isStepValid = () => {
-    switch(step) {
+    switch (step) {
       case 1:
         return formData.businessType && formData.businessName;
       case 2:
@@ -264,7 +264,7 @@ const OnboardingFlow = () => {
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
         {/* Progress Bar */}
         <div className="bg-gray-100 h-2">
-          <div 
+          <div
             className="h-full transition-all duration-300"
             style={{ width: `${(step / totalSteps) * 100}%`, backgroundColor: brandColor }}
           />
@@ -276,10 +276,9 @@ const OnboardingFlow = () => {
             {[1, 2, 3, 4].map((s) => (
               <React.Fragment key={s}>
                 <div className="flex flex-col items-center">
-                  <div 
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
-                      s < step ? 'text-white' : s === step ? 'text-white' : 'bg-gray-200 text-gray-400'
-                    }`}
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${s < step ? 'text-white' : s === step ? 'text-white' : 'bg-gray-200 text-gray-400'
+                      }`}
                     style={s <= step ? { backgroundColor: brandColor } : {}}
                   >
                     {s < step ? <Check size={20} /> : s}
@@ -538,22 +537,22 @@ const OnboardingFlow = () => {
               </button>
             ) : (
               <button
-                  onClick={handleSubmit}
-                  disabled={onboardLoading}
-                  className="flex items-center px-6 py-3 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ backgroundColor: brandColor }}
-                >
-                  {onboardLoading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      Complete Setup <Check size={20} className="ml-2" />
-                    </>
-                  )}
-                </button>
+                onClick={handleSubmit}
+                disabled={onboardLoading}
+                className="flex items-center px-6 py-3 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: brandColor }}
+              >
+                {onboardLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    Complete Setup <Check size={20} className="ml-2" />
+                  </>
+                )}
+              </button>
             )}
           </div>
         </div>
