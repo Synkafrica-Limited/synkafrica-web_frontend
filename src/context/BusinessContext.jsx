@@ -17,7 +17,10 @@ export function BusinessProvider({ children }) {
       let res = await businessService.getMyBusinesses();
       console.debug('[BusinessContext] fetchBusiness response:', res);
 
-      // Normalize responses: backend may return an array of businesses or a single object
+      // The businessService already handles wrapped responses and normalization
+      // so res should already be the normalized business object or null
+      
+      // Additional normalization just in case
       if (Array.isArray(res)) {
         res = res.length > 0 ? res[0] : null;
       }
@@ -50,6 +53,7 @@ export function BusinessProvider({ children }) {
           }
         : null;
 
+      console.debug('[BusinessContext] fetchBusiness normalized:', normalized);
       setBusiness(normalized);
       return normalized;
     } catch (err) {

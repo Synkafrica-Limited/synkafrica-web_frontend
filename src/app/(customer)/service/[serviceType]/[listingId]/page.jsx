@@ -56,7 +56,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
                 placeholder="Enter pickup location"
                 value={pickupLocation}
                 onChange={(e) => setPickupLocation(e.target.value)}
-                className="w-full h-9 pl-9 pr-3 rounded border border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#FF9900] focus:ring-1 focus:ring-[#FF9900] transition-all"
+                className="w-full h-9 pl-9 pr-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#E05D3D] focus:ring-1 focus:ring-[#E05D3D] transition-all"
               />
             </div>
           </div>
@@ -74,7 +74,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full h-9 pl-9 pr-3 rounded border border-gray-400 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#FF9900] focus:ring-1 focus:ring-[#FF9900] transition-all"
+                className="w-full h-9 pl-9 pr-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#E05D3D] focus:ring-1 focus:ring-[#E05D3D] transition-all"
               />
             </div>
           </div>
@@ -86,7 +86,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full h-9 pl-9 pr-3 rounded border border-gray-400 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#FF9900] focus:ring-1 focus:ring-[#FF9900] transition-all"
+                className="w-full h-9 pl-9 pr-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#E05D3D] focus:ring-1 focus:ring-[#E05D3D] transition-all"
               />
             </div>
           </div>
@@ -100,7 +100,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
               <select
                 value={guests}
                 onChange={(e) => setGuests(parseInt(e.target.value))}
-                className="w-full h-9 pl-9 pr-8 rounded border border-gray-400 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#FF9900] focus:ring-1 focus:ring-[#FF9900] transition-all appearance-none cursor-pointer"
+                className="w-full h-9 pl-9 pr-8 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#E05D3D] focus:ring-1 focus:ring-[#E05D3D] transition-all appearance-none cursor-pointer"
               >
                 {Array.from({length: serviceType === 'resort' ? 8 : serviceType === 'dining' ? 12 : 20}, (_, i) => i + 1).map(num => (
                   <option key={num} value={num}>{num} guest{num > 1 ? 's' : ''}</option>
@@ -121,7 +121,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
               <select
                 value={duration}
                 onChange={(e) => setDuration(parseInt(e.target.value))}
-                className="w-full h-9 pl-9 pr-8 rounded border border-gray-400 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#FF9900] focus:ring-1 focus:ring-[#FF9900] transition-all appearance-none cursor-pointer"
+                className="w-full h-9 pl-9 pr-8 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#E05D3D] focus:ring-1 focus:ring-[#E05D3D] transition-all appearance-none cursor-pointer"
               >
                 {(serviceType === 'car' ? [1,2,3,4,5,6,7,8,9,10,11,12] : [2,3,4,5,6,7,8]).map(hour => (
                   <option key={hour} value={hour}>{hour} hour{hour > 1 ? 's' : ''}</option>
@@ -143,7 +143,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
             onChange={(e) => setSpecialRequests(e.target.value)}
             placeholder="Any preferences or special requirements..."
             rows={3}
-            className="w-full px-3 py-2 rounded border border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#FF9900] focus:ring-1 focus:ring-[#FF9900] transition-all resize-none"
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#E05D3D] focus:ring-1 focus:ring-[#E05D3D] transition-all resize-none"
           />
         </div>
       </div>
@@ -230,28 +230,28 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
   };
 
   return (
-    <div className="bg-white border border-gray-300 rounded-md shadow-sm p-5 sticky top-6">
-      {/* Price Section - Amazon Style */}
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 sticky top-6">
+      {/* Price Section - Modern Style */}
       <div className="mb-6">
-        <div className="mb-2">
-          <span className="text-3xl font-normal text-gray-900 tracking-tight">
+        <div className="mb-3">
+          <span className="text-3xl font-semibold text-gray-900">
             ₦{service.price?.toLocaleString()}
           </span>
-          <span className="text-sm text-gray-500 ml-1">
+          <span className="text-sm text-gray-600 ml-2">
             / {serviceType === 'dining' ? 'person' : serviceType === 'resort' ? 'night' : 'hour'}
           </span>
         </div>
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm text-[#007185] hover:text-[#C7511F] hover:underline cursor-pointer font-medium">
+            <span className="text-sm text-gray-900 font-medium">
               {service.rating}
             </span>
           </div>
-          <span className="text-xs text-gray-500">({service.reviews} reviews)</span>
+          <span className="text-sm text-gray-500">({service.reviews} reviews)</span>
         </div>
-        <div className="text-xs text-green-700 font-medium mb-4">
-          <BadgeCheck className="w-3.5 h-3.5 inline mr-1" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-xs text-green-700 font-medium">
+          <BadgeCheck className="w-3.5 h-3.5" />
           Verified Service Provider
         </div>
       </div>
@@ -261,45 +261,45 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
         {getBookingFields()}
       </div>
       
-      {/* Pricing Breakdown - Amazon Style */}
-      <div className="border-t border-gray-200 pt-4 mb-4">
-        <div className="space-y-2 text-sm mb-4">
+      {/* Pricing Breakdown - Modern Style */}
+      <div className="border-t border-gray-200 pt-5 mb-5">
+        <div className="space-y-3 text-sm mb-4">
           <div className="flex justify-between">
-            <span className="text-gray-700">Subtotal:</span>
+            <span className="text-gray-600">Subtotal</span>
             <span className="text-gray-900 font-medium">₦{calculatePricing().subtotal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-700">Service fee:</span>
+            <span className="text-gray-600">Service fee</span>
             <span className="text-gray-900">₦{calculatePricing().serviceFee.toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-700">Tax:</span>
+            <span className="text-gray-600">Tax</span>
             <span className="text-gray-900">₦{calculatePricing().tax.toLocaleString()}</span>
           </div>
         </div>
         
-        <div className="border-t border-gray-300 pt-3 mb-4">
+        <div className="border-t border-gray-200 pt-4 mb-5">
           <div className="flex justify-between items-baseline">
-            <span className="text-base font-medium text-gray-900">Total:</span>
-            <span className="text-2xl font-normal text-gray-900">
+            <span className="text-base font-semibold text-gray-900">Total</span>
+            <span className="text-2xl font-semibold text-gray-900">
               ₦{calculatePricing().calculatedTotal.toLocaleString()}
             </span>
           </div>
         </div>
         
-        {/* Amazon-style Button */}
+        {/* Modern Brand Button */}
         <button
           onClick={handleBookNow}
           disabled={!isFormValid() || isLoading}
-          className={`w-full h-11 rounded-md font-medium text-sm transition-all ${
+          className={`w-full h-12 rounded-lg font-semibold text-sm transition-all ${
             isFormValid() && !isLoading
-              ? 'bg-[#FFD814] hover:bg-[#FCD200] text-gray-900 border border-[#D5D9D9] shadow-sm hover:shadow-md active:shadow-sm'
-              : 'bg-gray-200 text-gray-500 cursor-not-allowed border border-gray-300'
+              ? 'bg-[#E05D3D] hover:bg-[#c74d2f] text-white shadow-sm hover:shadow-md active:scale-[0.98]'
+              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
           }`}
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-900 border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
               Processing...
             </span>
           ) : (
@@ -307,9 +307,9 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
           )}
         </button>
         
-        <div className="mt-3 text-xs text-gray-600 text-center">
-          <Shield className="w-3 h-3 inline mr-1" />
-          Secure checkout • No hidden fees
+        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-600">
+          <Shield className="w-3.5 h-3.5" />
+          <span>Secure checkout • No hidden fees</span>
         </div>
       </div>
     </div>
@@ -328,10 +328,10 @@ const ImageGallery = ({ images, name }) => {
           <button
             key={index}
             onClick={() => setSelectedImage(index)}
-            className={`relative w-16 h-16 border-2 rounded overflow-hidden transition-all ${
+            className={`relative w-16 h-16 border-2 rounded-lg overflow-hidden transition-all ${
               selectedImage === index 
-                ? 'border-[#FF9900] shadow-sm' 
-                : 'border-gray-300 hover:border-gray-400'
+                ? 'border-[#E05D3D] shadow-sm' 
+                : 'border-gray-200 hover:border-gray-300'
             }`}
           >
             <img src={image} alt={`${name} ${index + 1}`} className="w-full h-full object-cover" />
@@ -340,7 +340,7 @@ const ImageGallery = ({ images, name }) => {
       </div>
       
       {/* Main Image */}
-      <div className="flex-1 bg-white border border-gray-300 rounded-md p-4">
+      <div className="flex-1 bg-white border border-gray-200 rounded-lg p-4">
         <div className="relative aspect-square bg-gray-50 rounded overflow-hidden">
           <img
             src={images[selectedImage]}
@@ -355,7 +355,7 @@ const ImageGallery = ({ images, name }) => {
 
 // Specification Card Component
 const SpecCard = ({ icon, label, value }) => (
-  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-[#DF5D3D] transition-colors text-center">
+  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-[#E05D3D] hover:shadow-sm transition-all text-center">
     <div className="text-2xl mb-2">{icon}</div>
     <div className="font-semibold text-gray-900 text-base mb-1">{value}</div>
     <div className="text-xs text-gray-500">{label}</div>
@@ -485,19 +485,19 @@ const ServiceDetailPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Clean Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-medium"
+              className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors font-medium"
             >
               <ArrowLeft className="w-5 h-5" />
               <span className="hidden sm:block">Back</span>
             </button>
             
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#DF5D3D] rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#E05D3D] rounded-lg flex items-center justify-center">
                 <Crown className="w-4 h-4 text-white" />
               </div>
               <span className="font-semibold text-gray-900 text-lg hidden sm:block">SynkAfrica</span>
@@ -523,11 +523,11 @@ const ServiceDetailPage = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Breadcrumb - Amazon Style */}
+        {/* Breadcrumb - Modern Style */}
         <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-4">
-          <span className="hover:text-[#C7511F] hover:underline cursor-pointer">Home</span>
+          <span className="hover:text-[#E05D3D] hover:underline cursor-pointer">Home</span>
           <span>›</span>
-          <span className="hover:text-[#C7511F] hover:underline cursor-pointer capitalize">{serviceType}</span>
+          <span className="hover:text-[#E05D3D] hover:underline cursor-pointer capitalize">{serviceType}</span>
           <span>›</span>
           <span className="text-gray-900">{service.name}</span>
         </div>
@@ -536,24 +536,24 @@ const ServiceDetailPage = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-4">
 
-            {/* Service Header - Amazon Style */}
-            <div className="bg-white border border-gray-300 rounded-md p-5 mb-4">
-              <h1 className="text-2xl font-normal text-gray-900 mb-3 leading-tight">{service.name}</h1>
+            {/* Service Header - Modern Style */}
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-4">
+              <h1 className="text-2xl font-semibold text-gray-900 mb-3 leading-tight">{service.name}</h1>
               <div className="flex items-center gap-3 mb-3">
                 <div className="flex items-center gap-1">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm text-[#007185] hover:text-[#C7511F] hover:underline cursor-pointer font-medium">
+                  <span className="text-sm text-gray-900 font-medium">
                     {service.rating}
                   </span>
                 </div>
-                <span className="text-xs text-gray-500">({service.reviews})</span>
+                <span className="text-sm text-gray-500">({service.reviews})</span>
                 <span className="text-gray-400">|</span>
                 <div className="flex items-center gap-1 text-xs text-gray-600">
                   <MapPin className="w-3.5 h-3.5" />
                   <span>{service.location}</span>
                 </div>
               </div>
-              <div className="inline-block px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs text-gray-700 font-medium">
+              <div className="inline-block px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-full text-xs text-gray-700 font-medium">
                 {service.category}
               </div>
             </div>
@@ -561,17 +561,17 @@ const ServiceDetailPage = () => {
             {/* Image Gallery */}
             <ImageGallery images={service.gallery} name={service.name} />
 
-            {/* Tabs - Amazon Style */}
-            <div className="bg-white border border-gray-300 rounded-md">
+            {/* Tabs - Modern Style */}
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
               <nav className="flex border-b border-gray-200">
                 {['overview', 'features', 'reviews', 'location'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2.5 text-sm font-medium capitalize border-b-2 transition-colors ${
+                    className={`px-4 py-3 text-sm font-medium capitalize border-b-2 transition-colors ${
                       activeTab === tab
-                        ? 'border-[#FF9900] text-[#C7511F]'
-                        : 'border-transparent text-gray-600 hover:text-[#C7511F]'
+                        ? 'border-[#E05D3D] text-[#E05D3D]'
+                        : 'border-transparent text-gray-600 hover:text-gray-900'
                     }`}
                   >
                     {tab}
@@ -584,14 +584,14 @@ const ServiceDetailPage = () => {
             <div className="space-y-6">
               {activeTab === 'overview' && (
                 <div className="space-y-4">
-                  <div className="bg-white border border-gray-300 rounded-md p-5">
-                    <h3 className="text-base font-medium text-gray-900 mb-3">About this Experience</h3>
+                  <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                    <h3 className="text-base font-semibold text-gray-900 mb-3">About this Experience</h3>
                     <p className="text-sm text-gray-700 leading-relaxed">{service.description}</p>
                   </div>
                   
-                  {/* Specifications - Amazon Style */}
-                  <div className="bg-white border border-gray-300 rounded-md p-5">
-                    <h3 className="text-base font-medium text-gray-900 mb-4">Specifications</h3>
+                  {/* Specifications - Modern Style */}
+                  <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                    <h3 className="text-base font-semibold text-gray-900 mb-4">Specifications</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {serviceType === 'car' && (
                         <>
@@ -629,8 +629,8 @@ const ServiceDetailPage = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white border border-gray-300 rounded-md p-4">
-                      <h4 className="text-sm font-medium text-gray-900 mb-3">What's Included</h4>
+                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-3">What's Included</h4>
                       <ul className="space-y-2">
                         {service.included.map((item, index) => (
                           <li key={index} className="flex items-start gap-2 text-gray-700 text-xs">
@@ -641,8 +641,8 @@ const ServiceDetailPage = () => {
                       </ul>
                     </div>
                     
-                    <div className="bg-white border border-gray-300 rounded-md p-4">
-                      <h4 className="text-sm font-medium text-gray-900 mb-3">Requirements</h4>
+                    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-3">Requirements</h4>
                       <ul className="space-y-2">
                         {service.requirements.map((item, index) => (
                           <li key={index} className="flex items-start gap-2 text-gray-700 text-xs">
@@ -657,8 +657,8 @@ const ServiceDetailPage = () => {
               )}
 
               {activeTab === 'features' && (
-                <div className="bg-white border border-gray-300 rounded-md p-5">
-                  <h3 className="text-base font-medium text-gray-900 mb-4">Features & Amenities</h3>
+                <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                  <h3 className="text-base font-semibold text-gray-900 mb-4">Features & Amenities</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {service.features.map((feature, index) => (
                       <div key={index} className="flex items-center gap-2 text-sm text-gray-700">
@@ -671,12 +671,12 @@ const ServiceDetailPage = () => {
               )}
 
               {activeTab === 'reviews' && (
-                <div className="bg-white border border-gray-300 rounded-md p-5">
+                <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
                   <div className="text-center py-8">
                     <Star className="w-12 h-12 fill-yellow-400 text-yellow-400 mx-auto mb-3" />
                     <h3 className="text-base font-medium text-gray-900 mb-1">No Reviews Yet</h3>
                     <p className="text-sm text-gray-600 mb-4">Be the first to share your experience</p>
-                    <button className="px-4 py-2 bg-[#FFD814] hover:bg-[#FCD200] text-gray-900 rounded border border-[#D5D9D9] text-sm font-medium shadow-sm hover:shadow-md transition-all">
+                    <button className="px-6 py-2.5 bg-[#E05D3D] hover:bg-[#c74d2f] text-white rounded-lg text-sm font-semibold shadow-sm hover:shadow-md transition-all">
                       Write a Review
                     </button>
                   </div>
@@ -684,13 +684,13 @@ const ServiceDetailPage = () => {
               )}
 
               {activeTab === 'location' && (
-                <div className="bg-white border border-gray-300 rounded-md p-5">
-                  <h3 className="text-base font-medium text-gray-900 mb-4">Location</h3>
-                  <div className="flex items-center gap-2 mb-4 p-3 bg-gray-50 border border-gray-200 rounded">
+                <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                  <h3 className="text-base font-semibold text-gray-900 mb-4">Location</h3>
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                     <MapPin className="w-4 h-4 text-gray-700" />
                     <span className="text-sm text-gray-900 font-medium">{service.location}</span>
                   </div>
-                  <div className="h-64 bg-gray-100 border border-gray-300 rounded flex items-center justify-center">
+                  <div className="h-64 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center">
                     <div className="text-center">
                       <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
                       <p className="text-sm text-gray-600 font-medium">Interactive Map</p>
@@ -706,11 +706,11 @@ const ServiceDetailPage = () => {
           <div className="lg:col-span-1">
             <BookingWidget service={service} serviceType={serviceType} listingId={params.listingId} />
             
-            {/* Host Card - Amazon Style */}
-            <div className="bg-white border border-gray-300 rounded-md p-4 mt-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Service Provider</h3>
+            {/* Host Card - Modern Style */}
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 mt-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Service Provider</h3>
               <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-gray-200">
-                <div className="w-10 h-10 bg-gray-200 border border-gray-300 rounded flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Building className="w-5 h-5 text-gray-600" />
                 </div>
                 <div className="flex-1 min-w-0">

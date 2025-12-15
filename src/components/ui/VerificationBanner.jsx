@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Info, CheckCircle } from 'lucide-react';
+import { Info, CheckCircle, X } from 'lucide-react';
 import verificationService from '@/services/verification.service';
 import { useBusiness } from '@/context/BusinessContext';
 
@@ -13,17 +13,26 @@ export default function VerificationBanner({ className = '' }) {
   const [progress, setProgress] = useState(0);
   const [dismissed, setDismissed] = useState(false);
 
+  // Check session-based dismissal
   useEffect(() => {
-    // respect a per-business dismissed flag in localStorage
     if (!business || !business.id) return;
-    try {
-      const key = `verification_banner_dismissed_${business.id}`;
-      const v = localStorage.getItem(key);
-      if (v === '1') setDismissed(true);
-    } catch (e) {
-      // ignore
+    const sessionKey = `verification_banner_session_dismissed_${business.id}`;
+    const sessionDismissed = sessionStorage.getItem(sessionKey);
+    if (sessionDismissed === '1') {
+      setDismissed(true);
     }
   }, [business]);
+
+  // Auto-dismiss after 10 seconds if not verified
+  useEffect(() => {
+    if (loading || !business || dismissed || status === 'verified' || (progress && progress >= 100)) return;
+    
+    const timer = setTimeout(() => {
+      dismiss();
+    }, 10000); // 10 seconds
+
+    return () => clearTimeout(timer);
+  }, [loading, business, dismissed, status, progress]);
 
   useEffect(() => {
     let mounted = true;
@@ -63,8 +72,8 @@ export default function VerificationBanner({ className = '' }) {
 
   const dismiss = () => {
     try {
-      const key = `verification_banner_dismissed_${business.id}`;
-      localStorage.setItem(key, '1');
+      const sessionKey = `verification_banner_session_dismissed_${business.id}`;
+      sessionStorage.setItem(sessionKey, '1');
     } catch (e) {
       // ignore
     }
@@ -73,7 +82,7 @@ export default function VerificationBanner({ className = '' }) {
 
   return (
     <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 ${className}`}>
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-4 animate-in fade-in duration-500">
         <div className="p-2 rounded-full bg-blue-100 text-blue-700">
           <Info className="w-5 h-5" />
         </div>
@@ -89,16 +98,24 @@ export default function VerificationBanner({ className = '' }) {
                 <li>Priority customer support</li>
               </ul>
             </div>
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex items-start gap-2">
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  onClick={goToVerify}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Complete Verification
+                </button>
+                <button onClick={goToSettings} className="text-sm text-blue-700 hover:underline">Update in Settings</button>
+              </div>
               <button
-                onClick={goToVerify}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition"
+                onClick={dismiss}
+                className="text-blue-600 hover:text-blue-800 transition-colors"
+                aria-label="Dismiss"
               >
-                <CheckCircle className="w-4 h-4" />
-                Complete Verification
+                <X className="w-5 h-5" />
               </button>
-              <button onClick={goToSettings} className="text-sm text-blue-700 hover:underline">Update in Settings</button>
-              <button onClick={dismiss} className="text-sm text-blue-600 hover:underline">Dismiss</button>
             </div>
           </div>
         </div>

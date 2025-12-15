@@ -17,9 +17,11 @@ async function getListingAnalytics(listingId) {
   return api.get(`/api/listings/${listingId}/analytics`, { auth: true });
 }
 
-export default {
+const dashboardService = {
   getVendorStats,
   getRevenueChart,
   getBookingsStats,
   getListingAnalytics,
 };
+
+export default dashboardService;

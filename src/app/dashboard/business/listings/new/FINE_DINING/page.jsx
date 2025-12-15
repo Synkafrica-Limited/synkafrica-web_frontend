@@ -22,7 +22,7 @@ export default function NewFineDiningListing() {
     capacity: "",
     priceRange: "",
     reservationRequired: true,
-    menuHighlights: "",
+    menuItems: [{ name: "", description: "", price: "" }],
     specialties: [],
     amenities: [],
     description: "",
@@ -31,7 +31,6 @@ export default function NewFineDiningListing() {
   });
 
   const [images, setImages] = useState([]);
-  const [menuPDF, setMenuPDF] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -54,10 +53,25 @@ export default function NewFineDiningListing() {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const handleMenuUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setMenuPDF(file);
+  const handleMenuItemChange = (index, field, value) => {
+    const updatedItems = [...form.menuItems];
+    updatedItems[index][field] = value;
+    setForm((prev) => ({ ...prev, menuItems: updatedItems }));
+  };
+
+  const addMenuItem = () => {
+    setForm((prev) => ({
+      ...prev,
+      menuItems: [...prev.menuItems, { name: "", description: "", price: "" }],
+    }));
+  };
+
+  const removeMenuItem = (index) => {
+    if (form.menuItems.length > 1) {
+      setForm((prev) => ({
+        ...prev,
+        menuItems: prev.menuItems.filter((_, i) => i !== index),
+      }));
     }
   };
 
@@ -65,7 +79,7 @@ export default function NewFineDiningListing() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await createFineDiningListing(form, images, menuPDF);
+      await createFineDiningListing(form, images);
     } catch (err) {
       // handled in hook
     } finally {
@@ -321,42 +335,86 @@ export default function NewFineDiningListing() {
 
         {/* Menu */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Menu & Specialties
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Menu Items *
+            </h2>
+            <button
+              type="button"
+              onClick={addMenuItem}
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              + Add Item
+            </button>
+          </div>
 
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Upload Menu (PDF)
-              </label>
-              <label className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center cursor-pointer hover:border-primary-500 transition-colors">
-                <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-600">
-                  {menuPDF ? menuPDF.name : "Click to upload menu PDF"}
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleMenuUpload}
-                  className="hidden"
-                />
-              </label>
-            </div>
+            {form.menuItems.map((item, index) => (
+              <div
+                key={index}
+                className="border border-gray-200 rounded-lg p-4 relative"
+              >
+                {form.menuItems.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeMenuItem(index)}
+                    className="absolute top-2 right-2 p-1 text-red-500 hover:bg-red-50 rounded"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Menu Highlights
-              </label>
-              <textarea
-                name="menuHighlights"
-                value={form.menuHighlights}
-                onChange={handleChange}
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Describe your signature dishes..."
-              />
-            </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dish Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={item.name}
+                      onChange={(e) =>
+                        handleMenuItemChange(index, "name", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="e.g., Grilled Salmon"
+                      required
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      value={item.description}
+                      onChange={(e) =>
+                        handleMenuItemChange(index, "description", e.target.value)
+                      }
+                      rows={2}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="Brief description of the dish..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Price (₦) *
+                    </label>
+                    <input
+                      type="number"
+                      value={item.price}
+                      onChange={(e) =>
+                        handleMenuItemChange(index, "price", e.target.value)
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="5000"
+                      min="0"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

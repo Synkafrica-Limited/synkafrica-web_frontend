@@ -23,6 +23,7 @@ import { useBusiness } from '@/context/BusinessContext';
 import transactionsService from "@/services/transactions.service";
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 import DashboardHeader from '@/components/layout/DashboardHeader';
+import NotificationBell from "@/components/dashboard/vendor/NotificationBell";
 
 const PAYOUT_STATUS_CONFIG = {
   PENDING: {

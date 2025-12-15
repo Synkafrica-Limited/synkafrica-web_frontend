@@ -8,6 +8,9 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { useBusiness } from "@/hooks/business/useBusiness";
 import { useCreateListing } from "./useCreateListing";
 import authService from '@/services/authService';
+import { buildCarRentalPayload } from '@/utils/listingPayloadBuilder';
+import { validateImages } from '@/utils/listingValidation';
+import { handleApiError } from '@/utils/errorParser';
 
 export const useCreateCarListing = () => {
   const router = useRouter();
@@ -46,108 +49,41 @@ export const useCreateCarListing = () => {
     setIsSubmitting(true);
 
     try {
-      // Validate required fields
-      if (!formData.carPlateNumber) {
-        throw new Error("Car plate number is required");
-      }
-
-      if (!formData.location) {
-        throw new Error("Pickup location is required");
-      }
-
-      // Extract city from location
-      const extractCityFromLocation = (location) => {
-        if (!location) return "Lagos";
-        const parts = location.split(',');
-        if (parts.length > 1) {
-          return parts[0].trim();
-        } else {
-          const commonCities = ['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan', 'Kano', 'Benin', 'Enugu', 'Calabar'];
-          const foundCity = commonCities.find(city => 
-            location.toLowerCase().includes(city.toLowerCase())
-          );
-          return foundCity || 'Lagos';
-        }
-      };
-
-      const extractedCity = extractCityFromLocation(formData.location);
-
-      // Map transmission types to expected values
-      const transmissionMap = {
-        "Automatic": "AUTOMATIC",
-        "Manual": "MANUAL"
-      };
-
-      // Map fuel types to expected values
-      const fuelTypeMap = {
-        "Petrol": "PETROL",
-        "Diesel": "DIESEL", 
-        "Electric": "ELECTRIC",
-        "Hybrid": "HYBRID"
-      };
-
-      // Handle potential array if hook returns raw list
+      // Get business ID
       const businessObj = Array.isArray(business) ? business[0] : business;
-
-      // Use the business ID from the business API response (normalized)
       const businessId = businessObj?.id || businessObj?._id || '';
 
       if (!businessId) {
         throw new Error("Business ID not found. Please ensure you have a valid business account.");
       }
 
-      // Prepare the request body according to the API endpoint
-      const files = images.map((img) => img?.file || img);
-      const hasFiles = files.some((f) => f instanceof File);
+      // Validate images
+      const imageValidation = validateImages(images);
+      if (!imageValidation.isValid) {
+        imageValidation.errors.forEach(err => addToast(err, 'error'));
+        return;
+      }
 
-      const payload = {
-        businessId: businessId,
-        title: formData.vehicleName,
-        description: formData.description,
-        category: "CAR_RENTAL",
-        basePrice: Number(formData.pricePerDay) || 0,
-        currency: "NGN",
-        ...(hasFiles ? {} : { images: images.map((img) => img.preview) }),
-        location: {
-          address: formData.location,
-          city: extractedCity,
-          state: "", 
-          country: "Nigeria"
-        },
-        carRental: {
-          carMake: formData.brand,
-          carModel: formData.model,
-          carYear: parseInt(formData.year),
-          carPlateNumber: formData.carPlateNumber,
-          carSeats: parseInt(formData.seats),
-          carTransmission: transmissionMap[formData.transmission] || formData.transmission,
-          carFuelType: fuelTypeMap[formData.fuelType] || formData.fuelType,
-          carFeatures: formData.features,
-          chauffeurIncluded: formData.chauffeurIncluded,
-          chauffeurPricePerDay: formData.chauffeurIncluded
-            ? parseInt(formData.chauffeurPrice || 0)
-            : 0,
-          chauffeurPricePerHour: formData.pricePerHour ? parseInt(formData.pricePerHour) : 0,
-          insuranceCoverage: true,
-        }
-      };
+      // Build payload using category-aware builder
+      const payload = buildCarRentalPayload(formData, businessId, images);
+      
+      console.log('[useCreateCarListing] Payload:', payload);
+
+      // Extract files for upload
+      const files = images.map((img) => img?.file || img).filter(f => f instanceof File);
 
       await createListing(payload, files);
 
       addToast("Car rental listing created successfully!", "success");
 
-      // Redirect after short delay to show toast
+      // Redirect after short delay
       setTimeout(() => {
         router.push("/dashboard/business/listings");
       }, 1000);
 
     } catch (error) {
       console.error("Error creating car listing:", error);
-      addToast(
-        error.message || "Failed to create listing. Please try again.",
-        "error"
-      );
-      throw error;
+      handleApiError(error, { addToast }, { setLoading: setIsSubmitting });
     } finally {
       setIsSubmitting(false);
     }

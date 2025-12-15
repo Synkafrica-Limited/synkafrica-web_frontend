@@ -19,16 +19,23 @@ export async function getMyBusinesses() {
       : null;
     console.debug('[business.service] getMyBusinesses - token present:', !!token, token ? `${String(token).slice(0, 8)}...` : null);
     const res = await api.get('/api/business', { auth: true });
-    console.debug('[business.service] getMyBusinesses response:', res);
+    console.debug('[business.service] getMyBusinesses raw response:', res);
+    
+    // Handle wrapped response format: { success, message, data: { business } } or { success, message, data: [businesses] }
+    // or direct format: { business } or [businesses] or single business object
+    const responseData = res?.data || res;
+    console.debug('[business.service] getMyBusinesses extracted data:', responseData);
+    
     // Normalize backend payloads: some backends return an array, others return { business } or a single object
-    let business = res;
-    if (Array.isArray(res)) {
-      business = res.length > 0 ? res[0] : null;
+    let business = responseData;
+    if (Array.isArray(responseData)) {
+      business = responseData.length > 0 ? responseData[0] : null;
     }
     if (business && business.business) {
       business = business.business;
     }
 
+    console.debug('[business.service] getMyBusinesses final normalized business:', business);
     return business;
   } catch (err) {
     const message = parseApiError(err);

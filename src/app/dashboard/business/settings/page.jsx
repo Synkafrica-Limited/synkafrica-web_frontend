@@ -5,6 +5,7 @@ import authService from '@/services/authService';
 import { Eye, EyeOff, Lock, Shield, CheckCircle } from "lucide-react";
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import VerificationSettings from './VerificationSettings';
+import NotificationBell from "@/components/dashboard/vendor/NotificationBell";
 
 export default function BusinessSettingsPage() {
   // Change Password State

@@ -24,7 +24,7 @@ export async function GET() {
     }
   } catch (e) {
     // ignore network errors; sitemap will contain static routes
-    // eslint-disable-next-line no-console
+    // console.log('Sitemap generated');
     console.debug('sitemap dynamic fetch failed', e);
   }
 
