@@ -5,47 +5,42 @@ import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
+import { Toast } from "@/components/ui/Toast";
 import { useToast } from "@/components/ui/ToastProvider";
-
 import listingsService from '@/services/listings.service';
+import authService from '@/services/authService';
+import { useBusiness } from '@/hooks/business/useBusiness';
+import { handleApiError } from '@/utils/errorParser';
+import { validateImages } from '@/utils/listingValidation';
+import { buildListingPayload } from '@/utils/listingPayloadBuilder';
+import { enumToLabel } from '@/config/listingSchemas';
 
-export default function EditListingPage() {
+export default function EditResortListing() {
   const router = useRouter();
   const { id } = useParams();
   const { toasts, addToast, removeToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [listingType, setListingType] = useState(null);
+  const [loadedListing, setLoadedListing] = useState(null);
 
-  // Mock data - replace with API call
+  const token = typeof window !== "undefined" ? authService.getAccessToken() : null;
+  const { business, loading: businessLoading, error: businessError } = useBusiness(token);
+
   const [form, setForm] = useState({
-    vehicleName: "",
-    vehicleType: "",
-    brand: "",
-    model: "",
-    year: "",
-    seats: "",
-    transmission: "",
-    fuelType: "",
-    pricePerDay: "",
-    pricePerHour: "",
-    chauffeurIncluded: true,
-    chauffeurPrice: "",
-    features: [],
-    description: "",
+    resortName: "",
+    packageType: "",
     location: "",
-    availability: "available",
-    // additional backend fields
-    currency: 'NGN',
-    contactPhone: '',
-    contactEmail: '',
-    website: '',
-    tags: [],
-    amenities: [],
-    extras: [],
-    capacity: '',
-    rules: [],
-    cancellationPolicy: '',
+    duration: "",
+    capacity: "",
+    pricePerPerson: "",
+    pricePerGroup: "",
+    attractions: [],
+    inclusions: [],
+    description: "",
+    availableDates: "",
+    bookingAdvance: "24",
+    availability: "ACTIVE",
+    status: "ACTIVE",
   });
 
   const [images, setImages] = useState([]);
@@ -56,58 +51,66 @@ export default function EditListingPage() {
       try {
         const res = await listingsService.getListing(id);
         if (res) {
-          // Helper to convert "AUTOMATIC" to "Automatic"
-          const toTitleCase = (str) => {
-            if (!str) return '';
-            return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+          setLoadedListing(res);
+
+          // Helper to extract image URLs
+          const extractImageUrls = (images) => {
+            if (!images) return [];
+            if (typeof images === 'string') {
+              try {
+                images = JSON.parse(images);
+              } catch {
+                return [];
+              }
+            }
+            if (!Array.isArray(images)) return [];
+
+            return images.map(img => {
+              if (typeof img === 'string' && img.trim()) return img;
+              if (img && typeof img === 'object' && img.secure_url) {
+                return img.secure_url;
+              }
+              return null;
+            }).filter(Boolean);
           };
 
-          // Map API listing to form shape
+          // Map API response to form
           const mapped = {
-            vehicleName: res.title || '',
-            vehicleType: res.vehicleType || res.category || '',
-            brand: res.carMake || res.carRental?.carMake || res.brand || '',
-            model: res.carModel || res.carRental?.carModel || res.model || '',
-            year: res.carYear || res.carRental?.carYear || res.year || '',
-            seats: res.carSeats || res.carRental?.carSeats || res.seats || '',
-            transmission: toTitleCase(res.carTransmission || res.carRental?.carTransmission || res.transmission || ''),
-            fuelType: toTitleCase(res.carFuelType || res.carRental?.carFuelType || res.fuelType || ''),
-            pricePerDay: res.basePrice || res.pricing?.perDay || res.prices?.daily || '',
-            pricePerHour:
-              res.chauffeurPricePerHour || res.carRental?.chauffeurPricePerHour || res.pricing?.perHour || res.pricePerHour || res.prices?.hourly || '',
-            chauffeurIncluded: typeof res.chauffeurIncluded === 'boolean' ? res.chauffeurIncluded : (typeof res.carRental?.chauffeurIncluded === 'boolean' ? res.carRental?.chauffeurIncluded : !!res.chauffeurIncluded),
-            chauffeurPrice:
-              res.chauffeurPricePerDay || res.carRental?.chauffeurPricePerDay || res.carRental?.chauffeurPrice || res.chauffeurPrice || '',
-            features: res.carFeatures || res.carRental?.carFeatures || res.features || res.amenities || [],
-            description: res.description || res.summary || '',
-            location:
-              (res.location && (res.location.address || res.location.name)) ||
+            resortName: res.title || '',
+            packageType: enumToLabel('RESORT', 'packageType', res.resort?.resortType || res.resort?.packageType || res.packageType),
+            location: (res.location && (res.location.address || res.location.name)) ||
               (typeof res.location === 'string' ? res.location : '') ||
               res.address || '',
-            availability: res.status || res.availability || 'available',
-            carPlateNumber: res.carPlateNumber || res.carRental?.carPlateNumber || res.registrationNumber || '',
-            // new fields
-            currency: res.currency || res.pricing?.currency || 'NGN',
-            contactPhone: res.phoneNumber || res.contact?.phone || res.contactPhone || '',
-            contactEmail: res.email || res.contact?.email || res.contactEmail || '',
-            website: res.website || res.url || '',
-            tags: res.tags || res.categories || [],
-            amenities: res.amenities || res.facilities || [],
-            extras: res.extras || res.addons || [],
-            capacity: res.capacity || res.maxGuests || res.guests || '',
-            rules: res.rules || res.policies || [],
-            cancellationPolicy: res.cancellationPolicy || res.cancellation || '',
+            duration: res.resort?.duration || res.duration || '',
+            capacity: res.resort?.capacity || res.capacity || res.maxOccupancy || '',
+            pricePerPerson: res.basePrice || res.pricing?.perPerson || '',
+            pricePerGroup: res.resort?.pricePerGroup || res.pricePerGroup || '',
+            attractions: Array.isArray(res.resort?.activities) ? res.resort.activities :
+              Array.isArray(res.resort?.attractions) ? res.resort.attractions :
+                Array.isArray(res.attractions) ? res.attractions : [],
+            inclusions: Array.isArray(res.resort?.inclusions) ? res.resort.inclusions :
+              Array.isArray(res.inclusions) ? res.inclusions :
+                Array.isArray(res.amenities) ? res.amenities : [],
+            description: res.description || res.summary || '',
+            availableDates: res.resort?.availableDates || res.availableDates || '',
+            bookingAdvance: res.resort?.bookingAdvanceHours || res.bookingAdvanceHours || '24',
+            availability: res.status || res.availability || 'ACTIVE',
+            status: res.status || res.availability || 'ACTIVE',
           };
 
           setForm(mapped);
-          // initialize images: keep existing URLs as previews
-          const existing = (res.images || []).map((url) => ({ preview: url, existing: true }));
+
+          // Extract and set images
+          const urls = extractImageUrls(res.images);
+          const existing = urls.map((url) => ({
+            preview: url,
+            existing: true
+          }));
           setImages(existing);
-          setListingType(res.category || 'car-rental');
         }
       } catch (err) {
         console.error('Failed to load listing:', err);
-        addToast('Failed to load listing. Please try again.', 'error');
+        addToast({ message: 'Failed to load listing. Please try again.', type: 'error' });
       } finally {
         setIsLoading(false);
       }
@@ -139,69 +142,92 @@ export default function EditListingPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      // basic validation
-      if (!form.vehicleName) throw new Error('Vehicle name is required');
-      if (!form.location) throw new Error('Pickup location is required');
+      // Get business ID
+      const businessObj = Array.isArray(business) ? business[0] : business;
+      const businessId = loadedListing?.businessId ||
+        businessObj?.id ||
+        businessObj?._id ||
+        businessObj?.businessId || '';
 
-      const payload = {
-        title: form.vehicleName,
-        description: form.description,
-        category: listingType === 'car-rental' ? 'CAR_RENTAL' : listingType,
-        basePrice: Number(form.pricePerDay) || 0,
-        currency: 'NGN',
-        location: {
-          address: form.location,
-        },
-        carRental: {
-          carMake: form.brand,
-          carModel: form.model,
-          carYear: Number(form.year) || null,
-          carPlateNumber: form.carPlateNumber,
-          carSeats: Number(form.seats) || null,
-          carTransmission: form.transmission,
-          carFuelType: form.fuelType,
-          carFeatures: form.features,
-          chauffeurIncluded: !!form.chauffeurIncluded,
-          chauffeurPricePerDay: form.chauffeurIncluded ? Number(form.chauffeurPrice || 0) : 0,
-        }
-      };
-
-      const hasNewFiles = images.some((i) => i.file instanceof File);
-      const listingId = id;
-
-      let res;
-      if (hasNewFiles) {
-        res = await listingsService.updateListingMultipart(listingId, payload, images);
-      } else {
-        // include existing images urls if any
-        if (images.length > 0) payload.images = images.map((i) => i.preview);
-        res = await listingsService.updateListing(listingId, payload);
+      if (!businessId) {
+        throw new Error('Business ID not found. Please ensure you have a valid business account.');
       }
 
-      addToast('Listing updated successfully', 'success');
-      setTimeout(() => router.push('/dashboard/business/listings'), 800);
+      // Build payload
+      const category = loadedListing?.category || 'RESORT';
+      const payload = buildListingPayload(category, form, businessId, images);
+
+      // Update listing
+      const hasNewFiles = images.some((i) => i.file instanceof File);
+      let res;
+
+      if (hasNewFiles) {
+        const newFiles = images
+          .filter((i) => i.file instanceof File)
+          .map((i) => i.file);
+
+        res = await listingsService.updateListingMultipart(id, payload, newFiles);
+      } else {
+        const existingImageUrls = images
+          .filter((i) => i.existing && i.preview)
+          .map((i) => i.preview);
+
+        if (existingImageUrls.length > 0) {
+          payload.images = existingImageUrls;
+        }
+
+        res = await listingsService.updateListing(id, payload);
+      }
+
+      addToast({ message: 'Resort listing updated successfully', type: 'success' });
+
+      setTimeout(() => {
+        router.push('/dashboard/business/listings');
+      }, 1000);
     } catch (err) {
-      console.error('Update failed:', err);
-      addToast(err?.message || 'Failed to update listing', 'error');
-      setIsSubmitting(false);
+      console.error('[EditResort] Update failed:', err);
+      handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
     }
   };
 
-  const vehicleTypes = ["Sedan", "SUV", "Luxury", "Van", "Bus", "Sports Car"];
-  const transmissionTypes = ["Automatic", "Manual"];
-  const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid"];
-  const featureOptions = [
-    "Air Conditioning",
-    "GPS",
-    "Bluetooth",
-    "Backup Camera",
-    "Sunroof",
-    "Leather Seats",
-    "USB Charging",
-    "Child Seat Available",
+  const packageTypes = [
+    "Beach Party Package",
+    "Water Sports Package",
+    "Boat Cruise",
+    "Resort Day Pass",
+    "Weekend Getaway",
+    "Custom Package",
+  ];
+
+  const attractionOptions = [
+    "Beach Access",
+    "Jet Ski",
+    "Boat Cruise",
+    "Parasailing",
+    "Banana Boat",
+    "Kayaking",
+    "Snorkeling",
+    "Beach Volleyball",
+    "Swimming Pool",
+    "Private Cabana",
+  ];
+
+  const inclusionOptions = [
+    "Welcome Drinks",
+    "Lunch Buffet",
+    "Dinner",
+    "BBQ",
+    "DJ/Music",
+    "Photography",
+    "Life Jackets",
+    "Equipment Rental",
+    "Transportation",
+    "Tour Guide",
   ];
 
   if (isLoading) {
@@ -238,9 +264,9 @@ export default function EditListingPage() {
           Back to Listings
         </Link>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-          Edit Listing
+          Edit Resort Package
         </h1>
-        <p className="text-gray-600 mt-1">Update your listing information</p>
+        <p className="text-gray-600 mt-1">Update your resort experience details</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -257,35 +283,32 @@ export default function EditListingPage() {
             </div>
             <div className="flex items-center gap-4">
               <span
-                className={`text-sm font-medium ${form.availability === "available"
+                className={`text-sm font-medium ${form.availability === "ACTIVE" || form.availability === "available"
                   ? "text-green-600"
                   : "text-gray-600"
                   }`}
               >
-                {form.availability === "available" ? "Active" : "Inactive"}
+                {form.availability === "ACTIVE" || form.availability === "available" ? "Active" : "Inactive"}
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  const newStatus =
-                    form.availability === "available"
-                      ? "unavailable"
-                      : "available";
-                  setForm((prev) => ({ ...prev, availability: newStatus }));
-                  addToast(
-                    `Listing ${newStatus === "available" ? "activated" : "deactivated"
-                    }`,
-                    "info",
-                    2000
-                  );
+                  const isCurrentlyActive = form.availability === "ACTIVE" || form.availability === "available";
+                  const newStatus = isCurrentlyActive ? "INACTIVE" : "ACTIVE";
+                  setForm((prev) => ({ ...prev, availability: newStatus, status: newStatus }));
+                  addToast({
+                    message: `Listing ${isCurrentlyActive ? "deactivated" : "activated"}`,
+                    type: "info",
+                    duration: 2000
+                  });
                 }}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.availability === "available"
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.availability === "ACTIVE" || form.availability === "available"
                   ? "bg-green-500"
                   : "bg-gray-300"
                   }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.availability === "available"
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.availability === "ACTIVE" || form.availability === "available"
                     ? "translate-x-7"
                     : "translate-x-1"
                     }`}
@@ -295,10 +318,10 @@ export default function EditListingPage() {
           </div>
         </div>
 
-        {/* Images Upload */}
+        {/* Images */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Vehicle Images
+            Resort Images
           </h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
@@ -307,8 +330,13 @@ export default function EditListingPage() {
                 <img
                   src={image.preview}
                   alt={`Upload ${index + 1}`}
-                  className="w-full h-32 object-cover rounded-lg"
+                  className="w-full h-32 object-cover rounded-lg border border-gray-200"
                 />
+                {image.existing && (
+                  <span className="absolute top-2 left-2 px-2 py-0.5 bg-blue-500 text-white text-xs rounded">
+                    Existing
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
@@ -333,40 +361,41 @@ export default function EditListingPage() {
           </div>
         </div>
 
-        {/* Vehicle Information */}
+        {/* Basic Information */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Vehicle Information
+            Package Information
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vehicle Name *
+                Resort/Package Name *
               </label>
               <input
                 type="text"
-                name="vehicleName"
-                value={form.vehicleName}
+                name="resortName"
+                value={form.resortName}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="e.g., Mercedes Benz S-Class"
+                placeholder="e.g., Luxury Beach Party Experience"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vehicle Type (Optional)
+                Package Type *
               </label>
               <select
-                name="vehicleType"
-                value={form.vehicleType}
+                name="packageType"
+                value={form.packageType}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
               >
-                <option value="">Select type</option>
-                {vehicleTypes.map((type) => (
+                <option value="">Select package type</option>
+                {packageTypes.map((type) => (
                   <option key={type} value={type}>
                     {type}
                   </option>
@@ -376,106 +405,47 @@ export default function EditListingPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Brand *
+                Location *
               </label>
               <input
                 type="text"
-                name="brand"
-                value={form.brand}
+                name="location"
+                value={form.location}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="e.g., Mercedes Benz"
+                placeholder="e.g., Lekki Beach, Lagos"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Model *
+                Duration
               </label>
               <input
                 type="text"
-                name="model"
-                value={form.model}
+                name="duration"
+                value={form.duration}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="e.g., S-Class"
-                required
+                placeholder="e.g., Full Day (8 hours)"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Year *
+                Maximum Capacity *
               </label>
               <input
                 type="number"
-                name="year"
-                value={form.year}
+                name="capacity"
+                value={form.capacity}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="2024"
-                min="1990"
-                max="2025"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Number of Seats *
-              </label>
-              <input
-                type="number"
-                name="seats"
-                value={form.seats}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="4"
+                placeholder="50"
                 min="1"
-                max="50"
                 required
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Transmission *
-              </label>
-              <select
-                name="transmission"
-                value={form.transmission}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                required
-              >
-                <option value="">Select transmission</option>
-                {transmissionTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fuel Type *
-              </label>
-              <select
-                name="fuelType"
-                value={form.fuelType}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                required
-              >
-                <option value="">Select fuel type</option>
-                {fuelTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
         </div>
@@ -487,94 +457,103 @@ export default function EditListingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price per Day (₦) *
+                Price per Person (₦) *
               </label>
               <input
                 type="number"
-                name="pricePerDay"
-                value={form.pricePerDay}
+                name="pricePerPerson"
+                value={form.pricePerPerson}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="25000"
+                placeholder="50000"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price per Hour (₦)
+                Price per Group (₦)
               </label>
               <input
                 type="number"
-                name="pricePerHour"
-                value={form.pricePerHour}
+                name="pricePerGroup"
+                value={form.pricePerGroup}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="5000"
+                placeholder="1500000"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                For exclusive group bookings
+              </p>
             </div>
-
-            <div className="md:col-span-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="chauffeurIncluded"
-                  checked={form.chauffeurIncluded}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  Chauffeur service included
-                </span>
-              </label>
-            </div>
-
-            {form.chauffeurIncluded && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Additional Chauffeur Price per Day (₦)
-                </label>
-                <input
-                  type="number"
-                  name="chauffeurPrice"
-                  value={form.chauffeurPrice}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="10000"
-                />
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Features */}
+        {/* Attractions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Features & Amenities
+            Attractions & Activities
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {featureOptions.map((feature) => (
-              <label key={feature} className="flex items-center gap-2">
+            {attractionOptions.map((attraction) => (
+              <label key={attraction} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={form.features.includes(feature)}
+                  checked={Array.isArray(form.attractions) && form.attractions.includes(attraction)}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setForm((prev) => ({
                         ...prev,
-                        features: [...prev.features, feature],
+                        attractions: [...(Array.isArray(prev.attractions) ? prev.attractions : []), attraction],
                       }));
                     } else {
                       setForm((prev) => ({
                         ...prev,
-                        features: prev.features.filter((f) => f !== feature),
+                        attractions: (Array.isArray(prev.attractions) ? prev.attractions : []).filter(
+                          (a) => a !== attraction
+                        ),
                       }));
                     }
                   }}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">{feature}</span>
+                <span className="text-sm text-gray-700">{attraction}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Inclusions */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Package Inclusions
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {inclusionOptions.map((inclusion) => (
+              <label key={inclusion} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={Array.isArray(form.inclusions) && form.inclusions.includes(inclusion)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setForm((prev) => ({
+                        ...prev,
+                        inclusions: [...(Array.isArray(prev.inclusions) ? prev.inclusions : []), inclusion],
+                      }));
+                    } else {
+                      setForm((prev) => ({
+                        ...prev,
+                        inclusions: (Array.isArray(prev.inclusions) ? prev.inclusions : []).filter(
+                          (i) => i !== inclusion
+                        ),
+                      }));
+                    }
+                  }}
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                />
+                <span className="text-sm text-gray-700">{inclusion}</span>
               </label>
             ))}
           </div>
@@ -597,24 +576,40 @@ export default function EditListingPage() {
                 onChange={handleChange}
                 rows={4}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Describe your vehicle and services..."
+                placeholder="Describe the resort experience, what makes it special..."
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Pickup Location *
+                Available Dates
               </label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
+                name="availableDates"
+                value={form.availableDates}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="e.g., Lagos, Victoria Island"
-                required
+                placeholder="e.g., Weekends, Holidays, All year round"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Booking Advance Notice (hours)
+              </label>
+              <select
+                name="bookingAdvance"
+                value={form.bookingAdvance}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="24">24 hours</option>
+                <option value="48">48 hours</option>
+                <option value="72">72 hours</option>
+                <option value="168">1 week</option>
+              </select>
             </div>
           </div>
         </div>

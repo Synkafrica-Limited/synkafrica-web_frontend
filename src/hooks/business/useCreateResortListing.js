@@ -4,6 +4,9 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { useBusiness } from './useBusiness';
 import { useCreateListing } from './useCreateListing';
 import authService from '@/services/authService';
+import { buildResortPayload } from '@/utils/listingPayloadBuilder';
+import { validateListingPayload, validateImages } from '@/utils/listingValidation';
+import { handleApiError } from '@/utils/errorParser';
 
 export const useCreateResortListing = () => {
   const router = useRouter();
@@ -15,51 +18,66 @@ export const useCreateResortListing = () => {
   const { createListing } = useCreateListing();
 
   const createResortListing = async (form, images = []) => {
+    if (!token) {
+      addToast({ message: 'Authentication required. Please log in.', type: 'error' });
+      return;
+    }
+
+    if (businessLoading) {
+      addToast({ message: 'Loading business information...', type: 'info' });
+      return;
+    }
+
+    if (businessError) {
+      addToast({ message: 'Failed to load business information. Please try again.', type: 'error' });
+      return;
+    }
+
     if (!business) {
-      addToast('Business account not found. Please create a business first.', 'error');
+      addToast({ message: 'Business account not found. Please create a business first.', type: 'error' });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Basic validation
-      if (!form.resortName || !form.location || !form.pricePerPerson) {
-        throw new Error('Name, location and price are required');
+      // Debug: Log the business object structure
+      console.log('[useCreateResortListing] Business object:', business);
+      console.log('[useCreateResortListing] Business type:', typeof business);
+      console.log('[useCreateResortListing] Is array:', Array.isArray(business));
+      
+      // Get business ID - handle both array and single object response
+      const businessObj = Array.isArray(business) ? business[0] : business;
+      console.log('[useCreateResortListing] Business obj:', businessObj);
+      
+      const businessId = businessObj?.id || businessObj?._id || businessObj?.businessId || '';
+      console.log('[useCreateResortListing] Extracted businessId:', businessId);
+
+      if (!businessId) {
+        console.error('[useCreateResortListing] Failed to extract business ID from:', businessObj);
+        throw new Error('Business ID not found. Please ensure you have a valid business account.');
       }
 
-      const hasFiles = Array.isArray(images) && images.some((i) => i instanceof File || i?.file instanceof File);
+      // Validate images
+      const imageValidation = validateImages(images);
+      if (!imageValidation.isValid) {
+        imageValidation.errors.forEach(err => addToast({ message: err, type: 'error' }));
+        return;
+      }
 
-      const payload = {
-        businessId: business.id || business._id || '',
-        title: form.resortName,
-        description: form.description,
-        category: 'RESORT',
-        basePrice: Number.parseInt(Number(form.pricePerPerson) || 0, 10),
-        currency: 'NGN',
-        // Only include image preview URLs when there are no new files to upload
-        ...(hasFiles ? {} : { images: images.map((i) => i.preview) }),
-        location: {
-          address: form.location,
-          city: form.location?.split(',')[0]?.trim() || 'Lagos',
-          country: 'Nigeria'
-        },
-        resort: {
-          packageType: form.packageType,
-          duration: form.duration,
-          capacity: Number.parseInt(Number(form.capacity) || 0, 10),
-          inclusions: form.inclusions || [],
-          attractions: form.attractions || [],
-          bookingAdvanceHours: Number.parseInt(Number(form.bookingAdvance) || 24, 10),
-        }
-      };
+      // Build payload using category-aware builder
+      const payload = buildResortPayload(form, businessId, images);
+      
+      console.log('[useCreateResortListing] Payload:', payload);
 
-      await createListing(payload, images);
-      addToast('Resort listing created successfully', 'success');
+      // Extract files for upload
+      const files = images.map((i) => i?.file || i).filter(f => f instanceof File);
+
+      await createListing(payload, files);
+      addToast({ message: 'Resort listing created successfully', type: 'success' });
       router.push('/dashboard/business/listings');
     } catch (err) {
       console.error('createResortListing error', err);
-      addToast(err?.message || 'Failed to create listing', 'error');
-      throw err;
+      handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
     } finally {
       setIsSubmitting(false);
     }

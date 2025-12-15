@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo } from "react";
-import { FiCamera } from "react-icons/fi";
+import { FiCamera, FiUser, FiMail, FiPhone, FiMapPin, FiGlobe, FiCreditCard, FiClock } from "react-icons/fi";
 import Button from "@/components/ui/Buttons";
 import { useToast } from "@/components/ui/ToastProvider";
 import ngBanks from 'ng-banks';
@@ -15,10 +15,6 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
     lastName: user?.lastName || "",
     email: user?.email || "",
     phoneNumber: user?.phoneNumber || "",
-
-    nationality: user?.nationality || "",
-    gender: user?.gender || "",
-    dateOfBirth: user?.dateOfBirth || user?.dob || "",
     // Business (only backend-recognized fields)
     id: business?.id || business?._id || business?.businessId || "",
     businessName: business?.businessName || business?.name || "",
@@ -38,14 +34,24 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
   // Debug: log incoming business prop to help diagnose population issues
   if (typeof window !== 'undefined') {
     // eslint-disable-next-line no-console
-    console.debug('BusinessEditProfileModal: business prop =', business);
+    console.debug('[BusinessEditProfileModal] business prop:', business);
+    console.debug('[BusinessEditProfileModal] logo fields:', {
+      logo: business?.logo,
+      businessLogo: business?.businessLogo,
+      profileImage: business?.profileImage
+    });
   }
 
-  const [profileImage, setProfileImage] = useState(business?.profileImage || null);
-  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [businessLogo, setBusinessLogo] = useState(
+    business?.logo ||
+    business?.businessLogo ||
+    business?.profileImage ||
+    null
+  );
+  const [businessLogoFile, setBusinessLogoFile] = useState(null);
   const [errors, setErrors] = useState({});
 
-  const fileInputRef = useRef(null);
+  const businessLogoInputRef = useRef(null);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -88,13 +94,13 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
     return Object.keys(newErrors).length === 0;
   }
 
-  // Handle profile image upload
-  const handleImageChange = (e) => {
+  // Handle business logo upload
+  const handleBusinessLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileImageFile(file);
+      setBusinessLogoFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => setProfileImage(reader.result);
+      reader.onloadend = () => setBusinessLogo(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -130,8 +136,8 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
       bankAccountName: form.bankAccountName || form.accountName,
       bankAccountNumber: form.bankAccountNumber || form.accountNumber,
       availability: form.availability,
-      // include file only if user selected one
-      profileImage: profileImageFile || null,
+      // Business logo
+      logo: businessLogoFile || null,
       businessEmail: form.businessEmail,
       phoneNumber: form.businessPhone,
       secondaryPhone: form.secondaryPhone,
@@ -185,35 +191,35 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
         </button>
 
         <div className="flex flex-col md:flex-row gap-0">
-          {/* Left: Profile Image Section */}
+          {/* Left: Business Logo Section */}
           <div className="flex flex-col items-center justify-center w-full md:w-[340px] py-8 px-4 md:py-12 md:px-0 bg-gray-50 md:bg-transparent">
             <div className="flex flex-col items-center">
+              <p className="text-xs font-semibold text-gray-600 mb-3">Business Logo</p>
               <div className="relative">
-                {profileImage ? (
+                {businessLogo ? (
                   <img
-                    src={profileImage}
+                    src={businessLogo}
                     alt="Business Logo"
-                    className="w-32 h-32 sm:w-36 sm:h-36 md:w-56 md:h-56 rounded-full object-cover border-4 border-[#181c26] bg-[#181c26] transition-all duration-200"
+                    className="w-32 h-32 sm:w-36 sm:h-36 md:w-48 md:h-48 rounded-full object-cover border-4 border-[#181c26] bg-[#181c26] transition-all duration-200"
                   />
                 ) : (
-                  <div className="w-32 h-32 sm:w-36 sm:h-36 md:w-56 md:h-56 rounded-full bg-[#181c26] flex items-center justify-center text-2xl sm:text-3xl md:text-5xl text-white font-medium select-none transition-all duration-200">
+                  <div className="w-32 h-32 sm:w-36 sm:h-36 md:w-48 md:h-48 rounded-full bg-[#181c26] flex items-center justify-center text-2xl sm:text-3xl md:text-4xl text-white font-medium select-none transition-all duration-200">
                     {initials}
                   </div>
                 )}
-                {/* Add Button */}
                 <button
                   type="button"
-                  className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 sm:px-6 bg-white rounded-xl shadow-lg border border-gray-100 text-gray-700 hover:bg-gray-50 transition text-xs sm:text-sm md:text-base font-medium"
-                  onClick={() => fileInputRef.current.click()}
+                  className="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-lg border border-gray-100 text-gray-700 hover:bg-gray-50 transition text-sm font-medium"
+                  onClick={() => businessLogoInputRef.current.click()}
                 >
-                  <FiCamera className="text-base sm:text-lg md:text-xl" />
-                  Add
+                  <FiCamera className="text-base" />
+                  {businessLogo ? 'Change' : 'Add'} Logo
                   <input
-                    ref={fileInputRef}
+                    ref={businessLogoInputRef}
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={handleImageChange}
+                    onChange={handleBusinessLogoChange}
                   />
                 </button>
               </div>
@@ -222,283 +228,308 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
 
           {/* Right: Form Section */}
           <div className="flex-1 px-4 sm:px-6 md:px-12 py-6 md:py-10 max-h-[80vh] overflow-y-auto">
-            <div className="font-bold text-lg sm:text-xl md:text-2xl mb-2">
-              Edit Profile Information
-            </div>
-            <div className="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6 md:mb-8">
-              Update your personal and business information. All fields marked with * are required.
+            <div className="mb-6">
+              <h2 className="font-bold text-2xl text-gray-900 mb-2">Edit Profile</h2>
+              <p className="text-gray-600 text-sm">
+                Update your personal and business information. All fields marked with * are required.
+              </p>
             </div>
 
             <form
               onSubmit={handleSubmit}
-              className="space-y-6"
+              className="space-y-8"
             >
               {/* Personal Information Section */}
-              <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">Personal Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-6 gap-y-3 md:gap-y-4">
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FiUser className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">Personal Information</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* First Name */}
                   <div>
-                    <label className="block text-xs font-semibold mb-1">First Name *</label>
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                      <FiUser className="w-4 h-4 text-gray-400" />
+                      First Name *
+                    </label>
                     <input
                       name="firstName"
                       value={form.firstName}
                       onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       placeholder="John"
                       required
                     />
                     {errors.firstName && (
-                      <p className="text-red-600 text-xs mt-1">{errors.firstName}</p>
+                      <p className="text-red-600 text-xs mt-1.5 ml-1">{errors.firstName}</p>
                     )}
                   </div>
 
                   {/* Last Name */}
                   <div>
-                    <label className="block text-xs font-semibold mb-1">Last Name *</label>
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                      <FiUser className="w-4 h-4 text-gray-400" />
+                      Last Name *
+                    </label>
                     <input
                       name="lastName"
                       value={form.lastName}
                       onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       placeholder="Doe"
                       required
                     />
                     {errors.lastName && (
-                      <p className="text-red-600 text-xs mt-1">{errors.lastName}</p>
+                      <p className="text-red-600 text-xs mt-1.5 ml-1">{errors.lastName}</p>
                     )}
                   </div>
 
                   {/* Personal Email */}
                   <div>
-                    <label className="block text-xs font-semibold mb-1">Email Address *</label>
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                      <FiMail className="w-4 h-4 text-gray-400" />
+                      Email Address *
+                    </label>
                     <input
                       name="email"
                       type="email"
                       value={form.email}
                       onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       placeholder="john.doe@example.com"
                       required
                     />
                     {errors.email && (
-                      <p className="text-red-600 text-xs mt-1">{errors.email}</p>
+                      <p className="text-red-600 text-xs mt-1.5 ml-1">{errors.email}</p>
                     )}
                   </div>
 
                   {/* Personal Phone */}
                   <div>
-                    <label className="block text-xs font-semibold mb-1">Phone Number *</label>
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                      <FiPhone className="w-4 h-4 text-gray-400" />
+                      Phone Number *
+                    </label>
                     <input
                       name="phoneNumber"
                       value={form.phoneNumber}
                       onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       placeholder="+2348012345678"
                       required
                     />
                     {errors.phoneNumber && (
-                      <p className="text-red-600 text-xs mt-1">{errors.phoneNumber}</p>
+                      <p className="text-red-600 text-xs mt-1.5 ml-1">{errors.phoneNumber}</p>
                     )}
-                  </div>
-
-                  {/* Nationality */}
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Nationality</label>
-                    <input
-                      name="nationality"
-                      value={form.nationality}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                      placeholder="Nigeria"
-                    />
-                  </div>
-
-                  {/* Gender */}
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Gender</label>
-                    <select
-                      name="gender"
-                      value={form.gender}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                    >
-                      <option value="">Select</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  {/* Date of Birth */}
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Date of Birth</label>
-                    <input
-                      name="dateOfBirth"
-                      type="date"
-                      value={form.dateOfBirth}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                    />
                   </div>
                 </div>
               </div>
 
               {/* Business Information Section */}
-              <div>
-                <h3 className="text-base font-semibold text-gray-900 mb-4">Business Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-6 gap-y-3 md:gap-y-4">
-                  {/* Business Name */}
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Business Name</label>
-                    <input
-                      name="businessName"
-                      value={form.businessName}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                      placeholder="Synkkafrica"
-                      required
-                    />
-                    {errors.businessName && (
-                      <p className="text-red-600 text-xs mt-1">{errors.businessName}</p>
-                    )}
+              <div className="bg-gradient-to-br from-primary-50 to-white rounded-xl p-6 border border-primary-200">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-primary-100 rounded-lg">
+                    <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
                   </div>
+                  <h3 className="text-lg font-bold text-gray-900">Business Information</h3>
+                </div>
 
-                  {/* Business Location */}
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Business Location</label>
-                    <input
-                      name="businessLocation"
-                      value={form.businessLocation}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                      placeholder="Lagos, lekki phase 1"
-                      required
-                    />
-                    {errors.businessLocation && (
-                      <p className="text-red-600 text-xs mt-1">{errors.businessLocation}</p>
-                    )}
-                  </div>
-
-                  {/* Business Description */}
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold mb-1">Business Description</label>
-                    <textarea
-                      name="description"
-                      value={form.description}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 min-h-20"
-                      placeholder="This company is built on trust..."
-                      required
-                    />
-                    {errors.description && (
-                      <p className="text-red-600 text-xs mt-1">{errors.description}</p>
-                    )}
-                  </div>
-
-                  {/* Business's URL */}
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Business's URL</label>
-                    <input
-                      name="url"
-                      type="url"
-                      value={form.url}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                      placeholder="Synkkafrica.com"
-                    />
-                  </div>
-
-                  {/* Business Contact: Email */}
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Business Email</label>
-                    <input
-                      name="businessEmail"
-                      type="email"
-                      value={form.businessEmail}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                      placeholder="vendor@example.com"
-                    />
-                  </div>
-
-                  {/* Business Contact: Phone */}
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Business Phone</label>
-                    <input
-                      name="businessPhone"
-                      value={form.businessPhone}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                      placeholder="+2348012345678"
-                    />
-                  </div>
-
-                  {/* Secondary Business Phone */}
-                  <div>
-                    <label className="block text-xs font-semibold mb-1">Secondary Phone</label>
-                    <input
-                      name="secondaryPhone"
-                      value={form.secondaryPhone}
-                      onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                      placeholder="+2348012345679"
-                    />
-                  </div>
-
-                  {/* Business Payment Details */}
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold mb-2">Business Payment Details</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      <select
-                        name="bankName"
-                        value={form.bankName}
-                        onChange={handleChange}
-                        className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                        required
-                      >
-                        <option value="">Select Bank</option>
-                        {banks.map((bank) => (
-                          <option key={bank.code} value={bank.name}>
-                            {bank.name}
-                          </option>
-                        ))}
-                      </select>
+                <div className="space-y-6">
+                  {/* Basic Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Business Name */}
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Business Name *
+                      </label>
                       <input
-                        name="bankAccountName"
-                        value={form.bankAccountName || form.accountName}
+                        name="businessName"
+                        value={form.businessName}
                         onChange={handleChange}
-                        className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                        placeholder="Odeyale Emmanuel"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                        placeholder="Synkafrica"
                         required
                       />
+                      {errors.businessName && (
+                        <p className="text-red-600 text-xs mt-1.5 ml-1">{errors.businessName}</p>
+                      )}
+                    </div>
+
+                    {/* Business Location */}
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                        <FiMapPin className="w-4 h-4 text-gray-400" />
+                        Location *
+                      </label>
                       <input
-                        name="bankAccountNumber"
-                        value={form.bankAccountNumber || form.accountNumber}
+                        name="businessLocation"
+                        value={form.businessLocation}
                         onChange={handleChange}
-                        className="border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
-                        placeholder="0246591373"
-                        maxLength="10"
-                        pattern="[0-9]{10}"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                        placeholder="Lagos, Lekki Phase 1"
                         required
                       />
-                      {errors.accountNumber && (
-                        <p className="text-red-600 text-xs mt-1">{errors.bankAccountNumber}</p>
+                      {errors.businessLocation && (
+                        <p className="text-red-600 text-xs mt-1.5 ml-1">{errors.businessLocation}</p>
                       )}
                     </div>
                   </div>
 
-                  {/* Business FAQ's */}
-                  {/* Removed Business FAQ and License upload fields per request */}
+                  {/* Business Description */}
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                      </svg>
+                      Description *
+                    </label>
+                    <textarea
+                      name="description"
+                      value={form.description}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white min-h-24"
+                      placeholder="Tell us about your business..."
+                      required
+                    />
+                    {errors.description && (
+                      <p className="text-red-600 text-xs mt-1.5 ml-1">{errors.description}</p>
+                    )}
+                  </div>
+
+                  {/* Contact Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                        <FiGlobe className="w-4 h-4 text-gray-400" />
+                        Website URL
+                      </label>
+                      <input
+                        name="url"
+                        type="url"
+                        value={form.url}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                        placeholder="https://synkafrica.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                        <FiMail className="w-4 h-4 text-gray-400" />
+                        Business Email
+                      </label>
+                      <input
+                        name="businessEmail"
+                        type="email"
+                        value={form.businessEmail}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                        placeholder="vendor@example.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                        <FiPhone className="w-4 h-4 text-gray-400" />
+                        Primary Phone
+                      </label>
+                      <input
+                        name="businessPhone"
+                        value={form.businessPhone}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                        placeholder="+2348012345678"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                        <FiPhone className="w-4 h-4 text-gray-400" />
+                        Secondary Phone
+                      </label>
+                      <input
+                        name="secondaryPhone"
+                        value={form.secondaryPhone}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                        placeholder="+2348012345679"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Payment Details */}
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                      <FiCreditCard className="w-4 h-4 text-gray-400" />
+                      Payment Details *
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1.5">Bank Name</label>
+                        <select
+                          name="bankName"
+                          value={form.bankName}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                          required
+                        >
+                          <option value="">Select Bank</option>
+                          {banks.map((bank) => (
+                            <option key={bank.code} value={bank.name}>
+                              {bank.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1.5">Account Holder</label>
+                        <input
+                          name="bankAccountName"
+                          value={form.bankAccountName || ""}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                          placeholder="John Doe"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1.5">Account Number</label>
+                        <input
+                          name="bankAccountNumber"
+                          value={form.bankAccountNumber || ""}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                          placeholder="0246591373"
+                          maxLength="10"
+                          pattern="[0-9]{10}"
+                          required
+                        />
+                      </div>
+                    </div>
+                    {errors.bankAccountNumber && (
+                      <p className="text-red-600 text-xs mt-1.5 ml-1">{errors.bankAccountNumber}</p>
+                    )}
+                  </div>
 
                   {/* Business Availability */}
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold mb-1">Business Availability</label>
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                      <FiClock className="w-4 h-4 text-gray-400" />
+                      Availability *
+                    </label>
                     <select
                       name="availability"
                       value={form.availability}
                       onChange={handleChange}
-                      className="w-full border rounded-md px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
                       required
                     >
                       <option value="">Select availability</option>
@@ -512,11 +543,18 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-end pt-4 border-t border-gray-200">
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full md:w-auto bg-primary-500 text-white rounded-md px-6 py-2 font-semibold text-sm hover:bg-primary-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-6 py-2.5 bg-primary-500 text-white rounded-lg font-semibold text-sm hover:bg-primary-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-lg"
                 >
                   {loading ? (
                     <>
@@ -524,7 +562,12 @@ export function BusinessEditProfileModal({ business, user, onClose, onSave, load
                       Saving...
                     </>
                   ) : (
-                    'Save All Information'
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Save Changes
+                    </>
                   )}
                 </Button>
               </div>

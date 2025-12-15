@@ -158,14 +158,34 @@ export default function ListingsPage() {
 
     setIsDeleting(true);
     try {
-      await deleteListing(listingToDelete.id);
-      addToast({ message: `"${listingToDelete.title}" has been deleted successfully`, type: "success" });
+      const listingId = listingToDelete.id || listingToDelete._id;
+      if (!listingId) {
+        throw new Error('Listing ID not found');
+      }
+      
+      console.log('Confirming delete for listing:', listingId);
+      
+      await deleteListing(listingId);
+      
+      addToast({ 
+        message: `"${listingToDelete.title}" has been deleted successfully`, 
+        type: "success" 
+      });
+      
       setListingToDelete(null);
+      setShowDeleteConfirm(false);
     } catch (err) {
-      addToast({ message: "Failed to delete listing. Please try again.", type: "error" });
+      console.error('Delete listing error:', err);
+      
+      // Refetch only on error to restore correct state
+      await refetch();
+      
+      const errorMsg = err?.response?.message || err?.message || "Failed to delete listing. Please try again.";
+      addToast({ message: errorMsg, type: "error" });
+      
+      // Keep dialog open on error
     } finally {
       setIsDeleting(false);
-      setShowDeleteConfirm(false);
     }
   };
 
@@ -215,6 +235,7 @@ export default function ListingsPage() {
       <DashboardHeader
         title="Manage Listings"
         subtitle="Create and manage your service listings"
+
         rightActions={(
           <>
             <button
@@ -224,31 +245,6 @@ export default function ListingsPage() {
               <Plus className="w-5 h-5" />
 
             </button>
-
-            {/* <Link
-              href="/dashboard/business/profile"
-              className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-gray-200 cursor-pointer hover:border-primary-500 transition-colors shrink-0 group"
-            >
-              {!token || userLoading ? (
-                <Skeleton className="w-full h-full" />
-              ) : userError ? (
-                <div className="w-full h-full bg-red-500 flex items-center justify-center text-white text-sm font-semibold">
-                  !
-                </div>
-              ) : user?.avatar ? (
-                <Image
-                  src={user.avatar}
-                  alt={`${user.firstName} ${user.lastName}`}
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-900 flex items-center justify-center text-white text-sm font-semibold group-hover:bg-gray-800 transition-colors">
-                  {initials}
-                </div>
-              )}
-            </Link> */}
           </>
         )}
       />
@@ -353,6 +349,12 @@ export default function ListingsPage() {
                         />
                       );
                     })()}
+                    {/* Category Badge */}
+                    <div className="absolute top-3 left-3">
+                      <span className={`px-2 py-1 rounded text-xs font-medium text-white ${category?.color || 'bg-gray-500'}`}>
+                        {category?.label || 'Unknown'}
+                      </span>
+                    </div>
                     {/* Status Badge */}
                     <div className="absolute top-3 right-3">
                       <button
@@ -383,6 +385,26 @@ export default function ListingsPage() {
                       ₦{listing.basePrice?.toLocaleString() || "0"}
                     </p>
 
+                    {/* Menu Items for Fine Dining */}
+                    {listing.category === 'FINE_DINING' && listing.dining?.menuItems && listing.dining.menuItems.length > 0 && (
+                      <div className="mb-3 pb-3 border-b border-gray-200">
+                        <p className="text-xs font-semibold text-gray-700 mb-2">Menu Items:</p>
+                        <div className="space-y-1">
+                          {listing.dining.menuItems.slice(0, 3).map((item, idx) => (
+                            <p key={idx} className="text-xs text-gray-600">
+                              • {item.name}
+                              {item.price && <span className="text-primary-600 font-semibold ml-1">₦{parseInt(item.price)?.toLocaleString() || 0}</span>}
+                            </p>
+                          ))}
+                          {listing.dining.menuItems.length > 3 && (
+                            <p className="text-xs text-gray-500 italic">
+                              +{listing.dining.menuItems.length - 3} more items
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Stats */}
                     <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                       <div className="flex items-center gap-1">
@@ -398,7 +420,21 @@ export default function ListingsPage() {
                     {/* Actions */}
                     <div className="flex gap-2">
                       <Link
-                        href={`/dashboard/business/listings/${listingId}/edit`}
+                        href={(() => {
+                          const baseUrl = `/dashboard/business/listings/${listingId}`;
+                          switch (listing.category) {
+                            case 'CAR_RENTAL':
+                              return `${baseUrl}/edit`;
+                            case 'RESORT':
+                              return `${baseUrl}/edit-resort`;
+                            case 'FINE_DINING':
+                              return `${baseUrl}/edit-fine-dining`;
+                            case 'CONVENIENCE_SERVICE':
+                              return `${baseUrl}/edit-convenience`;
+                            default:
+                              return `${baseUrl}/edit`;
+                          }
+                        })()}
                         className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary-50 text-primary-600 rounded-lg font-medium hover:bg-primary-100 transition-colors text-sm"
                       >
                         <Edit className="w-4 h-4" />

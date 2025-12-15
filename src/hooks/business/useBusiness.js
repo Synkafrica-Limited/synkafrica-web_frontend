@@ -18,14 +18,29 @@ export const useBusiness = (token) => {
 
     try {
       // Use the correct endpoint: /api/business/
-      const data = await api.get('/api/business/', { auth: true });
+      const response = await api.get('/api/business/', { auth: true });
+      
+      console.log('[useBusiness] Raw response:', response);
+
+      // Handle wrapped response - backend might return { data: {...} }
+      let data = response?.data || response;
+      console.log('[useBusiness] Extracted data:', data);
 
       // Backend returns single object or array
       let businessData = data;
       if (Array.isArray(data)) {
         businessData = data.length > 0 ? data[0] : null;
+      } else if (data && typeof data === 'object' && data.business) {
+        // Handle { business: {...} } wrapper
+        businessData = data.business;
+      } else if (data && typeof data === 'object' && data.businesses) {
+        // Handle { businesses: [...] } wrapper
+        businessData = Array.isArray(data.businesses) && data.businesses.length > 0 
+          ? data.businesses[0] 
+          : null;
       }
       
+      console.log('[useBusiness] Final business data:', businessData);
       setBusiness(businessData || null);
     } catch (err) {
       let errorMessage = 'Failed to fetch business data';

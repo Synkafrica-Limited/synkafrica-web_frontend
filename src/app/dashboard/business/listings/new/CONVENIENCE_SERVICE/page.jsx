@@ -17,7 +17,7 @@ export default function NewCont4venienceListing() {
   const [form, setForm] = useState({
     serviceName: "",
     serviceType: "",
-    coverage: "",
+    location: "", // Changed from 'coverage' to match what the hook expects
     priceType: "fixed",
     fixedPrice: "",
     hourlyRate: "",
@@ -28,6 +28,7 @@ export default function NewCont4venienceListing() {
     description: "",
     responseTime: "30",
     advanceBooking: false,
+    status: "ACTIVE",
   });
 
   const [images, setImages] = useState([]);
@@ -130,6 +131,57 @@ export default function NewCont4venienceListing() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Status Toggle */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">
+                Listing Status
+              </h2>
+              <p className="text-sm text-gray-600">
+                Control whether this listing is visible to customers
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span
+                className={`text-sm font-medium ${
+                  form.status === "ACTIVE"
+                    ? "text-green-600"
+                    : "text-gray-600"
+                }`}
+              >
+                {form.status === "ACTIVE" ? "Active" : "Inactive"}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const isCurrentlyActive = form.status === "ACTIVE";
+                  const newStatus = isCurrentlyActive ? "INACTIVE" : "ACTIVE";
+                  setForm((prev) => ({ ...prev, status: newStatus }));
+                  addToast({
+                    message: `Listing set to ${newStatus.toLowerCase()}`,
+                    type: "info",
+                    duration: 2000
+                  });
+                }}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                  form.status === "ACTIVE"
+                    ? "bg-green-500"
+                    : "bg-gray-300"
+                }`}
+              >
+                <span
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                    form.status === "ACTIVE"
+                      ? "translate-x-7"
+                      : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Images */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -212,12 +264,12 @@ export default function NewCont4venienceListing() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Coverage Area *
+                Coverage Area / Location *
               </label>
               <input
                 type="text"
-                name="coverage"
-                value={form.coverage}
+                name="location"
+                value={form.location}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Lagos Island, Lekki"

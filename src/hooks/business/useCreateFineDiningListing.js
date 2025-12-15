@@ -4,6 +4,9 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { useBusiness } from './useBusiness';
 import { useCreateListing } from './useCreateListing';
 import authService from '@/services/authService';
+import { buildFineDiningPayload } from '@/utils/listingPayloadBuilder';
+import { validateListingPayload, validateImages } from '@/utils/listingValidation';
+import { handleApiError } from '@/utils/errorParser';
 
 export const useCreateFineDiningListing = () => {
   const router = useRouter();
@@ -14,53 +17,63 @@ export const useCreateFineDiningListing = () => {
   const { business, loading: businessLoading, error: businessError } = useBusiness(token);
   const { createListing } = useCreateListing();
 
-  const createFineDiningListing = async (form, images = [], menuPdf = null) => {
+  const createFineDiningListing = async (form, images = []) => {
+    if (!token) {
+      addToast({ message: 'Authentication required. Please log in.', type: 'error' });
+      return;
+    }
+
+    if (businessLoading) {
+      addToast({ message: 'Loading business information...', type: 'info' });
+      return;
+    }
+
+    if (businessError) {
+      addToast({ message: 'Failed to load business information. Please try again.', type: 'error' });
+      return;
+    }
+
     if (!business) {
-      addToast('Business account not found. Please create a business first.', 'error');
+      addToast({ message: 'Business account not found. Please create a business first.', type: 'error' });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      if (!form.restaurantName || !form.location) {
-        throw new Error('Restaurant name and location are required');
+      // Debug: Log the business object structure
+      console.log('[useCreateFineDiningListing] Business object:', business);
+      
+      // Get business ID - handle both array and single object response
+      const businessObj = Array.isArray(business) ? business[0] : business;
+      const businessId = businessObj?.id || businessObj?._id || businessObj?.businessId || '';
+      console.log('[useCreateFineDiningListing] Extracted businessId:', businessId);
+
+      if (!businessId) {
+        console.error('[useCreateFineDiningListing] Failed to extract business ID from:', businessObj);
+        throw new Error('Business ID not found. Please ensure you have a valid business account.');
       }
 
-      const files = images.map((i) => i?.file || i);
-      // include menuPdf as a file if provided
-      const menuFile = menuPdf?.file || (menuPdf instanceof File ? menuPdf : null);
-      const allFiles = menuFile ? [...files, menuFile] : files;
-      const hasFiles = allFiles.some((f) => f instanceof File);
+      // Validate images
+      const imageValidation = validateImages(images);
+      if (!imageValidation.isValid) {
+        imageValidation.errors.forEach(err => addToast({ message: err, type: 'error' }));
+        return;
+      }
 
-      const payload = {
-        businessId: business?.id || business?._id || '',
-        title: form.restaurantName,
-        description: form.description,
-        category: 'FINE_DINING',
-        basePrice: Number(form.priceRange) || 0,
-        currency: 'NGN',
-        ...(hasFiles ? {} : { images: images.map((i) => i.preview) }),
-        location: {
-          address: form.location,
-          city: form.location?.split(',')[0]?.trim() || 'Lagos',
-          country: 'Nigeria'
-        },
-        dining: {
-          cuisineType: form.cuisineType || [],
-          diningType: form.diningType || '',
-          capacity: Number(form.capacity) || 0,
-          amenities: form.amenities || [],
-          menuUrl: menuPdf ? menuPdf.preview || null : null,
-        }
-      };
+      // Build payload using category-aware builder
+      const payload = buildFineDiningPayload(form, businessId, images);
+      
+      console.log('[useCreateFineDiningListing] Payload:', payload);
 
-        await createListing(payload, allFiles);
-      addToast('Fine dining listing created successfully', 'success');
+      // Extract files for upload
+      const files = images.map((i) => i?.file || i).filter(f => f instanceof File);
+
+      await createListing(payload, files);
+      addToast({ message: 'Fine dining listing created successfully', type: 'success' });
       router.push('/dashboard/business/listings');
     } catch (err) {
       console.error('createFineDiningListing error', err);
-      addToast(err?.message || 'Failed to create listing', 'error');
-      throw err;
+      handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
     } finally {
       setIsSubmitting(false);
     }
