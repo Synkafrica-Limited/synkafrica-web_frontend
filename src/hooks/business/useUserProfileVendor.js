@@ -16,12 +16,26 @@ export const useUserProfile = (token) => {
     try {
       // Backend exposes user profile at /api/users/profile
       const data = await api.get('/api/users/profile', { auth: true });
-      // Response may be { user } or { user, business }
-      if (data && data.user) setUser(data.user);
-      else setUser(data);
+      console.debug('[useUserProfile] Raw API response:', data);
+      
+      // Handle wrapped response format: { success, message, data: { user } }
+      // or direct format: { user } or just the user object
+      const responseData = data?.data || data;
+      console.debug('[useUserProfile] Extracted data:', responseData);
+      
+      // Try to extract user from various possible structures
+      if (responseData && responseData.user) {
+        setUser(responseData.user);
+      } else if (responseData) {
+        // If responseData doesn't have a 'user' field, it might be the user object itself
+        setUser(responseData);
+      } else {
+        console.warn('[useUserProfile] No user data found in response');
+        setUser(null);
+      }
     } catch (err) {
       const message = err.message || 'Something went wrong';
-      console.error("Failed to fetch user profile:", message); // Log the error
+      console.error("[useUserProfile] Failed to fetch user profile:", message, err); // Log the error
       setError(message);
     } finally {
       setLoading(false);

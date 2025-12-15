@@ -132,21 +132,35 @@ async function signIn(email, password, remember = false) {
   let data = null;
   try {
     data = await res.json();
-  } catch {
-    // ignore JSON parse errors
+  } catch (parseErr) {
+    console.error('Failed to parse sign in response:', parseErr);
+    throw new Error('Invalid server response format');
   }
 
   if (!res.ok) {
     const message = (data && data.message) || `Error ${res.status}`;
     const err = new Error(message);
     err.status = res.status;
+    err.response = data;
     throw err;
   }
 
-  const accessToken = data?.accessToken;
-  const refreshToken = data?.refreshToken;
+  // Handle various response formats from backend
+  // Backend may return tokens directly or wrapped in a data object
+  const responseData = data?.data || data;
+  const accessToken = responseData?.accessToken || responseData?.access_token || responseData?.token;
+  const refreshToken = responseData?.refreshToken || responseData?.refresh_token;
 
-  if (accessToken) setTokens({ accessToken, refreshToken }, remember);
+  if (accessToken) {
+    setTokens({ accessToken, refreshToken }, remember);
+    // Also store user data if provided
+    const user = responseData?.user || data?.user;
+    if (user) {
+      setUser(user, remember);
+    }
+  } else {
+    console.warn('Sign in response missing accessToken:', data);
+  }
 
   return data;
 }
@@ -161,21 +175,32 @@ async function signupVendor(firstName, lastName, email, password, phoneNumber = 
   let data = null;
   try {
     data = await res.json();
-  } catch {}
+  } catch (parseErr) {
+    console.error('Failed to parse signup response:', parseErr);
+    throw new Error('Invalid server response format');
+  }
 
   if (!res.ok) {
     const msg = data?.message || `Error ${res.status}`;
     const err = new Error(msg);
     err.status = res.status;
+    err.response = data;
     throw err;
   }
 
-  const accessToken = data?.accessToken;
-  const refreshToken = data?.refreshToken;
+  // Handle wrapped response format (data.data) or direct format
+  const responseData = data?.data || data;
+  const accessToken = responseData?.accessToken || responseData?.access_token || responseData?.token;
+  const refreshToken = responseData?.refreshToken || responseData?.refresh_token;
 
   // Persist tokens and user by default on signup
-  if (accessToken) setTokens({ accessToken, refreshToken }, true);
-  if (data?.user) setUser(data.user, true);
+  if (accessToken) {
+    setTokens({ accessToken, refreshToken }, true);
+    const user = responseData?.user || data?.user;
+    if (user) setUser(user, true);
+  } else {
+    console.warn('Signup response missing accessToken:', data);
+  }
 
   return data;
 }

@@ -112,7 +112,7 @@ export function useSession() {
       // Add a 5-minute buffer to refresh token before it actually expires
       const bufferTime = 5 * 60; // 5 minutes in seconds
       return decoded.exp && (decoded.exp - bufferTime) > now;
-    } catch (err) {
+    } catch {
       return false;
     }
   }, []);

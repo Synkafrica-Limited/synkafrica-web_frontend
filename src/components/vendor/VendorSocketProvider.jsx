@@ -6,17 +6,21 @@ import { useVendorNotifications } from "@/context/VendorNotificationContext";
 import BookingRequestModal from "./BookingRequestModal";
 import { authServiceWrapper } from "@/services/auth";
 import { initializeSocket, disconnectSocket } from "@/lib/socket";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function VendorSocketProvider({ children }) {
+    const { isAuthenticated } = useAuth();
     const { notifications } = useVendorNotifications();
     const [activeBookingRequest, setActiveBookingRequest] = useState(null);
 
     // Initialize socket connection
     useEffect(() => {
         const connectSocket = async () => {
-            const token = authServiceWrapper.getStoredToken();
-            if (token) {
-                initializeSocket(token);
+            if (isAuthenticated) {
+                const token = authServiceWrapper.getStoredToken();
+                if (token) {
+                    initializeSocket(token);
+                }
             }
         };
 
@@ -25,7 +29,7 @@ export default function VendorSocketProvider({ children }) {
         return () => {
             disconnectSocket();
         };
-    }, []);
+    }, [isAuthenticated]);
 
     // Setup event listeners
     useVendorSocketEvents();

@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthLayout from "@/components/layout/AuthLayout";
 import Buttons from "@/components/ui/Buttons";
 import { useValidate } from "@/hooks/customer/auth/useValidate";
 
-
-export default function EmailValidationScreen() {
+function EmailValidationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [code, setCode] = useState("");
@@ -190,5 +189,28 @@ export default function EmailValidationScreen() {
         </div>
       </form>
     </AuthLayout>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <AuthLayout
+      title="Let's confirm your email"
+      subtitle="Loading..."
+      bgGradient="bg-linear-to-br from-blue-400 via-blue-500 to-purple-800"
+      cancelHref="/customer/signin"
+    >
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    </AuthLayout>
+  );
+}
+
+export default function EmailValidationScreen() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <EmailValidationContent />
+    </Suspense>
   );
 }

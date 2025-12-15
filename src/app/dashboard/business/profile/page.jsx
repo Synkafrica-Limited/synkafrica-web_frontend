@@ -17,6 +17,17 @@ import DashboardHeader from '@/components/layout/DashboardHeader';
 import { ProtectedPage } from "@/components/ui/PageWrapper";
 import { useDataLoader } from "@/hooks/useDataLoader";
 
+// Normalize verification status from backend
+function normalizeVerificationStatus(status) {
+  if (!status) return 'not_verified';
+  const normalized = status.toLowerCase();
+  if (normalized === 'not_started') return 'not_verified';
+  if (normalized === 'pending' || normalized === 'under_review') return 'pending';
+  if (normalized === 'approved' || normalized === 'verified') return 'verified';
+  if (normalized === 'rejected') return 'rejected';
+  return 'not_verified';
+}
+
 
 function BusinessProfileContent() {
   const router = useRouter();
@@ -79,6 +90,12 @@ function BusinessProfileContent() {
         serviceLicense: business.serviceLicense || null,
         availability: business.availability || "",
         profileImage: business.profileImage || business.logo || user?.avatar || null,
+        // Verification status - normalize backend values
+        verificationStatus: normalizeVerificationStatus(business.verificationStatus),
+        isVerified: business.isVerified || false,
+        verifiedAt: business.verifiedAt || null,
+        // Profile completion from backend
+        profileCompletion: business.profileCompletion || 0,
       };
     },
     [user],
@@ -119,9 +136,8 @@ function BusinessProfileContent() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-            isNoBusinessError ? 'bg-blue-100' : 'bg-red-100'
-          }`}>
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isNoBusinessError ? 'bg-blue-100' : 'bg-red-100'
+            }`}>
             <svg className={`w-8 h-8 ${isNoBusinessError ? 'text-blue-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={
                 isNoBusinessError
@@ -196,10 +212,8 @@ function BusinessProfileContent() {
     return value && value.toString().trim() !== "";
   }).length;
 
-  // Calculate overall progress
-  const totalRequired = userRequiredFields.length + businessRequiredFields.length;
-  const totalCompleted = userCompleted + businessCompleted;
-  const progress = Math.round((totalCompleted / totalRequired) * 100);
+  // Use profile completion from backend (calculated server-side with accurate weights)
+  const progress = businessData.profileCompletion || 0;
 
   // Progress breakdown for detailed display
   const profileProgress = {
@@ -227,7 +241,7 @@ function BusinessProfileContent() {
         .toUpperCase() || "SA",
     name: businessData.businessName || "Business Name",
     email: businessData.email,
-    profileImage: businessData.profileImage,
+    profileImage: user?.avatar || businessData.profileImage,
   };
 
   // Payment details formatted
@@ -250,14 +264,29 @@ function BusinessProfileContent() {
 
     setUpdating(true);
     try {
-      // Update user profile if userData is provided
+      // Update user profile if userData is provided (including avatar)
       if (userData && Object.keys(userData).length > 0) {
-        await authService.updateProfile(userData);
+        const hasUserFile = userData.avatar instanceof File;
+        if (hasUserFile) {
+          const userFormData = new FormData();
+          Object.keys(userData).forEach(key => {
+            const val = userData[key];
+            if (val === null || val === undefined) return;
+            if (val instanceof File) {
+              userFormData.append(key, val);
+            } else if (typeof val === 'string' && val.trim() !== '') {
+              userFormData.append(key, String(val));
+            }
+          });
+          await authService.updateProfile(userFormData);
+        } else {
+          await authService.updateProfile(userData);
+        }
       }
 
-      // Update business profile
+      // Update business profile (including logo)
       if (businessData && (businessData.id || Object.keys(businessData).length > 0)) {
-        const hasFile = (businessData.profileImage instanceof File) || (businessData.faqs instanceof File) || (businessData.serviceLicense instanceof File);
+        const hasFile = (businessData.logo instanceof File) || (businessData.faqs instanceof File) || (businessData.serviceLicense instanceof File);
         if (hasFile) {
           const formData = new FormData();
           Object.keys(businessData).forEach(key => {
@@ -288,6 +317,14 @@ function BusinessProfileContent() {
       await refetchProfile();
       await refetchBusiness();
 
+      // Debug: Log the refetched business data
+      console.log('[Profile] Business data after update:', businessData);
+      console.log('[Profile] Bank details:', {
+        bankName: businessData?.bankName,
+        bankAccountName: businessData?.bankAccountName,
+        bankAccountNumber: businessData?.bankAccountNumber
+      });
+
       // Also refetch verification status for the business so UI reflects any verification-related changes
       try {
         const bizId = businessData.id || businessData.businessId || (businessData && businessData.id) || businessData;
@@ -305,6 +342,23 @@ function BusinessProfileContent() {
       toast?.danger?.(error?.message || 'Failed to update profile');
     } finally {
       setUpdating(false);
+    }
+  };
+
+  // Handle profile image upload from card
+  const handleProfileImageUpload = async (file) => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    try {
+      await authService.updateProfile(formData);
+      await refetchProfile();
+      toast?.success?.('Profile picture updated successfully');
+    } catch (error) {
+      console.error('Failed to upload profile picture:', error);
+      toast?.danger?.(error?.message || 'Failed to upload profile picture');
     }
   };
 
@@ -351,7 +405,11 @@ function BusinessProfileContent() {
           {/* Left Sidebar - Profile Card */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              <BusinessProfileCard business={cardBusiness} user={user} />
+              <BusinessProfileCard
+                business={{ ...cardBusiness, verificationStatus: businessData?.verificationStatus }}
+                user={user}
+                onImageUpload={handleProfileImageUpload}
+              />
             </div>
           </div>
 

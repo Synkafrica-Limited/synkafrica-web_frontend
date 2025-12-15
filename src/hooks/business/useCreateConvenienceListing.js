@@ -4,6 +4,8 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { useBusiness } from './useBusiness';
 import { useCreateListing } from './useCreateListing';
 import authService from '@/services/authService';
+import { buildConveniencePayload } from '@/utils/listingPayloadBuilder';
+import { validateListingPayload, validateImages } from '@/utils/listingValidation';
 import { handleApiError } from '@/utils/errorParser';
 
 export const useCreateConvenienceListing = () => {
@@ -16,48 +18,63 @@ export const useCreateConvenienceListing = () => {
   const { createListing } = useCreateListing();
 
   const createConvenienceListing = async (form, images = []) => {
+    if (!token) {
+      addToast({ message: 'Authentication required. Please log in.', type: 'error' });
+      return;
+    }
+
+    if (businessLoading) {
+      addToast({ message: 'Loading business information...', type: 'info' });
+      return;
+    }
+
+    if (businessError) {
+      addToast({ message: 'Failed to load business information. Please try again.', type: 'error' });
+      return;
+    }
+
     if (!business) {
-      addToast('Business account not found. Please create a business first.', 'error');
+      addToast({ message: 'Business account not found. Please create a business first.', type: 'error' });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      if (!form.serviceName || !form.location) {
-        throw new Error('Service name and location are required');
+      // Debug: Log the business object structure
+      console.log('[useCreateConvenienceListing] Business object:', business);
+      
+      // Get business ID - handle both array and single object response
+      const businessObj = Array.isArray(business) ? business[0] : business;
+      const businessId = businessObj?.id || businessObj?._id || businessObj?.businessId || '';
+      console.log('[useCreateConvenienceListing] Extracted businessId:', businessId);
+
+      if (!businessId) {
+        console.error('[useCreateConvenienceListing] Failed to extract business ID from:', businessObj);
+        throw new Error('Business ID not found. Please ensure you have a valid business account.');
       }
 
-      const files = images.map((i) => i?.file || i);
-      const hasFiles = files.some((f) => f instanceof File);
+      // Validate images
+      const imageValidation = validateImages(images);
+      if (!imageValidation.isValid) {
+        imageValidation.errors.forEach(err => addToast({ message: err, type: 'error' }));
+        return;
+      }
 
-      const payload = {
-        businessId: business?.id || business?._id || '',
-        title: form.serviceName,
-        description: form.description,
-        category: 'CONVENIENCE_SERVICE',
-        basePrice: Number(form.priceType === 'fixed' ? form.fixedPrice || 0 : form.hourlyRate || 0) || 0,
-        currency: 'NGN',
-        ...(hasFiles ? {} : { images: images.map((i) => i.preview) }),
-        location: {
-          address: form.location,
-          city: form.location?.split(',')[0]?.trim() || 'Lagos',
-          country: 'Nigeria'
-        },
-        convenience: {
-          serviceType: form.serviceType,
-          priceType: form.priceType,
-          minimumOrder: Number(form.minimumOrder || 0),
-          deliveryFee: Number(form.deliveryFee || 0),
-          features: form.features || []
-        }
-      };
+      // Build payload using category-aware builder
+      const payload = buildConveniencePayload(form, businessId, images);
+      
+      console.log('[useCreateConvenienceListing] Payload:', payload);
+
+      // Extract files for upload
+      const files = images.map((i) => i?.file || i).filter(f => f instanceof File);
 
       await createListing(payload, files);
-      addToast('Service listing created successfully', 'success');
+      addToast({ message: 'Service listing created successfully', type: 'success' });
       router.push('/dashboard/business/listings');
     } catch (err) {
       handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
-      throw err;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

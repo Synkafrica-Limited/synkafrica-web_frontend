@@ -9,28 +9,76 @@ class VerificationService {
       // Try dedicated endpoint first
       try {
         const response = await api.get(`/api/business/${businessId}/verification`, { auth: true });
+        console.log('[verification.service] API response:', response);
+        
+        // Extract status from the correct field: response.data.verificationStatus
+        const rawStatus = response?.data?.verificationStatus || response?.verificationStatus || response?.status;
+        console.log('[verification.service] Raw status from API:', rawStatus);
+        
+        // Normalize status values
+        let normalizedStatus = 'not_started';
+        if (rawStatus) {
+          const statusLower = rawStatus.toLowerCase();
+          console.log('[verification.service] Before normalization:', rawStatus, '→', statusLower);
+          
+          if (statusLower === 'pending' || statusLower === 'pending_review' || statusLower === 'under_review') {
+            normalizedStatus = 'pending';
+          } else if (statusLower === 'verified' || statusLower === 'approved') {
+            normalizedStatus = 'verified';
+          } else if (statusLower === 'rejected' || statusLower === 'declined') {
+            normalizedStatus = 'rejected';
+          } else if (statusLower === 'not_started') {
+            normalizedStatus = 'not_started';
+          } else {
+            console.warn('[verification.service] Unknown status value:', rawStatus);
+          }
+        }
+        
+        console.log('[verification.service] After normalization:', normalizedStatus);
+        
         return {
-          status: response?.status || 'not_started',
-          progress: response?.progress || 0,
-          submittedAt: response?.submittedAt,
-          reviewedAt: response?.reviewedAt,
-          rejectionReason: response?.rejectionReason,
-          documents: response?.documents || []
+          status: normalizedStatus,
+          progress: response?.data?.completionPercentage || response?.progress || 0,
+          submittedAt: response?.data?.submittedAt || response?.submittedAt,
+          reviewedAt: response?.data?.reviewedAt || response?.reviewedAt,
+          rejectionReason: response?.data?.rejectionReason || response?.rejectionReason,
+          documents: response?.data?.documents || response?.documents || []
         };
       } catch (err) {
         if (err.status === 404) {
           // Fallback: check business profile directly
           const business = await businessService.getBusinessById(businessId);
+          console.log('[verification.service] Fallback - business object:', business);
+          console.log('[verification.service] Fallback - verificationStatus field:', business?.verificationStatus);
           
           // Determine status from business profile fields
           let status = 'not_started';
           let progress = 0;
           
           if (business?.verificationStatus) {
-            status = business.verificationStatus;
+            const rawStatus = business.verificationStatus;
+            status = rawStatus.toLowerCase();
+            console.log('[verification.service] Fallback - raw status:', rawStatus, '→ lowercase:', status);
+            
+            // Normalize status - handle ALL backend values
+            if (status === 'pending_review' || status === 'pending' || status === 'under_review') {
+              status = 'pending';
+            } else if (status === 'approved' || status === 'verified') {
+              status = 'verified';
+            } else if (status === 'declined' || status === 'rejected') {
+              status = 'rejected';
+            } else if (status === 'not_started') {
+              status = 'not_started';
+            } else {
+              // Unknown status - log it and default to not_started
+              console.warn('[verification.service] Unknown verification status:', rawStatus);
+              status = 'not_started';
+            }
           } else if (business?.isVerified) {
             status = 'verified';
           }
+
+          console.log('[verification.service] Fallback - final normalized status:', status);
 
           // Calculate progress based on filled fields
           const requiredFields = ['businessName', 'registrationNumber', 'bankName', 'accountNumber'];

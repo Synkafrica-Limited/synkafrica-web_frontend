@@ -45,6 +45,47 @@ export function parseApiError(error) {
 }
 
 /**
+ * Extract field-level errors from backend response
+ * Returns { fieldErrors: { fieldName: errorMessage }, generalError: string }
+ */
+export function extractFieldErrors(error) {
+  const result = {
+    fieldErrors: {},
+    generalError: null,
+  };
+
+  if (!error?.response?.data) {
+    result.generalError = parseApiError(error);
+    return result;
+  }
+
+  const data = error.response.data;
+
+  // Handle structured validation errors
+  if (data.errors && Array.isArray(data.errors)) {
+    data.errors.forEach(err => {
+      if (err.field && err.message) {
+        result.fieldErrors[err.field] = err.message;
+      } else if (err.message) {
+        result.generalError = err.message;
+      }
+    });
+  } else if (data.errors && typeof data.errors === 'object') {
+    // Handle object-based errors
+    Object.entries(data.errors).forEach(([field, message]) => {
+      result.fieldErrors[field] = Array.isArray(message) ? message[0] : message;
+    });
+  }
+
+  // If no field errors, set general error
+  if (Object.keys(result.fieldErrors).length === 0) {
+    result.generalError = parseApiError(error);
+  }
+
+  return result;
+}
+
+/**
  * Shared API error handler with toast display
  */
 export function handleApiError(error, toast, options = {}) {
@@ -59,7 +100,8 @@ export function handleApiError(error, toast, options = {}) {
     } else if (toast.error) {
       toast.error(message);
     } else if (toast.addToast) {
-      toast.addToast(message, 'error');
+      // Support both old format (string, type) and new format ({ message, type })
+      toast.addToast({ message, type: 'error' });
     }
   }
 
