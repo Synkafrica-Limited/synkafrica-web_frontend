@@ -162,6 +162,11 @@ export default function SupportPage() {
             return;
         }
 
+        if (newTicket.description.trim().length < 20) {
+            addToast({ message: "Description must be at least 20 characters long", type: "warning" });
+            return;
+        }
+
         setIsCreating(true);
         try {
             const response = await api.post("/support/tickets", newTicket, { auth: true });
