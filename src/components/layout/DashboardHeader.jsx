@@ -40,13 +40,14 @@ export default function DashboardHeader({ title, subtitle, rightActions, showBac
             </div>
 
             {rightActions && (
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="flex flex-wrap items-end gap-2 sm:gap-3">
                 {rightActions}
+                
+            {/* Notification Bell - Always visible */}
+            <NotificationBell />
               </div>
             )}
 
-            {/* Notification Bell - Always visible */}
-            <NotificationBell />
           </div>
         </div>
       </div>

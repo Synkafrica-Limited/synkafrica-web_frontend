@@ -1,0 +1,37 @@
+export class Listing {
+  id: string;
+  businessId: string;
+  category: string;
+  title: string;
+  description: string;
+  basePrice: number;
+  currency: string;
+  images: any;
+  status: string;
+  carMake?: string;
+  carModel?: string;
+  carYear?: number;
+  carPlateNumber?: string;
+  carSeats?: number;
+  carTransmission?: string;
+  carFuelType?: string;
+  carFeatures?: any;
+  resortType?: string;
+  roomType?: string;
+  capacity?: number;
+  amenities?: any;
+  checkInTime?: string;
+  checkOutTime?: string;
+  cuisineType?: string;
+  menuCategories?: any;
+  menuItems?: any;
+  diningType?: string;
+  serviceType?: string;
+  serviceDuration?: number;
+  serviceArea?: string;
+  availabilityCalendar?: any;
+  cancellationPolicy?: string;
+  termsAndConditions?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

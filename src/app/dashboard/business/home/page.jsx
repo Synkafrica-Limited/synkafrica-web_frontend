@@ -67,6 +67,11 @@ export default function BusinessDashboard() {
 
   useEffect(() => {
     loadData();
+    // Track login count for verification banner
+    if (typeof window !== "undefined") {
+      const currentCount = parseInt(localStorage.getItem("vendor_login_count") || "0", 10);
+      localStorage.setItem("vendor_login_count", String(currentCount + 1));
+    }
   }, []);
 
   const handleRefresh = async () => {

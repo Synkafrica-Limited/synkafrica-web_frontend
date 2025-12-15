@@ -9,8 +9,27 @@ class VerificationService {
       // Try dedicated endpoint first
       try {
         const response = await api.get(`/api/business/${businessId}/verification`, { auth: true });
+        console.log('[verification.service] API response:', response);
+        console.log('[verification.service] API response.status:', response?.status);
+        
+        // Normalize status values
+        let normalizedStatus = response?.status || 'not_started';
+        console.log('[verification.service] Before normalization:', normalizedStatus);
+        
+        if (normalizedStatus === 'PENDING' || normalizedStatus === 'pending_review' || normalizedStatus === 'UNDER_REVIEW') {
+          normalizedStatus = 'pending';
+        } else if (normalizedStatus === 'VERIFIED' || normalizedStatus === 'approved' || normalizedStatus === 'APPROVED') {
+          normalizedStatus = 'verified';
+        } else if (normalizedStatus === 'REJECTED' || normalizedStatus === 'declined') {
+          normalizedStatus = 'rejected';
+        } else if (normalizedStatus === 'NOT_STARTED') {
+          normalizedStatus = 'not_started';
+        }
+        
+        console.log('[verification.service] After normalization:', normalizedStatus);
+        
         return {
-          status: response?.status || 'not_started',
+          status: normalizedStatus,
           progress: response?.progress || 0,
           submittedAt: response?.submittedAt,
           reviewedAt: response?.reviewedAt,
@@ -21,16 +40,37 @@ class VerificationService {
         if (err.status === 404) {
           // Fallback: check business profile directly
           const business = await businessService.getBusinessById(businessId);
+          console.log('[verification.service] Fallback - business object:', business);
+          console.log('[verification.service] Fallback - verificationStatus field:', business?.verificationStatus);
           
           // Determine status from business profile fields
           let status = 'not_started';
           let progress = 0;
           
           if (business?.verificationStatus) {
-            status = business.verificationStatus;
+            const rawStatus = business.verificationStatus;
+            status = rawStatus.toLowerCase();
+            console.log('[verification.service] Fallback - raw status:', rawStatus, '→ lowercase:', status);
+            
+            // Normalize status - handle ALL backend values
+            if (status === 'pending_review' || status === 'pending' || status === 'under_review') {
+              status = 'pending';
+            } else if (status === 'approved' || status === 'verified') {
+              status = 'verified';
+            } else if (status === 'declined' || status === 'rejected') {
+              status = 'rejected';
+            } else if (status === 'not_started') {
+              status = 'not_started';
+            } else {
+              // Unknown status - log it and default to not_started
+              console.warn('[verification.service] Unknown verification status:', rawStatus);
+              status = 'not_started';
+            }
           } else if (business?.isVerified) {
             status = 'verified';
           }
+
+          console.log('[verification.service] Fallback - final normalized status:', status);
 
           // Calculate progress based on filled fields
           const requiredFields = ['businessName', 'registrationNumber', 'bankName', 'accountNumber'];

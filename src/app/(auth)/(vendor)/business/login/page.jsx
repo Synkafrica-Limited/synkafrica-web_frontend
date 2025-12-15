@@ -99,15 +99,25 @@ export default function VendorSignInScreen() {
 
     try {
       const data = await authService.signIn(email.trim(), password, rememberMe);
-      if (data?.accessToken) {
+      
+      console.log('Sign in response:', data);
+      
+      // Check for token in both top level and data object
+      const token = data?.accessToken || data?.data?.accessToken;
+      
+      if (token) {
         // signIn already persisted tokens according to rememberMe
         router.push("/dashboard/business/home");
       } else {
-        setServerError("Unexpected server response. No token received.");
+        // Log what we actually received for debugging
+        console.error('Missing accessToken in response:', data);
+        const errorMsg = data?.message || "Login successful but no access token received. Please try again or contact support.";
+        setServerError(errorMsg);
       }
     } catch (err) {
       console.error("Sign in failed:", err);
-      setServerError(err?.message || "Unable to reach server.");
+      const errorMsg = err?.message || err?.response?.message || "Unable to sign in. Please check your credentials and try again.";
+      setServerError(errorMsg);
     } finally {
       setLoading(false);
     }
