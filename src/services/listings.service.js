@@ -112,19 +112,10 @@ export async function getListings(params = {}) {
 		const path = `/api/listings${search.toString() ? `?${search.toString()}` : ''}`;
 		console.log('[listings.service] Fetching listings:', path);
 		const res = await api.get(path);
+		console.log('[listings.service] API response:', res);
 		
-		// Handle wrapped response
-		const data = res?.data || res;
-		
-		if (Array.isArray(data)) {
-			return data;
-		}
-		
-		if (data?.listings && Array.isArray(data.listings)) {
-			return data.listings;
-		}
-		
-		return [];
+		// Return the full response object {success, message, data}
+		return res;
 	} catch (err) {
 		console.error('[listings.service] getListings error:', err);
 		throw err;

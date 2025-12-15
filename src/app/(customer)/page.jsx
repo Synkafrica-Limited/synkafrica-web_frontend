@@ -193,10 +193,14 @@ export default function HomePage() {
         setIsLoadingListings(true);
         setListingsError(null);
         
+        console.log('Fetching listings from API...');
         const response = await getListings();
+        console.log('API Response:', response);
         
         // Transform API response to match UI format
         const transformedListings = (response?.data || []).map(listing => {
+          console.log('Transforming listing:', listing.id, listing.title, listing.category);
+          
           // Extract image URL (handle both object and string formats)
           let imageUrl = '';
           if (listing.images && listing.images.length > 0) {
@@ -260,6 +264,7 @@ export default function HomePage() {
           };
         });
         
+        console.log('Transformed listings:', transformedListings.length, 'items');
         setApiListings(transformedListings);
       } catch (error) {
         console.error('Failed to fetch listings:', error);
