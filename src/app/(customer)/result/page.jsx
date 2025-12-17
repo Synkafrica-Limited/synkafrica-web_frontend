@@ -22,200 +22,9 @@ import {
   Search,
 } from "lucide-react";
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+import { getListings } from "@/services/listings.service";
 
-const mockListings = {
-  car: [
-    {
-      id: 1,
-      name: "Mercedes-Benz S-Class",
-      image:
-        "https://images.unsplash.com/photo-1610099610040-ab19f3a5ec35?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1064",
-      location: "Victoria Island, Lagos",
-      price: 75000,
-      rating: 4.8,
-      reviews: 124,
-      features: ["Professional Driver", "AC", "Leather Seats", "WiFi"],
-      available: true,
-    },
-    {
-      id: 2,
-      name: "Toyota Camry 2023",
-      image:
-        "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&h=300&fit=crop",
-      location: "Lekki Phase 1, Lagos",
-      price: 35000,
-      rating: 4.6,
-      reviews: 89,
-      features: ["Professional Driver", "AC", "GPS", "Bluetooth"],
-      available: true,
-    },
-    {
-      id: 3,
-      name: "Range Rover Sport",
-      image:
-        "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400&h=300&fit=crop",
-      location: "Ikoyi, Lagos",
-      price: 95000,
-      rating: 4.9,
-      reviews: 156,
-      features: [
-        "Luxury Interior",
-        "Professional Driver",
-        "Premium Sound",
-        "WiFi",
-      ],
-      available: true,
-    },
-  ],
-  water: [
-    {
-      id: 1,
-      name: "Luxury Yacht Charter",
-      image:
-        "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=400&h=300&fit=crop",
-      location: "Lagos Marina",
-      price: 250000,
-      rating: 5.0,
-      reviews: 67,
-      features: [
-        "Captain Included",
-        "Crew",
-        "Catering Available",
-        "Sound System",
-      ],
-      capacity: "20 guests",
-      available: true,
-    },
-    {
-      id: 2,
-      name: "Jet Ski Adventure",
-      image:
-        "https://images.unsplash.com/photo-1637005433009-63f2fe0fdd9e?w=400&h=300&fit=crop",
-      location: "Elegushi Beach",
-      price: 15000,
-      rating: 4.7,
-      reviews: 203,
-      features: [
-        "Safety Gear",
-        "Instructor",
-        "30min Session",
-        "Photos Included",
-      ],
-      capacity: "2 persons",
-      available: true,
-    },
-    {
-      id: 3,
-      name: "Speed Boat Tour",
-      image:
-        "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop",
-      location: "Ikoyi Marina",
-      price: 85000,
-      rating: 4.8,
-      reviews: 91,
-      features: [
-        "Professional Guide",
-        "Life Jackets",
-        "Refreshments",
-        "2hr Tour",
-      ],
-      capacity: "8 guests",
-      available: true,
-    },
-  ],
-  resort: [
-    {
-      id: 1,
-      name: "Beach View Shortlet Apartment",
-      image:
-        "https://images.unsplash.com/photo-1502672260266-6cbd4eb4c750?w=400&h=300&fit=crop",
-      location: "Ajah Lekki, Lagos",
-      price: 45000,
-      rating: 4.5,
-      reviews: 78,
-      features: ["Ocean View", "Pool Access", "Free WiFi", "Kitchen"],
-      roomType: "2 Bedroom Apartment",
-      available: true,
-    },
-    {
-      id: 2,
-      name: "Luxury Villa with Private Pool",
-      image:
-        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=300&fit=crop",
-      location: "Lekki Phase 1, Lagos",
-      price: 150000,
-      rating: 4.9,
-      reviews: 134,
-      features: ["Private Pool", "Beach Access", "Chef Service", "Security"],
-      roomType: "4 Bedroom Villa",
-      available: true,
-    },
-    {
-      id: 3,
-      name: "Cozy Beachfront Studio",
-      image:
-        "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
-      location: "Oniru, Lagos",
-      price: 28000,
-      rating: 4.3,
-      reviews: 56,
-      features: ["Beach View", "Kitchenette", "AC", "Free Parking"],
-      roomType: "Studio Apartment",
-      available: true,
-    },
-  ],
-  dining: [
-    {
-      id: 1,
-      name: "Ocean Breeze Restaurant",
-      image:
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
-      location: "Victoria Island, Lagos",
-      price: 25000,
-      rating: 4.7,
-      reviews: 289,
-      features: ["Seafood Specialty", "Ocean View", "Live Music", "Bar"],
-      cuisine: "Continental & Seafood",
-      available: true,
-    },
-    {
-      id: 2,
-      name: "Afro Fusion Kitchen",
-      image:
-        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
-      location: "Lekki Phase 1, Lagos",
-      price: 18000,
-      rating: 4.8,
-      reviews: 412,
-      features: [
-        "Contemporary African",
-        "Wine Selection",
-        "Outdoor Seating",
-        "Private Dining",
-      ],
-      cuisine: "African Fusion",
-      available: true,
-    },
-    {
-      id: 3,
-      name: "The Grill House",
-      image:
-        "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&h=300&fit=crop",
-      location: "Ikoyi, Lagos",
-      price: 35000,
-      rating: 4.9,
-      reviews: 178,
-      features: [
-        "Premium Steaks",
-        "Wine Cellar",
-        "Rooftop Dining",
-        "Valet Parking",
-      ],
-      cuisine: "Steakhouse & Grill",
-      available: true,
-    },
-  ],
-};
+// No mock data - only real API data is used
 
 const serviceContent = {
   car: {
@@ -371,6 +180,7 @@ export default function ServiceResult() {
   const router = useRouter();
   const [activeService, setActiveService] = useState("car");
   const [viewMode, setViewMode] = useState("list");
+  const [sortBy, setSortBy] = useState("recommended");
   const [favorites, setFavorites] = useState([]);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -388,15 +198,15 @@ export default function ServiceResult() {
   });
 
   const services = [
+    { id: "resort", label: "All stays", icon: Home },
     { id: "car", label: "Car rental", icon: Car },
     { id: "dining", label: "Dining", icon: Utensils },
-    { id: "resort", label: "Resort house", icon: Home },
-    { id: "water", label: "Water recreation", icon: Sailboat },
+    { id: "water", label: "Activities", icon: Sailboat },
   ];
 
   const content = serviceContent[activeService];
 
-  // Fetch listings
+  // Fetch listings from API
   const fetchListings = async (
     service,
     searchParams = new URLSearchParams()
@@ -405,12 +215,80 @@ export default function ServiceResult() {
     setError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Build API query params
+      const apiParams = {
+        serviceType: service,
+        // Add search params from URL
+        ...(searchParams.get('location') && { location: searchParams.get('location') }),
+        ...(searchParams.get('minPrice') && { minPrice: priceRange[0] }),
+        ...(searchParams.get('maxPrice') && { maxPrice: priceRange[1] }),
+        ...(filters.highlyRated && { minRating: 4.0 }),
+      };
 
-      let filteredListings = mockListings[service] || [];
+      // Fetch real listings from API
+      const response = await getListings(apiParams);
+      console.log('Fetched listings:', response);
 
-      // Apply price filter
-      filteredListings = filteredListings.filter(
+      // Handle different response formats
+      let apiListings = [];
+      if (Array.isArray(response)) {
+        apiListings = response;
+      } else if (response.data && Array.isArray(response.data)) {
+        apiListings = response.data;
+      } else if (response.listings && Array.isArray(response.listings)) {
+        apiListings = response.listings;
+      }
+
+      // Transform API response to match component expectations
+      const transformedListings = apiListings.map(listing => {
+        // Handle images - can be array of strings or array of objects
+        let imageUrl = 'https://via.placeholder.com/400x300';
+        if (listing.images && listing.images.length > 0) {
+          const firstImage = listing.images[0];
+          if (typeof firstImage === 'string') {
+            imageUrl = firstImage;
+          } else if (typeof firstImage === 'object' && firstImage.secure_url) {
+            imageUrl = firstImage.secure_url;
+          } else if (typeof firstImage === 'object' && firstImage.url) {
+            imageUrl = firstImage.url;
+          }
+        }
+
+        // Handle location - can be object or JSON string
+        let locationStr = '';
+        if (typeof listing.location === 'string') {
+          try {
+            const locObj = JSON.parse(listing.location);
+            locationStr = locObj.address || locObj.city || listing.location;
+          } catch (e) {
+            locationStr = listing.location;
+          }
+        } else if (typeof listing.location === 'object' && listing.location !== null) {
+          locationStr = listing.location.address || listing.location.city || '';
+        }
+
+        return {
+          id: listing.id || listing._id,
+          name: listing.title || listing.name || 'Service',
+          image: imageUrl,
+          location: locationStr,
+          price: listing.pricing?.basePrice || listing.basePrice || listing.price || 0,
+          rating: listing.rating || 4.5,
+          reviews: listing.reviewCount || listing.reviews || 0,
+          features: listing.amenities || listing.features || listing.carFeatures || [],
+          available: listing.isAvailable !== false,
+          // Service-specific fields
+          capacity: listing.capacity,
+          roomType: listing.roomType,
+          cuisine: listing.cuisine,
+          // Keep original data for reference
+          vendorId: listing.vendorId,
+          businessId: listing.businessId,
+        };
+      });
+
+      // Apply client-side price filter
+      let filteredListings = transformedListings.filter(
         (listing) =>
           listing.price >= priceRange[0] && listing.price <= priceRange[1]
       );
@@ -434,9 +312,9 @@ export default function ServiceResult() {
 
       setListings(filteredListings);
     } catch (err) {
-      console.error("Failed to load listings:", err);
-      setError("Failed to load listings");
-      setListings(mockListings[service] || []);
+      console.error("Failed to load listings from API:", err);
+      setError("Failed to load listings. Please try again.");
+      setListings([]);
     } finally {
       setLoading(false);
     }
@@ -445,7 +323,8 @@ export default function ServiceResult() {
   // Initialize
   useEffect(() => {
     setIsClient(true);
-    fetchListings(activeService);
+    const params = new URLSearchParams(window.location.search);
+    fetchListings(activeService, params);
   }, []);
 
   // Fetch when service changes
@@ -627,6 +506,22 @@ export default function ServiceResult() {
       {/* Divider */}
       <div className="border-t border-gray-200 my-6"></div>
 
+      {/* Search by Property Name */}
+      <div className="mb-6">
+        <h4 className="font-semibold mb-3 text-gray-900">Search by property name</h4>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="e.g. Marriott"
+            className="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-300 focus:border-[#E05D3D] focus:ring-2 focus:ring-[#E05D3D]/20 transition-all text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-gray-200 my-6"></div>
+
       {/* Popular Filters Section */}
       <div className="mb-6">
         <button
@@ -779,8 +674,8 @@ export default function ServiceResult() {
         }
       `}</style>
 
-      <header className="bg-gray-800 text-white shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {services.map((service) => {
@@ -789,19 +684,12 @@ export default function ServiceResult() {
                   <button
                     key={service.id}
                     onClick={() => handleServiceChange(service.id)}
-                    className={`flex items-center gap-2 px-5 h-11 rounded-xl text-sm font-medium transition-all duration-200 flex-shrink-0 ${
+                    className={`flex items-center gap-2 px-4 pb-3 text-sm font-medium transition-colors border-b-2 ${
                       activeService === service.id
-                        ? "text-white shadow-lg"
-                        : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+                        ? "border-[#0071C2] text-[#0071C2]"
+                        : "border-transparent text-gray-600 hover:text-gray-900"
                     }`}
-                    style={
-                      activeService === service.id
-                        ? { 
-                            backgroundColor: "#DF5D3D",
-                            boxShadow: "0 4px 12px rgba(223, 93, 61, 0.3)"
-                          }
-                        : {}
-                    }
+                    style={{}}
                   >
                     <Icon size={18} />
                     <span>{service.label}</span>
@@ -1015,13 +903,9 @@ export default function ServiceResult() {
                                 </div>
                               </div>
                               <div className="text-right shrink-0">
-                                <div className="flex items-center gap-1.5 mb-1 bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100">
-                                  <Star
-                                    size={16}
-                                    className="fill-yellow-400 text-yellow-400"
-                                  />
-                                  <span className="font-bold text-gray-900">
-                                    {listing.rating}
+                                <div className="flex items-center gap-1.5 mb-1 bg-green-700 px-3 py-1.5 rounded">
+                                  <span className="font-bold text-white text-sm">
+                                    {listing.rating.toFixed(1)}
                                   </span>
                                 </div>
                                 <div className="text-xs text-gray-500 font-medium">

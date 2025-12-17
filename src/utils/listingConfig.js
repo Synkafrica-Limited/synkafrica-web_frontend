@@ -155,7 +155,7 @@ export function denormalizeEnum(category, field, value) {
 
   const map = config.enums[field];
   // Find key by value
-  const entry = Object.entries(map).find(([k, v]) => v === value);
+  const entry = Object.entries(map).find(([, v]) => v === value);
   return entry ? entry[0] : value;
 }
 

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Send, Paperclip, Search, Info, Plus, X, Loader2 } from "lucide-react";
+import { Send, Paperclip, Search, Info, Plus, X, Loader2, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { api } from "@/lib/fetchClient";
+import { getSocket } from "@/lib/socket";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 
 const TICKET_TYPES = [
@@ -44,6 +45,7 @@ export default function SupportPage() {
     const [isSending, setIsSending] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const [permissionDenied, setPermissionDenied] = useState(false);
     const messagesEndRef = useRef(null);
     const { addToast } = useToast();
 
@@ -64,20 +66,46 @@ export default function SupportPage() {
     // Fetch messages when active ticket changes
     useEffect(() => {
         if (activeTicket) {
+            setPermissionDenied(false);
             fetchMessages(activeTicket.id);
         }
     }, [activeTicket]);
 
     // Auto-refresh messages every 10 seconds for active ticket
     useEffect(() => {
-        if (!activeTicket) return;
+        if (!activeTicket || permissionDenied) return;
 
         const interval = setInterval(() => {
             fetchMessages(activeTicket.id);
         }, 10000); // Poll every 10 seconds
 
         return () => clearInterval(interval);
-    }, [activeTicket]);
+    }, [activeTicket, permissionDenied]);
+
+    // WebSocket listener for real-time messages
+    useEffect(() => {
+        if (!activeTicket || permissionDenied) return;
+
+        const socket = getSocket();
+        if (!socket) return;
+
+        const handleNewMessage = (data) => {
+            // STRICT SAFETY: Only handle messages for this specific ticket
+            if (data && (data.ticketId === activeTicket.id || data.ticket_id === activeTicket.id)) {
+                setMessages((prev) => {
+                    // Check for duplicates
+                    if (prev.some(m => m.id === data.id)) return prev;
+                    return [...prev, data];
+                });
+            }
+        };
+
+        socket.on("support:message", handleNewMessage);
+
+        return () => {
+            socket.off("support:message", handleNewMessage);
+        };
+    }, [activeTicket, permissionDenied]);
 
     // Scroll to bottom of messages
     useEffect(() => {
@@ -113,6 +141,9 @@ export default function SupportPage() {
         try {
             // Fetch ticket details which includes messages
             const res = await api.get(`/support/tickets/${ticketId}`, { auth: true });
+
+            // Should be covered by catch block if 403, but double check data validity
+            setPermissionDenied(false);
             if (res && Array.isArray(res.messages)) {
                 setMessages(res.messages);
             } else {
@@ -120,7 +151,16 @@ export default function SupportPage() {
             }
         } catch (error) {
             console.error("Failed to fetch messages:", error);
-            setMessages([]);
+
+            // Check for specific backend error code or 403 status
+            if (
+                error.code === 'TICKET_ACCESS_DENIED' ||
+                error.status === 403 ||
+                error.message?.includes('access')
+            ) {
+                setPermissionDenied(true);
+                setMessages([]);
+            }
         }
     };
 
@@ -303,15 +343,26 @@ export default function SupportPage() {
                                 <div className="absolute inset-0 opacity-[0.06]" style={{
                                     backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                                 }} />
-                                {messages.length === 0 ? (
+                                {permissionDenied ? (
+                                    <div className="flex flex-col items-center justify-center h-full text-red-500">
+                                        <AlertCircle className="w-12 h-12 mb-2" />
+                                        <p className="text-sm font-medium">Access Denied</p>
+                                        <p className="text-xs text-red-400">You do not have permission to view this ticket.</p>
+                                    </div>
+                                ) : messages.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
                                         <Info className="w-12 h-12 mb-2" />
                                         <p className="text-sm">No messages yet. Start the conversation!</p>
                                     </div>
                                 ) : (
                                     messages.map((msg, index) => {
-                                        const isVendor = msg.sender === 'user' || msg.senderType === 'BUSINESS';
-                                        const isAdmin = msg.sender === 'admin' || msg.senderType === 'ADMIN' || msg.senderType === 'SUPPORT';
+                                        // STRICT SENDER TYPE CHECK
+                                        const isVendor = msg.senderType === 'BUSINESS';
+
+                                        // "senderType" is our source of truth. 
+                                        // Fallback to "sender" only if absolutely necessary and strictly "user".
+                                        // But per requirements, we trust senderType.
+
                                         const showSender = index === 0 || messages[index - 1]?.senderType !== msg.senderType;
 
                                         return (

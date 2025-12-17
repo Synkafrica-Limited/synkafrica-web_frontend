@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Phone, MapPin } from "lucide-react";
 
 const ProductCard = ({
@@ -10,15 +13,17 @@ const ProductCard = ({
   buttonVariant = "filled",
   type = "car", // car, dining, resort, recreation, laundry
 }) => {
+  const router = useRouter();
+
   const getNavigationPath = () => {
     const pathMap = {
-      car: `/car/${id}`,
-      dining: `/dining/${id}`,
-      resort: `/resort/${id}`,
-      recreation: `/recreation/${id}`,
-      laundry: `/laundry/${id}`,
+      car: `/service/car/${id}`,
+      dining: `/service/dining/${id}`,
+      resort: `/service/resort/${id}`,
+      recreation: `/service/water/${id}`,
+      laundry: `/service/laundry/${id}`,
     };
-    return pathMap[type] || `/product/${id}`;
+    return pathMap[type] || `/service/${type}/${id}`;
   };
 
   const getPriceLabel = () => {
@@ -33,7 +38,7 @@ const ProductCard = ({
   };
 
   const handleClick = () => {
-    window.location.href = getNavigationPath();
+    router.push(getNavigationPath());
   };
 
   return (

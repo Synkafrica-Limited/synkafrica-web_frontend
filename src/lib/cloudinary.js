@@ -31,4 +31,5 @@ export async function uploadFiles(files = []) {
   return results;
 }
 
-export default { uploadFileToCloudinary, uploadFiles };
+const cloudinaryService = { uploadFileToCloudinary, uploadFiles };
+export default cloudinaryService;

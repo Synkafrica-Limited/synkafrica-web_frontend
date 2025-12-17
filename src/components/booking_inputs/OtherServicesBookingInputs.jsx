@@ -86,31 +86,26 @@ const OtherServicesBookingInputs = ({ onSearch, showBorder = true }) => {
   const isFormValid = query.trim();
 
   return (
-    <div
-      className={`mt-4 sm:mt-6 p-4 sm:p-6 bg-white rounded-3xl relative ${
-        showBorder
-          ? 'shadow-[0_20px_60px_-15px_rgba(223,93,61,0.4),0_10px_30px_-10px_rgba(223,93,61,0.3)] border border-orange-50'
-          : ''
-      }`}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+    <div className="relative">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Service Query */}
         <div className="flex flex-col relative" ref={dropdownRef}>
+          <label className="text-xs font-semibold text-gray-700 mb-1.5 px-1">
+            What are you looking for?
+          </label>
           <div className={`relative transition-all duration-200 ${
-            focusedField === 'query' 
-              ? 'ring-2 ring-[#DF5D3D]/20 rounded-xl' 
-              : ''
+            focusedField === 'query' ? 'z-20' : ''
           }`}>
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
               <Sparkles className={`w-5 h-5 transition-colors ${
                 focusedField === 'query' || query
-                  ? 'text-[#DF5D3D]'
+                  ? 'text-primary-500'
                   : 'text-gray-400'
               }`} />
             </div>
             <input
               type="text"
-              placeholder="What are you looking for?"
+              placeholder="Describe your service need"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
               onFocus={() => {
@@ -120,56 +115,56 @@ const OtherServicesBookingInputs = ({ onSearch, showBorder = true }) => {
                 }
               }}
               onBlur={() => setFocusedField(null)}
-              className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder:text-gray-400 ${
+              className={`w-full pl-12 pr-4 py-3.5 border rounded-lg focus:outline-none transition-all duration-200 placeholder:text-gray-400 text-gray-900 font-medium ${
                 errors.query 
-                  ? 'border-red-400 bg-red-50/30' 
+                  ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
                   : focusedField === 'query'
-                  ? 'border-[#DF5D3D] bg-orange-50/30'
-                  : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
+                  ? 'border-primary-500 bg-white focus:ring-2 focus:ring-primary-100'
+                  : 'border-gray-300 bg-white hover:border-gray-400'
               }`}
             />
+            {errors.query && (
+              <p className="text-xs text-red-600 mt-1 px-1">{errors.query}</p>
+            )}
           </div>
           
           {showSuggestions && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-100 rounded-xl shadow-xl max-h-64 overflow-y-auto z-20">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50">
               {filteredServices.length > 0 ? (
                 filteredServices.map((service, index) => (
                   <div
                     key={index}
                     onClick={() => handleServiceSelect(service)}
-                    className="px-4 py-3 hover:bg-orange-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 group"
+                    className="px-4 py-3 hover:bg-primary-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 group"
                   >
-                    <Sparkles className="w-4 h-4 text-gray-400 group-hover:text-[#DF5D3D] transition-colors" />
-                    <span className="text-sm text-gray-700 group-hover:text-gray-900">{service}</span>
+                    <Sparkles className="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" />
+                    <span className="text-sm text-gray-700 font-medium group-hover:text-gray-900">{service}</span>
                   </div>
                 ))
               ) : (
                 <div className="px-4 py-4 text-gray-500 text-sm text-center">
-                  No services found. Try describing what you need!
+                  Service not found
                 </div>
               )}
             </div>
           )}
-          
-          {errors.query && (
-            <span className="text-red-500 text-xs mt-1.5 ml-1 font-medium">{errors.query}</span>
-          )}
         </div>
 
         {/* Search Button */}
-        <button
-          onClick={handleSearch}
-          disabled={!isFormValid}
-          className={`px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-            isFormValid
-              ? 'bg-[#DF5D3D] hover:bg-[#c94e30] active:bg-[#b33d20] text-white shadow-lg shadow-[#DF5D3D]/30 hover:shadow-xl hover:shadow-[#DF5D3D]/40 hover:-translate-y-0.5'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          <Search className="w-5 h-5" />
-          <span className="hidden sm:inline">Get Started</span>
-          <span className="sm:hidden">Start</span>
-        </button>
+        <div className="flex flex-col justify-end">
+          <button
+            onClick={handleSearch}
+            disabled={!isFormValid}
+            className={`w-full h-[52px] rounded-lg font-semibold text-base transition-all duration-200 flex items-center justify-center gap-2 ${
+              isFormValid
+                ? 'bg-[#E05D3D] hover:bg-[#c54a2a] text-white shadow-md hover:shadow-lg active:scale-95'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <Search className="w-5 h-5" />
+            <span>Search</span>
+          </button>
+        </div>
       </div>
     </div>
   );

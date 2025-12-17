@@ -116,31 +116,26 @@ const DiningBookingInputs = ({ onSearch, showBorder = true }) => {
   const isFormValid = restaurant.trim() && bookingDate && bookingTime && guests && parseInt(guests) >= 1;
 
   return (
-    <div
-      className={`mt-4 sm:mt-6 p-4 sm:p-6 bg-white rounded-3xl relative ${
-        showBorder
-          ? 'shadow-[0_20px_60px_-15px_rgba(223,93,61,0.4),0_10px_30px_-10px_rgba(223,93,61,0.3)] border border-orange-50'
-          : ''
-      }`}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4">
+    <div className="relative">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
         {/* Restaurant/Cuisine */}
         <div className="flex flex-col relative" ref={dropdownRef}>
+          <label className="text-xs font-semibold text-gray-700 mb-1.5 px-1">
+            Restaurant
+          </label>
           <div className={`relative transition-all duration-200 ${
-            focusedField === 'restaurant' 
-              ? 'ring-2 ring-[#DF5D3D]/20 rounded-xl' 
-              : ''
+            focusedField === 'restaurant' ? 'z-20' : ''
           }`}>
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
               <UtensilsCrossed className={`w-5 h-5 transition-colors ${
                 focusedField === 'restaurant' || restaurant
-                  ? 'text-[#DF5D3D]'
+                  ? 'text-primary-500'
                   : 'text-gray-400'
               }`} />
             </div>
             <input
               type="text"
-              placeholder="Restaurant type or location"
+              placeholder="Restaurant or cuisine"
               value={restaurant}
               onChange={(e) => handleRestaurantChange(e.target.value)}
               onFocus={() => {
@@ -150,53 +145,53 @@ const DiningBookingInputs = ({ onSearch, showBorder = true }) => {
                 }
               }}
               onBlur={() => setFocusedField(null)}
-              className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder:text-gray-400 ${
+              className={`w-full pl-12 pr-4 py-3.5 border rounded-lg focus:outline-none transition-all duration-200 placeholder:text-gray-400 text-gray-900 font-medium ${
                 errors.restaurant 
-                  ? 'border-red-400 bg-red-50/30' 
+                  ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
                   : focusedField === 'restaurant'
-                  ? 'border-[#DF5D3D] bg-orange-50/30'
-                  : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
+                  ? 'border-primary-500 bg-white focus:ring-2 focus:ring-primary-100'
+                  : 'border-gray-300 bg-white hover:border-gray-400'
               }`}
             />
+            {errors.restaurant && (
+              <p className="text-xs text-red-600 mt-1 px-1">{errors.restaurant}</p>
+            )}
           </div>
           
           {showSuggestions && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-100 rounded-xl shadow-xl max-h-64 overflow-y-auto z-20">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50">
               {filteredRestaurants.length > 0 ? (
                 filteredRestaurants.map((rest, index) => (
                   <div
                     key={index}
                     onClick={() => handleRestaurantSelect(rest)}
-                    className="px-4 py-3 hover:bg-orange-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 group"
+                    className="px-4 py-3 hover:bg-primary-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3 group"
                   >
-                    <UtensilsCrossed className="w-4 h-4 text-gray-400 group-hover:text-[#DF5D3D] transition-colors" />
-                    <span className="text-sm text-gray-700 group-hover:text-gray-900">{rest}</span>
+                    <UtensilsCrossed className="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" />
+                    <span className="text-sm text-gray-700 font-medium group-hover:text-gray-900">{rest}</span>
                   </div>
                 ))
               ) : (
                 <div className="px-4 py-4 text-gray-500 text-sm text-center">
-                  No restaurants found matching your search.
+                  Restaurant not found
                 </div>
               )}
             </div>
-          )}
-          
-          {errors.restaurant && (
-            <span className="text-red-500 text-xs mt-1.5 ml-1 font-medium">{errors.restaurant}</span>
           )}
         </div>
 
         {/* Booking Date */}
         <div className="flex flex-col relative">
+          <label className="text-xs font-semibold text-gray-700 mb-1.5 px-1">
+            Booking Date
+          </label>
           <div className={`relative transition-all duration-200 ${
-            focusedField === 'date' 
-              ? 'ring-2 ring-[#DF5D3D]/20 rounded-xl' 
-              : ''
+            focusedField === 'date' ? 'z-20' : ''
           }`}>
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
               <Calendar className={`w-5 h-5 transition-colors ${
                 focusedField === 'date' || bookingDate
-                  ? 'text-[#DF5D3D]'
+                  ? 'text-primary-500'
                   : 'text-gray-400'
               }`} />
             </div>
@@ -212,38 +207,33 @@ const DiningBookingInputs = ({ onSearch, showBorder = true }) => {
               onFocus={() => setFocusedField('date')}
               onBlur={() => setFocusedField(null)}
               min={new Date().toISOString().split('T')[0]}
-              className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl focus:outline-none transition-all duration-200 [&::-webkit-calendar-picker-indicator]:cursor-pointer ${
+              className={`w-full pl-12 pr-4 py-3.5 border rounded-lg focus:outline-none transition-all duration-200 font-medium cursor-pointer ${
                 errors.bookingDate 
-                  ? 'border-red-400 bg-red-50/30' 
+                  ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
                   : focusedField === 'date'
-                  ? 'border-[#DF5D3D] bg-orange-50/30'
-                  : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
-              } ${bookingDate || focusedField === 'date' ? 'text-gray-900' : 'text-transparent'}`}
+                  ? 'border-primary-500 bg-white focus:ring-2 focus:ring-primary-100'
+                  : 'border-gray-300 bg-white hover:border-gray-400'
+              } ${bookingDate ? 'text-gray-900' : 'text-gray-400'}`}
               style={{ colorScheme: 'light' }}
             />
-            {!bookingDate && focusedField !== 'date' && (
-              <span className="absolute left-12 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[15px] z-0">
-                Booking date
-              </span>
+            {errors.bookingDate && (
+              <p className="text-xs text-red-600 mt-1 px-1">{errors.bookingDate}</p>
             )}
           </div>
-          
-          {errors.bookingDate && (
-            <span className="text-red-500 text-xs mt-1.5 ml-1 font-medium">{errors.bookingDate}</span>
-          )}
         </div>
 
         {/* Booking Time */}
         <div className="flex flex-col relative">
+          <label className="text-xs font-semibold text-gray-700 mb-1.5 px-1">
+            Booking Time
+          </label>
           <div className={`relative transition-all duration-200 ${
-            focusedField === 'time' 
-              ? 'ring-2 ring-[#DF5D3D]/20 rounded-xl' 
-              : ''
+            focusedField === 'time' ? 'z-20' : ''
           }`}>
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
               <Clock className={`w-5 h-5 transition-colors ${
                 focusedField === 'time' || bookingTime
-                  ? 'text-[#DF5D3D]'
+                  ? 'text-primary-500'
                   : 'text-gray-400'
               }`} />
             </div>
@@ -258,44 +248,39 @@ const DiningBookingInputs = ({ onSearch, showBorder = true }) => {
               }}
               onFocus={() => setFocusedField('time')}
               onBlur={() => setFocusedField(null)}
-              className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl focus:outline-none transition-all duration-200 [&::-webkit-calendar-picker-indicator]:cursor-pointer ${
+              className={`w-full pl-12 pr-4 py-3.5 border rounded-lg focus:outline-none transition-all duration-200 font-medium cursor-pointer ${
                 errors.bookingTime 
-                  ? 'border-red-400 bg-red-50/30' 
+                  ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
                   : focusedField === 'time'
-                  ? 'border-[#DF5D3D] bg-orange-50/30'
-                  : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
-              } ${bookingTime || focusedField === 'time' ? 'text-gray-900' : 'text-transparent'}`}
+                  ? 'border-primary-500 bg-white focus:ring-2 focus:ring-primary-100'
+                  : 'border-gray-300 bg-white hover:border-gray-400'
+              } ${bookingTime ? 'text-gray-900' : 'text-gray-400'}`}
               style={{ colorScheme: 'light' }}
             />
-            {!bookingTime && focusedField !== 'time' && (
-              <span className="absolute left-12 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[15px] z-0">
-                Booking time
-              </span>
+            {errors.bookingTime && (
+              <p className="text-xs text-red-600 mt-1 px-1">{errors.bookingTime}</p>
             )}
           </div>
-          
-          {errors.bookingTime && (
-            <span className="text-red-500 text-xs mt-1.5 ml-1 font-medium">{errors.bookingTime}</span>
-          )}
         </div>
 
         {/* Number of Guests */}
         <div className="flex flex-col relative">
+          <label className="text-xs font-semibold text-gray-700 mb-1.5 px-1">
+            Guests
+          </label>
           <div className={`relative transition-all duration-200 ${
-            focusedField === 'guests' 
-              ? 'ring-2 ring-[#DF5D3D]/20 rounded-xl' 
-              : ''
+            focusedField === 'guests' ? 'z-20' : ''
           }`}>
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
               <Users className={`w-5 h-5 transition-colors ${
                 focusedField === 'guests' || guests
-                  ? 'text-[#DF5D3D]'
+                  ? 'text-primary-500'
                   : 'text-gray-400'
               }`} />
             </div>
             <input
               type="number"
-              placeholder="Guests"
+              placeholder="Number of guests"
               value={guests}
               onChange={(e) => {
                 setGuests(e.target.value);
@@ -306,35 +291,35 @@ const DiningBookingInputs = ({ onSearch, showBorder = true }) => {
               onFocus={() => setFocusedField('guests')}
               onBlur={() => setFocusedField(null)}
               min="1"
-              className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl focus:outline-none transition-all duration-200 placeholder:text-gray-400 ${
+              className={`w-full pl-12 pr-4 py-3.5 border rounded-lg focus:outline-none transition-all duration-200 placeholder:text-gray-400 text-gray-900 font-medium ${
                 errors.guests 
-                  ? 'border-red-400 bg-red-50/30' 
+                  ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-2 focus:ring-red-100' 
                   : focusedField === 'guests'
-                  ? 'border-[#DF5D3D] bg-orange-50/30'
-                  : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'
+                  ? 'border-primary-500 bg-white focus:ring-2 focus:ring-primary-100'
+                  : 'border-gray-300 bg-white hover:border-gray-400'
               }`}
             />
+            {errors.guests && (
+              <p className="text-xs text-red-600 mt-1 px-1">{errors.guests}</p>
+            )}
           </div>
-          
-          {errors.guests && (
-            <span className="text-red-500 text-xs mt-1.5 ml-1 font-medium">{errors.guests}</span>
-          )}
         </div>
 
         {/* Search Button */}
-        <button
-          onClick={handleSearch}
-          disabled={!isFormValid}
-          className={`px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-            isFormValid
-              ? 'bg-[#DF5D3D] hover:bg-[#c94e30] active:bg-[#b33d20] text-white shadow-lg shadow-[#DF5D3D]/30 hover:shadow-xl hover:shadow-[#DF5D3D]/40 hover:-translate-y-0.5'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          <Search className="w-5 h-5" />
-          <span className="hidden sm:inline">Book Table</span>
-          <span className="sm:hidden">Book</span>
-        </button>
+        <div className="flex flex-col justify-end">
+          <button
+            onClick={handleSearch}
+            disabled={!isFormValid}
+            className={`w-full h-[52px] rounded-lg font-semibold text-base transition-all duration-200 flex items-center justify-center gap-2 ${
+              isFormValid
+                ? 'bg-[#E05D3D] hover:bg-[#c54a2a] text-white shadow-md hover:shadow-lg active:scale-95'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <Search className="w-5 h-5" />
+            <span>Search</span>
+          </button>
+        </div>
       </div>
     </div>
   );

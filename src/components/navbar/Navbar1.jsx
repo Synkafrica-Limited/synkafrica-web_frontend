@@ -3,180 +3,58 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useToast } from '@/components/ui/ToastProvider';
+import { useSession } from "@/hooks/customer/auth/useSession";
 
 const Navbar1 = ({ onBecomeVendor }) => {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showMoreDropdown, setShowMoreDropdown] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const moreRef = useRef(null);
   const hoverCloseTimeout = useRef(null);
   const toast = useToast();
 
-  // Check authentication status on component mount
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
 
-  // Handle scroll
+  const { isLoggedIn, user, logout, loading: sessionLoading } = useSession();
+  
+  // Sync local loading state with session loading
+  useEffect(() => {
+    setIsLoading(sessionLoading);
+  }, [sessionLoading]);
+
+
+
+  // Get current path
+  const pathname = usePathname();
+  const isLandingPage = pathname === "/";
+
+  // Handle scroll for shadow effect
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 10);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Check if user is authenticated
-  const checkAuthStatus = async () => {
-    try {
-      setIsLoading(true);
-      const token = getAuthToken();
-      
-      if (!token) {
-        setIsLoggedIn(false);
-        setUserProfile(null);
-        return;
-      }
-
-      // Verify token and fetch user profile
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setIsLoggedIn(true);
-        setUserProfile(userData);
-      } else {
-        // Token is invalid or expired
-        clearAuthToken();
-        setIsLoggedIn(false);
-        setUserProfile(null);
-      }
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-      setIsLoggedIn(false);
-      setUserProfile(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Token management helpers
-  const getAuthToken = () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('authToken');
-    }
-    return null;
-  };
-
-  const setAuthToken = (token) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('authToken', token);
-    }
-  };
-
-  const clearAuthToken = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('authToken');
-    }
-  };
-
-  // Handle user login
-  const handleLogin = async (email, password) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setAuthToken(data.token);
-        setIsLoggedIn(true);
-        setUserProfile(data.user);
-        setShowProfileDropdown(false);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      toast?.danger?.(error.message || 'Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // ... (keep handleLogout, navigateToLogin, navigateToRegister functions same)
 
   // Handle user logout
   const handleLogout = async () => {
     try {
-      const token = getAuthToken();
-      
-      // Call logout API to invalidate token on server
-      if (token) {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-      }
+      await logout();
     } catch (error) {
-      console.error('Logout API error:', error);
+      console.error('Logout error:', error);
+      toast?.danger?.(error.message || 'Logout failed. Please try again.');
     } finally {
-      clearAuthToken();
-      setIsLoggedIn(false);
-      setUserProfile(null);
       setShowProfileDropdown(false);
       setShowMoreDropdown(false);
       router.refresh(); // Refresh the page to update any server components
-    }
-  };
-
-  // Handle user registration
-  const handleRegister = async (userData) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setAuthToken(data.token);
-        setIsLoggedIn(true);
-        setUserProfile(data.user);
-        setShowProfileDropdown(false);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast?.danger?.(error.message || 'Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -263,16 +141,20 @@ const Navbar1 = ({ onBecomeVendor }) => {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-white shadow-sm transition-all duration-300">
+      <nav 
+        className={`sticky top-0 z-50 bg-white transition-all duration-300 ${
+          isScrolled ? 'shadow-md' : 'shadow-sm'
+        } border-b border-gray-100`}
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Brand Logo */}
             <div className="flex items-center">
               <Link href="/" className="flex items-center space-x-2 group">
                 <Image
-                  src="/images/brand/synkafrica-logo-w-text.png"
+                  src="/images/brand/synkafrica-logo-single.png"
                   alt="Synkkafrica Logo"
-                  width={150}
+                  width={40}
                   height={40}
                   className="transition-transform duration-300 group-hover:scale-105"
                 />
@@ -284,40 +166,55 @@ const Navbar1 = ({ onBecomeVendor }) => {
               
             </div>
 
-            {/* Right Section - Become a vendor & Auth Buttons */}
-            <div className="hidden md:flex items-center space-x-3">
+            {/* Right Section - Navigation Links, Become a vendor & Auth Buttons */}
+            <div className="hidden md:flex items-center space-x-6">
+              {/* Navigation Links */}
+              <Link 
+                href="/support" 
+                className="text-sm font-medium text-gray-700 hover:text-[#E05D3D] transition-colors"
+              >
+                Support
+              </Link>
+              <Link 
+                href="/about" 
+                className="text-sm font-medium text-gray-700 hover:text-[#E05D3D] transition-colors"
+              >
+                About
+              </Link>
+              
               {/* Become a vendor button */}
-              <a href="../business">
-                <button className="px-4 py-2 text-sm font-medium text-primary-500 hover:bg-primary-50 rounded-md transition-colors duration-200 whitespace-nowrap">
-                  Become a vendor
-                </button>
-              </a>
+              <Link 
+                href="/business"
+                className="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 whitespace-nowrap text-gray-700 hover:text-[#E05D3D] hover:bg-gray-50"
+              >
+                Become a vendor
+              </Link>
 
               {!isLoggedIn ? (
                 /* Register and Sign In Buttons */
                 <div className="flex items-center space-x-2">
-                  <button 
-                    className="px-4 py-2 text-sm font-medium text-primary-500 border border-primary-500 hover:bg-primary-50 rounded-md transition-colors duration-200" 
-                    onClick={navigateToRegister}
+                  <Link 
+                    href="/signup"
+                    className="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 text-[#E05D3D] border border-[#E05D3D] hover:bg-orange-50"
                   >
                     Sign up
-                  </button>
-                  <button 
-                    className="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-400 rounded-md transition-colors duration-200" 
-                    onClick={navigateToLogin}
+                  </Link>
+                  <Link 
+                    href="/login"
+                    className="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 text-white bg-[#E05D3D] hover:bg-[#c54a2a]"
                   >
                     Sign in
-                  </button>
+                  </Link>
                 </div>
               ) : (
                 // User Profile
                 <div className="relative group">
                   <button
                     onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                    className="w-9 h-9 rounded-full overflow-hidden border-2 border-gray-200 hover:border-primary-500 transition-colors duration-200"
+                    className="w-9 h-9 rounded-full overflow-hidden border-2 transition-colors duration-200 border-[#E05D3D] hover:border-[#c54a2a]"
                   >
                     <img
-                      src={userProfile?.avatar || "/images/default-avatar.png"}
+                      src={user?.avatar || "/images/default-avatar.png"}
                       alt="Profile"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
@@ -331,31 +228,31 @@ const Navbar1 = ({ onBecomeVendor }) => {
                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 animate-fadeIn border border-gray-100">
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-sm font-semibold text-gray-900">
-                          {userProfile?.name || "User"}
+                          {user?.name || "User"}
                         </p>
-                        <p className="text-xs text-gray-500">{userProfile?.email || ""}</p>
+                        <p className="text-xs text-gray-500">{user?.email || ""}</p>
                       </div>
-                      <a
+                      <Link
                         href="/dashboard/bookings"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all duration-200"
                         onClick={() => setShowProfileDropdown(false)}
                       >
                         Bookings
-                      </a>
-                      <a
+                      </Link>
+                      <Link
                         href="/dashboard/feedback"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all duration-200"
                         onClick={() => setShowProfileDropdown(false)}
                       >
                         Write a review
-                      </a>
-                      <a
-                        href="/dashboard"
+                      </Link>
+                      <Link
+                        href="/dashboard/profile"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all duration-200"
                         onClick={() => setShowProfileDropdown(false)}
                       >
                         Profile
-                      </a>
+                      </Link>
                       <div className="mt-1 px-2 py-2 border-t border-gray-100">
                         <button
                           onClick={handleLogout}
@@ -374,7 +271,7 @@ const Navbar1 = ({ onBecomeVendor }) => {
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 text-gray-600 hover:text-blue-700 hover:bg-gray-100 rounded-full transition-all duration-200"
+                className="p-2 rounded-full transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               >
                 <svg
                   className="h-6 w-6"
@@ -458,97 +355,50 @@ const Navbar1 = ({ onBecomeVendor }) => {
 
           {/* Sidebar Content */}
           <div className="flex-1 overflow-y-auto">
-            <div className="p-6 space-y-1">
-              <a
-                href="/car-rental"
-                className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Car rental
-              </a>
-              <a
-                href="/dining"
-                className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Dining
-              </a>
-              <a
-                href="/beach-resorts"
-                className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Beach & Resorts
-              </a>
-              <a
-                href="/laundry-service"
-                className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Convenience Services
-              </a>
-              {isLoggedIn && (
-                <>
-                  <a
-                    href="/write-review"
-                    className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Write a review
-                  </a>
-                  <a
-                    href="/dashboard/bookings"
-                    className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Bookings
-                  </a>
-                  <a
-                    href="/messages"
-                    className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Messages
-                  </a>
-                  <a
-                    href="/dashboard/"
-                    className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Profile
-                  </a>
-                  <a
-                    href="/home/business"
-                    className="block py-3 px-4 text-gray-900 font-medium hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      if (typeof onBecomeVendor === "function") onBecomeVendor();
-                    }}
-                  >
-                    Become a vendor
-                  </a>
-                </>
-              )}
+            <div className="p-6 space-y-3">
               {!isLoggedIn ? (
-                <button
-                  onClick={() => {
-                    navigateToLogin();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full mt-6 px-4 py-3 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors duration-200"
-                >
-                  Sign In
-                </button>
+                <>
+                  <Link
+                    href="/login"
+                    className="w-full px-4 py-3 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200 text-center block"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="w-full px-4 py-3 text-sm font-medium text-primary-600 border border-primary-600 hover:bg-primary-50 rounded-lg transition-colors duration-200 text-center block"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
+                  <Link
+                    href="/business"
+                    className="block w-full px-4 py-3 text-sm font-medium text-center text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Become a Vendor
+                  </Link>
+                </>
               ) : (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full mt-6 px-4 py-3 text-sm font-medium text-red-600 border border-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                >
-                  Sign Out
-                </button>
+                <>
+                  <Link
+                    href="/business"
+                    className="block w-full px-4 py-3 text-sm font-medium text-center text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Become a Vendor
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-3 text-sm font-medium text-red-600 border border-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                  >
+                    Sign Out
+                  </button>
+                </>
               )}
             </div>
           </div>

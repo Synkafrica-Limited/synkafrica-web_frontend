@@ -82,7 +82,8 @@ async function request(method, path, body = null, opts = {}) {
       // If refresh fails, clear tokens and redirect to login
       authService.clearTokens();
       if (typeof window !== 'undefined') {
-        window.location.href = '/business/login?expired=true';
+        const isBusiness = window.location.pathname.startsWith('/business');
+        window.location.href = isBusiness ? '/business/login?expired=true' : '/login?expired=true';
       }
       throw new Error('Authentication expired. Please log in again.');
     }
@@ -93,6 +94,7 @@ async function request(method, path, body = null, opts = {}) {
     const err = new Error(errorMessage);
     err.status = res.status;
     err.response = data;
+    err.code = data?.code; // Extract backend error code
     err.url = fullUrl;
     err.method = method;
 
