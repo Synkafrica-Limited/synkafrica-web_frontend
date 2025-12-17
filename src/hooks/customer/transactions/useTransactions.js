@@ -82,7 +82,9 @@ export const useTransactions = (options = {}) => {
       }
 
     } catch (err) {
-      console.error("Transactions fetch error:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Transactions fetch error:", err);
+      }
       setError(err.message || "Unable to fetch transactions.");
       setTransactions([]);
     } finally {
@@ -100,7 +102,9 @@ export const useTransactions = (options = {}) => {
       const response = await transactionsService.getTransactionDetails(transactionId);
       return response.data || response;
     } catch (err) {
-      console.error("Transaction details error:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Transaction details error:", err);
+      }
       setError(err.message);
       return null;
     } finally {

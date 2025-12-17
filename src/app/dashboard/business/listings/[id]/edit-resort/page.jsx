@@ -109,7 +109,9 @@ export default function EditResortListing() {
           setImages(existing);
         }
       } catch (err) {
-        console.error('Failed to load listing:', err);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to load listing:', err);
+        }
         addToast({ message: 'Failed to load listing. Please try again.', type: 'error' });
       } finally {
         setIsLoading(false);
@@ -190,7 +192,9 @@ export default function EditResortListing() {
         router.push('/dashboard/business/listings');
       }, 1000);
     } catch (err) {
-      console.error('[EditResort] Update failed:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[EditResort] Update failed:', err);
+      }
       handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
     }
   };

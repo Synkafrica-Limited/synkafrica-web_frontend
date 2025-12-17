@@ -15,11 +15,14 @@ export function BusinessProvider({ children }) {
     setError(null);
     try {
       let res = await businessService.getMyBusinesses();
-      console.debug('[BusinessContext] fetchBusiness response:', res);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[BusinessContext] fetchBusiness response:', res);
+      }
 
       // The businessService already handles wrapped responses and normalization
       // so res should already be the normalized business object or null
-      
+
       // Additional normalization just in case
       if (Array.isArray(res)) {
         res = res.length > 0 ? res[0] : null;
@@ -33,31 +36,35 @@ export function BusinessProvider({ children }) {
       // Normalize fields into a consistent business object
       const normalized = res
         ? {
-            id: res.id || res._id || res.businessId || null,
-            businessName: res.businessName || res.name || '',
-            businessLocation: res.businessLocation || res.location || '',
-            businessDescription: res.description || res.businessDescription || '',
-            phoneNumber: res.phoneNumber || res.businessPhone || '',
-            secondaryPhone: res.secondaryPhone || res.phoneNumber2 || '',
-            url: res.url || res.businessURL || '',
-            bankName: res.bankName || '',
-            bankAccountName: res.bankAccountName || res.accountName || '',
-            bankAccountNumber: res.bankAccountNumber || res.accountNumber || '',
-            faqs: res.faqs || null,
-            serviceLicense: res.serviceLicense || null,
-            availability: res.availability || '',
-            profileImage: res.profileImage || res.logo || null,
-            verificationStatus: res.verificationStatus || 'not_started',
-            verificationProgress: res.verificationProgress || 0,
-            isVerified: res.isVerified || false,
-          }
+          id: res.id || res._id || res.businessId || null,
+          businessName: res.businessName || res.name || '',
+          businessLocation: res.businessLocation || res.location || '',
+          businessDescription: res.description || res.businessDescription || '',
+          phoneNumber: res.phoneNumber || res.businessPhone || '',
+          secondaryPhone: res.secondaryPhone || res.phoneNumber2 || '',
+          url: res.url || res.businessURL || '',
+          bankName: res.bankName || '',
+          bankAccountName: res.bankAccountName || res.accountName || '',
+          bankAccountNumber: res.bankAccountNumber || res.accountNumber || '',
+          faqs: res.faqs || null,
+          serviceLicense: res.serviceLicense || null,
+          availability: res.availability || '',
+          profileImage: res.profileImage || res.logo || null,
+          verificationStatus: res.verificationStatus || 'not_started',
+          verificationProgress: res.verificationProgress || 0,
+          isVerified: res.isVerified || false,
+        }
         : null;
 
-      console.debug('[BusinessContext] fetchBusiness normalized:', normalized);
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[BusinessContext] fetchBusiness normalized:', normalized);
+      }
       setBusiness(normalized);
       return normalized;
     } catch (err) {
-      console.error('[BusinessContext] fetchBusiness error:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[BusinessContext] fetchBusiness error:', err);
+      }
       setError(err);
       setBusiness(null);
       return null;
@@ -88,77 +95,13 @@ export function useBusiness() {
   const ctx = useContext(BusinessContext);
   // Return context if available; allow callers to handle null when provider is not present
   if (!ctx) {
-    // eslint-disable-next-line no-console
-    console.debug('useBusiness called outside BusinessProvider - returning null');
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.debug('useBusiness called outside BusinessProvider - returning null');
+    }
     return null;
   }
   return ctx;
 }
 
 export default BusinessContext;
-// "use client";
-
-// import React, { createContext, useContext, useState, useCallback } from 'react';
-// import businessService from '@/services/business.service';
-// import authService from '@/services/authService';
-
-// const BusinessContext = createContext({
-//   business: null,
-//   setBusiness: () => {},
-//   fetchBusiness: async () => null,
-// });
-
-// export function BusinessProvider({ children, initialBusiness = null }) {
-//   const [business, setBusiness] = useState(initialBusiness);
-
-//   const fetchBusiness = useCallback(async () => {
-//     try {
-//       const token = (typeof window !== 'undefined' && authService && authService.getAccessToken)
-//         ? authService.getAccessToken()
-//         : null;
-//       console.debug('[BusinessContext] fetchBusiness - token present:', !!token, token ? `${String(token).slice(0,8)}...` : null);
-
-//       const res = await businessService.getMyBusinesses();
-//       console.debug('[BusinessContext] fetchBusiness response:', res);
-
-//       if (res) {
-//         const normalized = {
-//           id: res.id || res._id,
-//           businessName: res.businessName || res.name || '',
-//           businessLocation: res.businessLocation || '',
-//           businessDescription: res.businessDescription || '',
-//           phoneNumber: res.phoneNumber || '',
-//           phoneNumber2: res.phoneNumber2 || '',
-//           businessURL: res.businessURL || '',
-//           bankName: res.bankName || '',
-//           accountName: res.accountName || '',
-//           accountNumber: res.accountNumber || '',
-//           faqs: res.faqs || null,
-//           serviceLicense: res.serviceLicense || null,
-//           availability: res.availability || '',
-//           profileImage: res.profileImage || null,
-//         };
-//         setBusiness(normalized);
-//       } else {
-//         setBusiness(null);
-//       }
-
-//       return res;
-//     } catch (err) {
-//       console.error('[BusinessContext] fetchBusiness error:', err);
-//       throw err;
-//     }
-//   }, []);
-
-//   return (
-//     <BusinessContext.Provider value={{ business, setBusiness, fetchBusiness }}>
-//       {children}
-//     </BusinessContext.Provider>
-//   );
-// }
-
-// export function useBusiness() {
-//   return useContext(BusinessContext);
-// }
-
-// export default BusinessContext;

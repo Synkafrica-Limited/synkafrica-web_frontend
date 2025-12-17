@@ -24,6 +24,7 @@ import { useUserProfile } from "@/hooks/business/useUserProfileVendor";
 import dashboardService from "@/services/dashboardService";
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import FilterTabs from '@/components/ui/FilterTabs';
+import { handleApiError } from "@/utils/errorParser";
 
 // Service categories matching your requirements
 const SERVICE_CATEGORIES = [
@@ -124,7 +125,9 @@ export default function ListingsPage() {
 
       setAnalytics(analyticsData);
     } catch (error) {
-      console.error('Failed to fetch analytics:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to fetch analytics:', error);
+      }
     } finally {
       setAnalyticsLoading(false);
     }
@@ -162,27 +165,25 @@ export default function ListingsPage() {
       if (!listingId) {
         throw new Error('Listing ID not found');
       }
-      
-      console.log('Confirming delete for listing:', listingId);
-      
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Confirming delete for listing:', listingId);
+      }
+
       await deleteListing(listingId);
-      
-      addToast({ 
-        message: `"${listingToDelete.title}" has been deleted successfully`, 
-        type: "success" 
+
+      addToast({
+        message: `"${listingToDelete.title}" has been deleted successfully`,
+        type: "success"
       });
-      
+
       setListingToDelete(null);
       setShowDeleteConfirm(false);
     } catch (err) {
-      console.error('Delete listing error:', err);
-      
       // Refetch only on error to restore correct state
       await refetch();
-      
-      const errorMsg = err?.response?.message || err?.message || "Failed to delete listing. Please try again.";
-      addToast({ message: errorMsg, type: "error" });
-      
+      handleApiError(err, addToast);
+
       // Keep dialog open on error
     } finally {
       setIsDeleting(false);
@@ -200,7 +201,7 @@ export default function ListingsPage() {
         type: "success"
       });
     } catch (err) {
-      addToast({ message: "Failed to update listing status. Please try again.", type: "error" });
+      handleApiError(err, addToast);
     } finally {
       setTogglingStatus(null);
     }

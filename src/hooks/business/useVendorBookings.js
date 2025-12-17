@@ -22,7 +22,9 @@ export const useVendorBookings = (options = {}) => {
       const params = {};
       if (backendStatus) params.status = backendStatus;
 
-      console.log("Fetching vendor bookings with params:", params);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Fetching vendor bookings with params:", params);
+      }
 
       const data = await bookingsService.getVendorBookings(params);
 
@@ -93,11 +95,13 @@ export const useVendorBookings = (options = {}) => {
 
       setBookings(adapted);
     } catch (err) {
-      console.error("Failed to fetch vendor bookings:", {
-        error: err,
-        message: err?.message,
-        status,
-      });
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Failed to fetch vendor bookings:", {
+          error: err,
+          message: err?.message,
+          status,
+        });
+      }
       setError(err?.message || "Failed to load bookings");
       setBookings([]);
     } finally {

@@ -338,13 +338,14 @@ export default function VerificationSettings() {
                                 {verificationStatus.documents.map((doc, idx) => (
                                     <a
                                         key={idx}
-                                        href={doc.url}
+                                        href={doc.documentUrl || doc.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
+                                        className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors max-w-xs truncate"
+                                        title={doc.documentName || doc.name}
                                     >
-                                        <FileText className="w-4 h-4" />
-                                        View Certificate
+                                        <FileText className="w-4 h-4 flex-shrink-0" />
+                                        <span className="truncate">{doc.documentName || doc.name || `View Certificate ${idx + 1}`}</span>
                                     </a>
                                 ))}
                             </div>

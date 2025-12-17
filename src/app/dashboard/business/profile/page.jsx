@@ -9,7 +9,8 @@ import { useUserProfile } from "@/hooks/business/useUserProfileVendor";
 import { useBusiness } from '@/context/BusinessContext';
 import authService from '@/services/authService';
 import businessService from '@/services/business.service';
-// verification moved to Account Settings (VerificationSettings)
+import verificationService from "@/services/verification.service";
+// verification verification logic integrated
 import { useRouter } from 'next/navigation';
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -66,6 +67,31 @@ function BusinessProfileContent() {
         throw new Error('No business found. Please complete your business onboarding first.');
       }
 
+      // Fetch fresh verification status
+      let verificationData = null;
+      try {
+        const businessId = business.id || business._id || business.businessId;
+        if (businessId) {
+          verificationData = await verificationService.getStatus(businessId);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch specific verification status', err);
+      }
+
+      // Determine distinct status
+      const refinedStatus = verificationData?.status
+        ? normalizeVerificationStatus(verificationData.status)
+        : normalizeVerificationStatus(business.verificationStatus);
+
+      const refinedIsVerified = refinedStatus === 'verified';
+
+      // Re-calculate completion if we have fresh verification data
+      let refinedCompletion = business.profileCompletion || 0;
+      if (refinedIsVerified && refinedCompletion < 100) {
+        // If verified, ensure completion reflects that major milestone if backend lags
+        refinedCompletion = Math.max(refinedCompletion, 100);
+      }
+
       return {
         id: business.id || business._id || business.businessId,
         initials: business.businessName
@@ -90,12 +116,12 @@ function BusinessProfileContent() {
         serviceLicense: business.serviceLicense || null,
         availability: business.availability || "",
         profileImage: business.profileImage || business.logo || user?.avatar || null,
-        // Verification status - normalize backend values
-        verificationStatus: normalizeVerificationStatus(business.verificationStatus),
-        isVerified: business.isVerified || false,
-        verifiedAt: business.verifiedAt || null,
+        // Verification status - PRIORITY to fresh fetch
+        verificationStatus: refinedStatus,
+        isVerified: refinedIsVerified,
+        verifiedAt: verificationData?.reviewedAt || business.verifiedAt || null,
         // Profile completion from backend
-        profileCompletion: business.profileCompletion || 0,
+        profileCompletion: refinedCompletion,
       };
     },
     [user],

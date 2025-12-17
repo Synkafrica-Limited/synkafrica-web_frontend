@@ -65,7 +65,9 @@ export const useGetName = () => {
       try {
         data = await response.json();
       } catch (parseError) {
-        console.error("Failed to parse response JSON", parseError);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Failed to parse response JSON", parseError);
+        }
         setError("Failed to parse server response");
         return false;
       }
@@ -88,7 +90,9 @@ export const useGetName = () => {
           localStorage.setItem("customerUser", JSON.stringify(updatedUser));
         }
       } catch (e) {
-        console.error("Failed to update localStorage with user data:", e);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Failed to update localStorage with user data:", e);
+        }
       }
 
       // Trigger storage event for cross-tab sync
@@ -98,7 +102,9 @@ export const useGetName = () => {
       router.push("/dashboard/"); 
       return true;
     } catch (err) {
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(err);
+      }
       setError(
         err.message || "Unable to reach server. Please try again later."
       );

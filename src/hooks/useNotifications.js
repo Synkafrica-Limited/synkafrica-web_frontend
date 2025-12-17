@@ -76,7 +76,9 @@ export function useRemoteNotifications({ pollInterval = 20000 } = {}) {
         setUnreadCount(res.data.unread);
       }
     } catch (err) {
-      console.debug('fetchCounts err', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('fetchCounts err', err);
+      }
     }
   }, []);
 
@@ -116,7 +118,9 @@ export function useRemoteNotifications({ pollInterval = 20000 } = {}) {
       }
       await fetchCounts();
     } catch (err) {
-      console.error('markRead error:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('markRead error:', err);
+      }
       setNotifications(prevNotifications);
       setUnreadCount(prevCount);
     }
@@ -131,7 +135,9 @@ export function useRemoteNotifications({ pollInterval = 20000 } = {}) {
       await api.patch('/api/notifications/mark-all-read', {}, { auth: true });
       await fetchCounts();
     } catch (err) {
-      console.error('markAllRead error:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('markAllRead error:', err);
+      }
       setNotifications(prevNotifications);
       setUnreadCount(prevCount);
     }
@@ -160,7 +166,9 @@ export function useRemoteNotifications({ pollInterval = 20000 } = {}) {
       try {
         await fetchCounts();
       } catch (err) {
-        console.debug('poll fetchCounts err', err);
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('poll fetchCounts err', err);
+        }
       }
     }, pollInterval);
 

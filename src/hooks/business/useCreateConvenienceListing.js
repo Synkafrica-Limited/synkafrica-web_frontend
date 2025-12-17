@@ -41,16 +41,22 @@ export const useCreateConvenienceListing = () => {
     setIsSubmitting(true);
     try {
       // Debug: Log the business object structure
-      console.log('[useCreateConvenienceListing] Business object:', business);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useCreateConvenienceListing] Business object:', business);
+      }
       
       // Get business ID - handle both array and single object response
       const businessObj = Array.isArray(business) ? business[0] : business;
       const businessId = businessObj?.id || businessObj?._id || businessObj?.businessId || '';
-      console.log('[useCreateConvenienceListing] Extracted businessId:', businessId);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useCreateConvenienceListing] Extracted businessId:', businessId);
+      }
 
       if (!businessId) {
-        console.error('[useCreateConvenienceListing] Failed to extract business ID from:', businessObj);
-        throw new Error('Business ID not found. Please ensure you have a valid business account.');
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[useCreateConvenienceListing] Failed to extract business ID from:', businessObj);
+        }
+        throw new Error('Business ID not found. Please ensure you have a business profile.');
       }
 
       // Validate images
@@ -63,7 +69,9 @@ export const useCreateConvenienceListing = () => {
       // Build payload using category-aware builder
       const payload = buildConveniencePayload(form, businessId, images);
       
-      console.log('[useCreateConvenienceListing] Payload:', payload);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useCreateConvenienceListing] Payload:', payload);
+      }
 
       // Extract files for upload
       const files = images.map((i) => i?.file || i).filter(f => f instanceof File);

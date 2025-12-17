@@ -43,18 +43,26 @@ export const useCreateResortListing = () => {
       // Debug: Log the business object structure
       console.log('[useCreateResortListing] Business object:', business);
       console.log('[useCreateResortListing] Business type:', typeof business);
-      console.log('[useCreateResortListing] Is array:', Array.isArray(business));
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useCreateResortListing] Business object:', business);
+        console.log('[useCreateResortListing] Business type:', typeof business);
+        console.log('[useCreateResortListing] Is array:', Array.isArray(business));
+      }
       
       // Get business ID - handle both array and single object response
       const businessObj = Array.isArray(business) ? business[0] : business;
-      console.log('[useCreateResortListing] Business obj:', businessObj);
       
       const businessId = businessObj?.id || businessObj?._id || businessObj?.businessId || '';
-      console.log('[useCreateResortListing] Extracted businessId:', businessId);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useCreateResortListing] Business obj:', businessObj);
+        console.log('[useCreateResortListing] Extracted businessId:', businessId);
+      }
 
       if (!businessId) {
-        console.error('[useCreateResortListing] Failed to extract business ID from:', businessObj);
-        throw new Error('Business ID not found. Please ensure you have a valid business account.');
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[useCreateResortListing] Failed to extract business ID from:', businessObj);
+        }
+        throw new Error('Business ID not found. Please ensure you have a business profile.');
       }
 
       // Validate images
@@ -67,7 +75,9 @@ export const useCreateResortListing = () => {
       // Build payload using category-aware builder
       const payload = buildResortPayload(form, businessId, images);
       
-      console.log('[useCreateResortListing] Payload:', payload);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useCreateResortListing] Payload:', payload);
+      }
 
       // Extract files for upload
       const files = images.map((i) => i?.file || i).filter(f => f instanceof File);
@@ -76,7 +86,9 @@ export const useCreateResortListing = () => {
       addToast({ message: 'Resort listing created successfully', type: 'success' });
       router.push('/dashboard/business/listings');
     } catch (err) {
-      console.error('createResortListing error', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('createResortListing error', err);
+      }
       handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
     } finally {
       setIsSubmitting(false);
