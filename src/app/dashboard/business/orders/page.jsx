@@ -24,6 +24,7 @@ import { useVendorBookings } from "@/hooks/business/useVendorBookings";
 import bookingsService from "@/services/bookings.service";
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import FilterTabs from '@/components/ui/FilterTabs';
+import { handleApiError } from "@/utils/errorParser";
 
 const STATUS_CONFIG = {
   pending: { label: "Pending", color: "bg-yellow-100 text-yellow-700", icon: Clock },
@@ -79,10 +80,11 @@ export default function OrdersPage() {
       addToast({ message: `Booking ${displayId} accepted successfully!`, type: "success" });
       setShowAcceptConfirm(false);
       setSelectedOrder(null);
-      refetch();
+      refetch(); // Refresh local list
+      // Trigger global dashboard refresh
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('dashboard:refresh'));
     } catch (err) {
-      console.error('Accept booking error:', err);
-      addToast({ message: err?.message || "Failed to accept booking. Please try again.", type: "error" });
+      handleApiError(err, addToast);
     } finally {
       setIsProcessing(false);
     }
@@ -110,10 +112,11 @@ export default function OrdersPage() {
       setShowDeclineConfirm(false);
       setSelectedOrder(null);
       setDeclineReason("");
-      refetch();
+      refetch(); // Refresh local list
+      // Trigger global dashboard refresh
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('dashboard:refresh'));
     } catch (err) {
-      console.error('Reject booking error:', err);
-      addToast({ message: err?.message || "Failed to decline booking. Please try again.", type: "error" });
+      handleApiError(err, addToast);
     } finally {
       setIsProcessing(false);
     }

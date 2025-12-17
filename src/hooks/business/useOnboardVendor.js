@@ -66,7 +66,9 @@ export function useOnboardVendor() {
       const token = authService.getAccessToken();
       if (!token) {
         const msg = 'Authentication required. Please log in again.';
-        console.error('[useOnboardVendor] No access token');
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[useOnboardVendor] No access token');
+        }
         addToast({ message: msg, type: 'error' });
         setError(msg);
         setLoading(false);
@@ -75,7 +77,9 @@ export function useOnboardVendor() {
 
       // 1) Create business (basic fields)
       const createPayload = pickCreateFields(formData);
-      console.debug('[useOnboardVendor] createPayload:', createPayload);
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[useOnboardVendor] createPayload:', createPayload);
+      }
 
       let created = null;
       try {
@@ -89,7 +93,9 @@ export function useOnboardVendor() {
         const looksLikeAddressRejection = /address|city|state|country|postalCode|latitude|longitude|should not exist/i.test(messageText);
 
         if (status === 400 && looksLikeAddressRejection) {
-          console.warn('[useOnboardVendor] Backend rejected address in create payload, retrying without address');
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('[useOnboardVendor] Backend rejected address in create payload, retrying without address');
+          }
           const payloadNoAddress = { ...createPayload };
           delete payloadNoAddress.address;
           delete payloadNoAddress.city;
@@ -126,10 +132,14 @@ export function useOnboardVendor() {
                  created = { ...created, ...patchedData };
               }
             } catch (patchErr) {
-              console.warn('[useOnboardVendor] profile PATCH after retry failed:', patchErr);
+              if (process.env.NODE_ENV === 'development') {
+                console.warn('[useOnboardVendor] profile PATCH after retry failed:', patchErr);
+              }
             }
           } catch (retryErr) {
-            console.error('[useOnboardVendor] Retry create without address failed:', retryErr);
+            if (process.env.NODE_ENV === 'development') {
+              console.error('[useOnboardVendor] Retry create without address failed:', retryErr);
+            }
             throw retryErr;
           }
         } else {
@@ -142,7 +152,9 @@ export function useOnboardVendor() {
 
       if (!businessData || !(businessData.id || businessData._id)) {
         const msg = 'Failed to create business. Check server response.';
-        console.error('[useOnboardVendor] create failed:', created);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[useOnboardVendor] create failed:', created);
+        }
         // Removed undefined toast call
         addToast({ message: msg, type: 'error' });
         setError(msg);
@@ -170,7 +182,9 @@ export function useOnboardVendor() {
           ctx.setBusiness(normalized);
         }
       } catch (err) {
-        console.warn('[useOnboardVendor] could not set BusinessContext (not present):', err?.message || err);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[useOnboardVendor] could not set BusinessContext (not present):', err?.message || err);
+        }
       }
 
       // Since address/location are included in the create payload above, merge
@@ -192,7 +206,9 @@ export function useOnboardVendor() {
           ctx.setBusiness(merged);
         }
       } catch (err) {
-        console.warn('[useOnboardVendor] could not merge profile into BusinessContext:', err?.message || err);
+        if (process.env.NODE_ENV === 'development') {
+           console.warn('[useOnboardVendor] could not merge profile into BusinessContext:', err?.message || err);
+        }
       }
 
       addToast({ message: 'Business created and profile saved.', type: 'success' });

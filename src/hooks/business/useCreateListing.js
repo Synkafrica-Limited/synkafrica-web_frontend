@@ -11,7 +11,9 @@ export function useCreateListing() {
 	const createListing = async (payload, images = []) => {
 		setIsSubmitting(true);
 		try {
-			console.log('[useCreateListing] Creating listing:', payload.category);
+			if (process.env.NODE_ENV === 'development') {
+				console.log('[useCreateListing] Creating listing:', payload.category);
+			}
 
 			// Validate payload has required fields
 			if (!payload.title?.trim()) {
@@ -35,17 +37,25 @@ export function useCreateListing() {
 
 			let result;
 			if (hasFiles) {
-				console.log('[useCreateListing] Creating with multipart (files)');
+				if (process.env.NODE_ENV === 'development') {
+					console.log('[useCreateListing] Creating with multipart (files)');
+				}
 				result = await listingsService.createListingMultipart(payload, images);
 			} else {
-				console.log('[useCreateListing] Creating with JSON');
+				if (process.env.NODE_ENV === 'development') {
+					console.log('[useCreateListing] Creating with JSON');
+				}
 				result = await listingsService.createListing(payload);
 			}
 
-			console.log('[useCreateListing] Success:', result);
+			if (process.env.NODE_ENV === 'development') {
+				console.log('[useCreateListing] Success:', result);
+			}
 			return result;
 		} catch (err) {
-			console.error('[useCreateListing] Error:', err);
+			if (process.env.NODE_ENV === 'development') {
+				console.error('[useCreateListing] Error:', err);
+			}
 			handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
 			throw err;
 		} finally {

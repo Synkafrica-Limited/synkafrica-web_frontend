@@ -3,11 +3,13 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export function useLogin() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { addToast } = useToast();
 
   // Check if already logged in on component mount
   useEffect(() => {
@@ -63,6 +65,10 @@ export function useLogin() {
       return data;
     } catch (err) {
       setError(err.message);
+      addToast({
+        message: err.message || "Login failed",
+        type: "error"
+      });
       return null;
     } finally {
       setLoading(false);

@@ -103,12 +103,16 @@ export const useVendorTransactions = (token, options = {}) => {
 
       // Backend now handles businessId filtering - no client-side filtering needed
       // Trust the backend response since we pass businessId in query params
-      console.debug('[useVendorTransactions] fetched', uniqueTxns.length, 'transactions from backend');
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[useVendorTransactions] fetched', uniqueTxns.length, 'transactions from backend');
+      }
 
       setTransactions(uniqueTxns);
       setStats(statsResponse || null);
     } catch (err) {
-      console.error("Failed to fetch transactions:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Failed to fetch transactions:", err);
+      }
       setError(err.message || "Failed to load transactions");
     } finally {
       setLoading(false);

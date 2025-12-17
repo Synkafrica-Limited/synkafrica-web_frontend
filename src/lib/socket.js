@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+import logger from "@/utils/logger";
 
 let socket = null;
 
@@ -6,7 +7,9 @@ export const initializeSocket = (token) => {
   if (socket) return socket;
 
   if (!token) {
-    console.warn("Socket initialization skipped: No token provided");
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Socket initialization skipped: No token provided");
+    }
     return null;
   }
 
@@ -25,21 +28,15 @@ export const initializeSocket = (token) => {
   });
 
   socket.on("connect", () => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Socket connected:", socket.id);
-    }
+    logger.log("Socket connected:", socket.id);
   });
 
   socket.on("connect_error", (err) => {
-    if (process.env.NODE_ENV === "development") {
-      console.error("Socket connection error:", err.message);
-    }
+    logger.error("Socket connection error:", err.message);
   });
 
   socket.on("disconnect", (reason) => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Socket disconnected:", reason);
-    }
+    logger.log("Socket disconnected:", reason);
   });
 
   return socket;

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Send, Paperclip, Search, Info, Plus, X, Loader2, AlertCircle } from "lucide-react";
+import { Send, Search, Info, Plus, X, Loader2, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { api } from "@/lib/fetchClient";
 import { getSocket } from "@/lib/socket";
 import DashboardHeader from "@/components/layout/DashboardHeader";
+import { handleApiError } from "@/utils/errorParser";
 
 const TICKET_TYPES = [
     { value: "CUSTOMER_COMPLAINT", label: "Customer Complaint" },
@@ -116,21 +117,26 @@ export default function SupportPage() {
         setIsLoading(true);
         try {
             const res = await api.get("/support/tickets", { auth: true });
-            // Handle response structure: { tickets: [...], pagination: {...} }
-            if (res && Array.isArray(res.tickets)) {
-                setTickets(res.tickets);
-                if (res.tickets.length > 0 && !activeTicket) {
-                    setActiveTicket(res.tickets[0]);
+            // Unwrapping: API returns { success: true, data: { tickets: [...] } }
+            // or sometimes direct array if unwrapped by client
+            const data = res.tickets ? res : (res.data || res);
+
+            if (data && Array.isArray(data.tickets)) {
+                setTickets(data.tickets);
+                if (data.tickets.length > 0 && !activeTicket) {
+                    setActiveTicket(data.tickets[0]);
                 }
-            } else if (Array.isArray(res)) {
+            } else if (Array.isArray(data)) {
                 // Fallback for direct array response
-                setTickets(res);
-                if (res.length > 0 && !activeTicket) {
-                    setActiveTicket(res[0]);
+                setTickets(data);
+                if (data.length > 0 && !activeTicket) {
+                    setActiveTicket(data[0]);
                 }
             }
         } catch (error) {
-            console.error("Failed to fetch tickets:", error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Failed to fetch tickets:", error);
+            }
             setTickets([]);
         } finally {
             setIsLoading(false);
@@ -144,13 +150,19 @@ export default function SupportPage() {
 
             // Should be covered by catch block if 403, but double check data validity
             setPermissionDenied(false);
-            if (res && Array.isArray(res.messages)) {
-                setMessages(res.messages);
+
+            // Unwrapping
+            const data = res.messages ? res : (res.data || res);
+
+            if (data && Array.isArray(data.messages)) {
+                setMessages(data.messages);
             } else {
                 setMessages([]);
             }
         } catch (error) {
-            console.error("Failed to fetch messages:", error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Failed to fetch messages:", error);
+            }
 
             // Check for specific backend error code or 403 status
             if (
@@ -163,6 +175,8 @@ export default function SupportPage() {
             }
         }
     };
+
+
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -178,17 +192,18 @@ export default function SupportPage() {
             const newMsg = {
                 id: Date.now(),
                 sender: "user",
+                senderType: "BUSINESS",
                 message: newMessage,
                 createdAt: new Date().toISOString(),
             };
             setMessages([...messages, newMsg]);
+
             setNewMessage("");
 
-            // Refresh tickets to update last message
-            fetchTickets();
+            // Refresh tickets to update last message/status if needed
+            // No need to full refresh, just keep optimistic
         } catch (error) {
-            console.error("Failed to send message:", error);
-            addToast({ message: "Failed to send message", type: "error" });
+            handleApiError(error, addToast);
         } finally {
             setIsSending(false);
         }
@@ -223,13 +238,13 @@ export default function SupportPage() {
 
             // Refresh tickets and select the new one
             await fetchTickets();
-            // Handle response structure: { success: true, message: "...", ticket: {...} }
-            if (response && response.ticket) {
-                setActiveTicket(response.ticket);
+
+            const data = response.ticket ? response : (response.data || response);
+            if (data && data.ticket) {
+                setActiveTicket(data.ticket);
             }
         } catch (error) {
-            console.error("Failed to create ticket:", error);
-            addToast({ message: error.message || "Failed to create ticket", type: "error" });
+            handleApiError(error, addToast);
         } finally {
             setIsCreating(false);
         }
@@ -316,21 +331,21 @@ export default function SupportPage() {
                     {activeTicket ? (
                         <>
                             {/* Chat Header */}
-                            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-white shadow-xs z-10">
                                 <div>
-                                    <h2 className="font-semibold text-gray-900">{activeTicket.subject}</h2>
-                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <h2 className="font-semibold text-gray-900 leading-tight">{activeTicket.subject}</h2>
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                                         <span>Ticket #{activeTicket.ticketNumber || activeTicket.id}</span>
-                                        <span>•</span>
-                                        <span className="flex items-center gap-1">
+                                        <span className="text-gray-300">•</span>
+                                        <span className="flex items-center gap-1.5">
                                             <div className={`w-2 h-2 rounded-full ${activeTicket.status === 'OPEN' ? 'bg-green-500' :
                                                 activeTicket.status === 'IN_PROGRESS' ? 'bg-blue-500' :
                                                     'bg-gray-400'
                                                 }`} />
                                             {activeTicket.status}
                                         </span>
-                                        <span>•</span>
-                                        <span className={PRIORITY_LEVELS.find(p => p.value === activeTicket.priority)?.color}>
+                                        <span className="text-gray-300">•</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 ${PRIORITY_LEVELS.find(p => p.value === activeTicket.priority)?.color}`}>
                                             {activeTicket.priority} Priority
                                         </span>
                                     </div>
@@ -338,83 +353,48 @@ export default function SupportPage() {
                             </div>
 
                             {/* Messages */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#E5DDD5] dark:bg-[#0B141A] relative">
-                                {/* WhatsApp-style background pattern */}
-                                <div className="absolute inset-0 opacity-[0.06]" style={{
-                                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-                                }} />
+                            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gray-50/50">
                                 {permissionDenied ? (
                                     <div className="flex flex-col items-center justify-center h-full text-red-500">
                                         <AlertCircle className="w-12 h-12 mb-2" />
-                                        <p className="text-sm font-medium">Access Denied</p>
-                                        <p className="text-xs text-red-400">You do not have permission to view this ticket.</p>
+                                        <p className="text-lg font-medium">Access Denied</p>
+                                        <p className="text-sm text-red-400">You do not have permission to view this ticket.</p>
                                     </div>
                                 ) : messages.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                        <Info className="w-12 h-12 mb-2" />
-                                        <p className="text-sm">No messages yet. Start the conversation!</p>
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                            <Send className="w-8 h-8 text-gray-300 ml-1" />
+                                        </div>
+                                        <p className="text-lg font-medium text-gray-900">Start the conversation</p>
+                                        <p className="text-sm">Type a message below to reply to support.</p>
                                     </div>
                                 ) : (
                                     messages.map((msg, index) => {
                                         // STRICT SENDER TYPE CHECK
                                         const isVendor = msg.senderType === 'BUSINESS';
-
-                                        // "senderType" is our source of truth. 
-                                        // Fallback to "sender" only if absolutely necessary and strictly "user".
-                                        // But per requirements, we trust senderType.
-
                                         const showSender = index === 0 || messages[index - 1]?.senderType !== msg.senderType;
 
                                         return (
-                                            <div key={msg.id} className="relative">
+                                            <div key={msg.id} className={`flex flex-col ${isVendor ? 'items-end' : 'items-start'} animate-fadeIn`}>
                                                 {/* Sender label */}
                                                 {showSender && (
-                                                    <div className={`flex items-center gap-2 mb-1 ${isVendor ? 'justify-end' : 'justify-start'}`}>
-                                                        {!isVendor && (
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xs font-semibold">
-                                                                    A
-                                                                </div>
-                                                                <span className="text-xs font-medium text-gray-600">Support Team</span>
-                                                            </div>
-                                                        )}
-                                                        {isVendor && (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-xs font-medium text-gray-600">You</span>
-                                                                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-xs font-semibold">
-                                                                    V
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                    <span className="text-xs text-gray-400 mb-1 px-1">
+                                                        {isVendor ? 'You' : 'Support Team'}
+                                                    </span>
                                                 )}
 
                                                 {/* Message bubble */}
-                                                <div className={`flex ${isVendor ? 'justify-end' : 'justify-start'}`}>
-                                                    <div className={`max-w-[75%] sm:max-w-[65%] rounded-2xl px-4 py-2.5 shadow-sm relative ${isVendor
-                                                        ? 'bg-[#DCF8C6] dark:bg-[#005C4B] text-gray-900 dark:text-white rounded-tr-sm'
-                                                        : 'bg-white dark:bg-[#202C33] text-gray-900 dark:text-white rounded-tl-sm'
-                                                        }`}>
-                                                        {/* Message tail */}
-                                                        <div className={`absolute top-0 ${isVendor ? 'right-0 -mr-2' : 'left-0 -ml-2'}`}>
-                                                            <svg width="8" height="13" viewBox="0 0 8 13" className={isVendor ? 'text-[#DCF8C6] dark:text-[#005C4B]' : 'text-white dark:text-[#202C33]'}>
-                                                                <path d={isVendor ? "M1.533,3.568 L8.000,0.000 L8.000,13.000 L1.533,3.568 Z" : "M6.467,3.568 L0.000,0.000 L0.000,13.000 L6.467,3.568 Z"} fill="currentColor" />
-                                                            </svg>
-                                                        </div>
-
-                                                        <p className="text-sm leading-relaxed break-words">{msg.message || msg.content}</p>
-                                                        <div className="flex items-center justify-end gap-1 mt-1">
-                                                            <p className="text-[10px] text-gray-500 dark:text-gray-400">
-                                                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                            </p>
-                                                            {isVendor && (
-                                                                <svg width="16" height="11" viewBox="0 0 16 11" className="text-blue-500">
-                                                                    <path d="M11.071,0.5 L5.5,6.071 L2.929,3.5 L1.5,4.929 L5.5,8.929 L12.5,1.929 L11.071,0.5 Z M13.929,0.5 L12.5,1.929 L15.5,4.929 L13.929,6.5 L15.357,7.929 L18.357,4.929 L13.929,0.5 Z" fill="currentColor" transform="translate(-1 -0.5)" />
-                                                                </svg>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                <div className={`max-w-[85%] sm:max-w-[75%] px-4 py-3 rounded-2xl shadow-sm border ${isVendor
+                                                    ? 'bg-primary-600 text-white rounded-tr-sm border-primary-600'
+                                                    : 'bg-white text-gray-800 rounded-tl-sm border-gray-100'
+                                                    }`}>
+                                                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message || msg.content}</p>
                                                 </div>
+
+                                                {/* Timestamp */}
+                                                <span className="text-[10px] text-gray-400 mt-1 px-1">
+                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
                                             </div>
                                         );
                                     })
@@ -423,14 +403,9 @@ export default function SupportPage() {
                             </div>
 
                             {/* Input Area */}
+                            {/* File Preview */}
                             <div className="p-4 bg-white border-t border-gray-100">
                                 <form onSubmit={handleSendMessage} className="flex items-end gap-2">
-                                    <button
-                                        type="button"
-                                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-full transition-colors"
-                                    >
-                                        <Paperclip className="w-5 h-5" />
-                                    </button>
                                     <div className="flex-1 bg-gray-50 rounded-xl border border-gray-200 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all">
                                         <textarea
                                             value={newMessage}

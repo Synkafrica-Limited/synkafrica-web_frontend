@@ -10,6 +10,8 @@ import DashboardHeader from '@/components/layout/DashboardHeader';
 import NotificationBell from "@/components/dashboard/vendor/NotificationBell";
 import { Plus } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { handleApiError } from "@/utils/errorParser";
+import logger from "@/utils/logger";
 
 export default function NotificationsPage() {
   const { notifications, markAsRead, markAllAsRead, removeNotification, addNotification } = useVendorNotifications();
@@ -20,6 +22,7 @@ export default function NotificationsPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
 
   // Fetch notifications from backend on mount
   useEffect(() => {
@@ -50,10 +53,11 @@ export default function NotificationsPage() {
         addNotification(notification);
       });
 
-      console.log('[NotificationsPage] Fetched and synced notifications:', backendNotifications.length);
+      logger.log('[NotificationsPage] Fetched and synced notifications:', backendNotifications.length);
     } catch (error) {
-      console.error('[NotificationsPage] Error fetching notifications:', error);
-      addToast({ message: 'Could not load latest notifications', type: 'error' });
+      handleApiError(error, addToast, {
+        setLoading: setIsLoading
+      });
     } finally {
       setIsLoading(false);
     }
@@ -61,9 +65,15 @@ export default function NotificationsPage() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await fetchNotifications();
-    setIsRefreshing(false);
-    addToast({ message: 'Notifications refreshed', type: 'success', duration: 2000 });
+    try {
+      await fetchNotifications();
+      addToast({ message: 'Notifications refreshed', type: 'success', duration: 2000 });
+    } catch (error) {
+      // fetchNotifications handles its own errors but we might want to catch unexpected ones here
+      handleApiError(error, addToast);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const getNotificationTitle = (type) => {
@@ -117,7 +127,8 @@ export default function NotificationsPage() {
       try {
         await notificationService.markAsRead(notification.id);
       } catch (error) {
-        console.error('Failed to mark notification as read on backend:', error);
+        // Silent failure is acceptable for read marking in background
+        logger.error('Failed to mark notification as read on backend:', error);
       }
     }
 
@@ -140,13 +151,17 @@ export default function NotificationsPage() {
   };
 
   const handleMarkAllAsRead = async () => {
+    setIsMarkingAllRead(true);
+    // Optimistic update
     markAllAsRead();
 
     try {
       await notificationService.markAllAsRead();
       addToast({ message: 'All notifications marked as read', type: 'success', duration: 2000 });
     } catch (error) {
-      console.error('Failed to mark all as read on backend:', error);
+      handleApiError(error, addToast);
+    } finally {
+      setIsMarkingAllRead(false);
     }
   };
 
@@ -158,7 +173,9 @@ export default function NotificationsPage() {
       try {
         await notificationService.deleteNotification(notificationId);
       } catch (error) {
-        console.error('Failed to delete notification from backend:', error);
+        logger.error('Failed to delete notification from backend:', error);
+        // Minimal UI obstruction for individual delete failures that are already removed locally
+        handleApiError(error, addToast);
       }
     }
   };
@@ -179,7 +196,7 @@ export default function NotificationsPage() {
       await Promise.all(
         notifications.map(notification =>
           notificationService.deleteNotification(notification.id).catch(err => {
-            console.error('Failed to delete notification:', notification.id, err);
+            logger.error('Failed to delete notification:', notification.id, err);
           })
         )
       );
@@ -187,8 +204,7 @@ export default function NotificationsPage() {
       addToast({ message: 'All notifications deleted', type: 'success', duration: 2000 });
       setShowDeleteAllConfirm(false);
     } catch (error) {
-      console.error('Failed to delete all notifications:', error);
-      addToast({ message: 'Failed to delete some notifications', type: 'error' });
+      handleApiError(error, addToast, { setLoading: setIsDeleting });
     } finally {
       setIsDeleting(false);
     }
@@ -366,10 +382,12 @@ export default function NotificationsPage() {
                 <>
                   <button
                     onClick={handleMarkAllAsRead}
-                    className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-primary-50 transition-colors"
+                    disabled={isMarkingAllRead}
+                    className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Check className="w-4 h-4" />
-                    Mark all as read
+                    <Check className={`w-4 h-4 ${isMarkingAllRead ? 'hidden' : ''}`} />
+                    {isMarkingAllRead && <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin mr-1"></div>}
+                    {isMarkingAllRead ? 'Marking...' : 'Mark all as read'}
                   </button>
                   <button
                     onClick={handleDeleteAll}

@@ -6,6 +6,8 @@ import { Eye, EyeOff, Lock, Shield, CheckCircle } from "lucide-react";
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import VerificationSettings from './VerificationSettings';
 import NotificationBell from "@/components/dashboard/vendor/NotificationBell";
+import { handleApiError } from "@/utils/errorParser";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export default function BusinessSettingsPage() {
   // Change Password State
@@ -21,6 +23,8 @@ export default function BusinessSettingsPage() {
 
   // Settings tabs: 'security' | 'verification'
   const [activeTab, setActiveTab] = useState('security');
+
+  const { addToast } = useToast();
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -42,11 +46,13 @@ export default function BusinessSettingsPage() {
     try {
       await authService.changePassword(currentPassword, newPassword);
       setPwSuccess("Password updated successfully");
+      addToast({ message: "Password updated successfully", type: "success" });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      setPwError(err?.message || "Failed to update password");
+      const msg = handleApiError(err, addToast);
+      setPwError(msg);
     } finally {
       setPwLoading(false);
     }
@@ -209,7 +215,7 @@ export default function BusinessSettingsPage() {
                     <div className="pt-4">
                       <button
                         type="submit"
-                        className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         disabled={pwLoading}
                       >
                         {pwLoading ? (

@@ -53,8 +53,16 @@ export const useCreateCarListing = () => {
       const businessObj = Array.isArray(business) ? business[0] : business;
       const businessId = businessObj?.id || businessObj?._id || '';
 
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useCreateCarListing] Business object:', business);
+        console.log('[useCreateCarListing] Extracted businessId:', businessId);
+      }
+
       if (!businessId) {
-        throw new Error("Business ID not found. Please ensure you have a valid business account.");
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[useCreateCarListing] Failed to extract business ID from:', businessObj);
+        }
+        throw new Error('Business ID not found. Please ensure you have a business profile.');
       }
 
       // Validate images
@@ -67,7 +75,11 @@ export const useCreateCarListing = () => {
       // Build payload using category-aware builder
       const payload = buildCarRentalPayload(formData, businessId, images);
       
-      console.log('[useCreateCarListing] Payload:', payload);
+      if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development') {
+        console.log('[useCreateCarListing] Payload:', payload);
+      }
+      }
 
       // Extract files for upload
       const files = images.map((img) => img?.file || img).filter(f => f instanceof File);
@@ -81,9 +93,11 @@ export const useCreateCarListing = () => {
         router.push("/dashboard/business/listings");
       }, 1000);
 
-    } catch (error) {
-      console.error("Error creating car listing:", error);
-      handleApiError(error, { addToast }, { setLoading: setIsSubmitting });
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('createCarListing error', err);
+      }
+      handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
     } finally {
       setIsSubmitting(false);
     }
