@@ -112,7 +112,9 @@ export default function EditCarRentalListing() {
           setImages(existing);
         }
       } catch (err) {
-        console.error('Failed to load listing:', err);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to load listing:', err);
+        }
         addToast({ message: 'Failed to load listing. Please try again.', type: 'error' });
       } finally {
         setIsLoading(false);
@@ -193,7 +195,9 @@ export default function EditCarRentalListing() {
         router.push('/dashboard/business/listings');
       }, 1000);
     } catch (err) {
-      console.error('[EditCarRental] Update failed:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[EditCarRental] Update failed:', err);
+      }
       handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
     }
   };
@@ -265,8 +269,8 @@ export default function EditCarRentalListing() {
             <div className="flex items-center gap-4">
               <span
                 className={`text-sm font-medium ${form.availability === "ACTIVE" || form.availability === "available"
-                    ? "text-green-600"
-                    : "text-gray-600"
+                  ? "text-green-600"
+                  : "text-gray-600"
                   }`}
               >
                 {form.availability === "ACTIVE" || form.availability === "available" ? "Active" : "Inactive"}
@@ -284,14 +288,14 @@ export default function EditCarRentalListing() {
                   });
                 }}
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.availability === "ACTIVE" || form.availability === "available"
-                    ? "bg-green-500"
-                    : "bg-gray-300"
+                  ? "bg-green-500"
+                  : "bg-gray-300"
                   }`}
               >
                 <span
                   className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.availability === "ACTIVE" || form.availability === "available"
-                      ? "translate-x-7"
-                      : "translate-x-1"
+                    ? "translate-x-7"
+                    : "translate-x-1"
                     }`}
                 />
               </button>

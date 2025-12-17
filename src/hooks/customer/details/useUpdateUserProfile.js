@@ -2,10 +2,13 @@
 "use client";
 
 import { useState } from "react";
+import { useToast } from "@/components/ui/ToastProvider";
+import logger from "@/utils/logger";
 
 export const useUpdateProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { addToast } = useToast();
 
   /**
    * updateProfile
@@ -48,7 +51,9 @@ export const useUpdateProfile = () => {
       try {
         data = await response.json();
       } catch (parseError) {
-        console.error("Failed to parse response JSON", parseError);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Failed to parse response JSON", parseError);
+        }
       }
 
       if (!response.ok) {
@@ -71,7 +76,9 @@ export const useUpdateProfile = () => {
           localStorage.setItem("customerUser", JSON.stringify(updatedUser));
         }
       } catch (e) {
-        console.error("Failed to update local user data:", e);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Failed to update local user data:", e);
+        }
       }
 
       // Trigger storage event for session sync
@@ -79,10 +86,10 @@ export const useUpdateProfile = () => {
 
       return true;
     } catch (err) {
-      console.error(err);
-      setError(
-        err.message || "Unable to reach server. Please try again later."
-      );
+      logger.error('Profile update failed:', err);
+      const msg = err.message || "Unable to reach server. Please try again later.";
+      setError(msg);
+      addToast({ message: msg, type: "error" });
       return false;
     } finally {
       setLoading(false);

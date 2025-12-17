@@ -26,8 +26,10 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+import { useToast } from "@/components/ui/ToastProvider";
 import { useOrder } from "@/context/OrderContext";
 import { getListing } from "@/services/listings.service";
+import logger from "@/utils/logger";
 
 // No mock data - only real API data is used
 
@@ -61,7 +63,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
             </div>
           </div>
         )}
-        
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -102,7 +104,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
                 onChange={(e) => setGuests(parseInt(e.target.value))}
                 className="w-full h-9 pl-9 pr-8 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#E05D3D] focus:ring-1 focus:ring-[#E05D3D] transition-all appearance-none cursor-pointer"
               >
-                {Array.from({length: serviceType === 'resort' ? 8 : serviceType === 'dining' ? 12 : 20}, (_, i) => i + 1).map(num => (
+                {Array.from({ length: serviceType === 'resort' ? 8 : serviceType === 'dining' ? 12 : 20 }, (_, i) => i + 1).map(num => (
                   <option key={num} value={num}>{num} guest{num > 1 ? 's' : ''}</option>
                 ))}
               </select>
@@ -123,7 +125,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
                 onChange={(e) => setDuration(parseInt(e.target.value))}
                 className="w-full h-9 pl-9 pr-8 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 focus:outline-none focus:border-[#E05D3D] focus:ring-1 focus:ring-[#E05D3D] transition-all appearance-none cursor-pointer"
               >
-                {(serviceType === 'car' ? [1,2,3,4,5,6,7,8,9,10,11,12] : [2,3,4,5,6,7,8]).map(hour => (
+                {(serviceType === 'car' ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : [2, 3, 4, 5, 6, 7, 8]).map(hour => (
                   <option key={hour} value={hour}>{hour} hour{hour > 1 ? 's' : ''}</option>
                 ))}
               </select>
@@ -153,7 +155,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
   const calculatePricing = () => {
     let basePrice = service.price;
     let multiplier = 1;
-    
+
     switch (serviceType) {
       case 'car':
       case 'water':
@@ -165,12 +167,12 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
       default:
         multiplier = 1;
     }
-    
+
     const subtotal = basePrice * multiplier;
     const serviceFee = subtotal * 0.10; // 10% service fee
     const tax = subtotal * 0.075; // 7.5% tax
     const calculatedTotal = subtotal + serviceFee + tax;
-    
+
     return {
       basePrice,
       subtotal,
@@ -196,7 +198,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
   const handleBookNow = () => {
     if (!isFormValid()) return;
     setIsLoading(true);
-    
+
     setTimeout(() => {
       const pricing = calculatePricing();
       const orderData = {
@@ -222,7 +224,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
           priceBreakdown: pricing.priceBreakdown,
         }
       };
-      
+
       const order = createOrder(orderData);
       router.push(`/checkout?orderId=${order.orderId}`);
       setIsLoading(false);
@@ -260,7 +262,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
       <div className="space-y-4 mb-6">
         {getBookingFields()}
       </div>
-      
+
       {/* Pricing Breakdown - Modern Style */}
       <div className="border-t border-gray-200 pt-5 mb-5">
         <div className="space-y-3 text-sm mb-4">
@@ -277,7 +279,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
             <span className="text-gray-900">₦{calculatePricing().tax.toLocaleString()}</span>
           </div>
         </div>
-        
+
         <div className="border-t border-gray-200 pt-4 mb-5">
           <div className="flex justify-between items-baseline">
             <span className="text-base font-semibold text-gray-900">Total</span>
@@ -286,16 +288,15 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
             </span>
           </div>
         </div>
-        
+
         {/* Modern Brand Button */}
         <button
           onClick={handleBookNow}
           disabled={!isFormValid() || isLoading}
-          className={`w-full h-12 rounded-lg font-semibold text-sm transition-all ${
-            isFormValid() && !isLoading
-              ? 'bg-[#E05D3D] hover:bg-[#c74d2f] text-white shadow-sm hover:shadow-md active:scale-[0.98]'
-              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-          }`}
+          className={`w-full h-12 rounded-lg font-semibold text-sm transition-all ${isFormValid() && !isLoading
+            ? 'bg-[#E05D3D] hover:bg-[#c74d2f] text-white shadow-sm hover:shadow-md active:scale-[0.98]'
+            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            }`}
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
@@ -306,7 +307,7 @@ const BookingWidget = ({ service, serviceType, listingId }) => {
             'Proceed to Checkout'
           )}
         </button>
-        
+
         <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-600">
           <Shield className="w-3.5 h-3.5" />
           <span>Secure checkout • No hidden fees</span>
@@ -328,17 +329,16 @@ const ImageGallery = ({ images, name }) => {
           <button
             key={index}
             onClick={() => setSelectedImage(index)}
-            className={`relative w-16 h-16 border-2 rounded-lg overflow-hidden transition-all ${
-              selectedImage === index 
-                ? 'border-[#E05D3D] shadow-sm' 
-                : 'border-gray-200 hover:border-gray-300'
-            }`}
+            className={`relative w-16 h-16 border-2 rounded-lg overflow-hidden transition-all ${selectedImage === index
+              ? 'border-[#E05D3D] shadow-sm'
+              : 'border-gray-200 hover:border-gray-300'
+              }`}
           >
             <img src={image} alt={`${name} ${index + 1}`} className="w-full h-full object-cover" />
           </button>
         ))}
       </div>
-      
+
       {/* Main Image */}
       <div className="flex-1 bg-white border border-gray-200 rounded-lg p-4">
         <div className="relative aspect-square bg-gray-50 rounded overflow-hidden">
@@ -371,6 +371,7 @@ const ServiceDetailPage = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [isFavorite, setIsFavorite] = useState(false);
+  const { addToast } = useToast();
 
   const serviceType = params.serviceType || 'car';
   const listingId = params.listingId;
@@ -385,16 +386,16 @@ const ServiceDetailPage = () => {
 
       setLoading(true);
       setError(null);
-      
+
       try {
         // Fetch real listing from API
         const listingData = await getListing(listingId);
-        console.log('Fetched listing:', listingData);
-        
+        logger.log('Fetched listing:', listingData);
+
         // Handle images - can be array of strings or array of objects
         let imageUrl = '';
         let gallery = [];
-        
+
         if (listingData.images && listingData.images.length > 0) {
           // Process all images
           gallery = listingData.images.map(img => {
@@ -402,7 +403,7 @@ const ServiceDetailPage = () => {
             if (typeof img === 'object') return img.secure_url || img.url || '';
             return '';
           }).filter(Boolean);
-          
+
           imageUrl = gallery[0] || '';
         }
 
@@ -445,11 +446,12 @@ const ServiceDetailPage = () => {
           vendorId: listingData.vendorId || listingData.vendor?.id,
           businessId: listingData.businessId || listingData.business?.id,
         };
-        
+
         setService(transformedService);
       } catch (err) {
-        console.error('Failed to fetch listing:', err);
+        logger.error('Failed to fetch listing:', err);
         setError(err.message || 'Failed to load service details');
+        addToast({ message: "Failed to load service details", type: "error" });
       } finally {
         setLoading(false);
       }
@@ -495,23 +497,22 @@ const ServiceDetailPage = () => {
               <ArrowLeft className="w-5 h-5" />
               <span className="hidden sm:block">Back</span>
             </button>
-            
+
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#E05D3D] rounded-lg flex items-center justify-center">
                 <Crown className="w-4 h-4 text-white" />
               </div>
               <span className="font-semibold text-gray-900 text-lg hidden sm:block">SynkAfrica</span>
             </div>
-            
+
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setIsFavorite(!isFavorite)}
                 className="w-9 h-9 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center"
               >
                 <Heart
-                  className={`w-4 h-4 transition-colors ${
-                    isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'
-                  }`}
+                  className={`w-4 h-4 transition-colors ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                    }`}
                 />
               </button>
               <button className="w-9 h-9 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center">
@@ -568,11 +569,10 @@ const ServiceDetailPage = () => {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-3 text-sm font-medium capitalize border-b-2 transition-colors ${
-                      activeTab === tab
-                        ? 'border-[#E05D3D] text-[#E05D3D]'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`px-4 py-3 text-sm font-medium capitalize border-b-2 transition-colors ${activeTab === tab
+                      ? 'border-[#E05D3D] text-[#E05D3D]'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
                   >
                     {tab}
                   </button>
@@ -588,7 +588,7 @@ const ServiceDetailPage = () => {
                     <h3 className="text-base font-semibold text-gray-900 mb-3">About this Experience</h3>
                     <p className="text-sm text-gray-700 leading-relaxed">{service.description}</p>
                   </div>
-                  
+
                   {/* Specifications - Modern Style */}
                   <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
                     <h3 className="text-base font-semibold text-gray-900 mb-4">Specifications</h3>
@@ -627,7 +627,7 @@ const ServiceDetailPage = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5">
                       <h4 className="text-sm font-semibold text-gray-900 mb-3">What's Included</h4>
@@ -640,7 +640,7 @@ const ServiceDetailPage = () => {
                         ))}
                       </ul>
                     </div>
-                    
+
                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5">
                       <h4 className="text-sm font-semibold text-gray-900 mb-3">Requirements</h4>
                       <ul className="space-y-2">
@@ -705,7 +705,7 @@ const ServiceDetailPage = () => {
           {/* Booking Widget Sidebar */}
           <div className="lg:col-span-1">
             <BookingWidget service={service} serviceType={serviceType} listingId={params.listingId} />
-            
+
             {/* Host Card - Modern Style */}
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 mt-4">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Service Provider</h3>
@@ -723,7 +723,7 @@ const ServiceDetailPage = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Member since</span>

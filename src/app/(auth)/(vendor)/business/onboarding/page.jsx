@@ -34,6 +34,7 @@ const OnboardingFlow = () => {
   const [marker, setMarker] = useState(null);
   const [searchBox, setSearchBox] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isGeocoding, setIsGeocoding] = useState(false);
 
   const totalSteps = 4;
   const brandColor = '#DF5D3D';
@@ -47,7 +48,9 @@ const OnboardingFlow = () => {
     if (step === 3 && !mapLoaded) {
       const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
       if (!googleMapsApiKey) {
-        console.warn('[Onboarding] Google Maps API key not set. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in your .env.local to enable the map.');
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[Onboarding] Google Maps API key not set. Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in your .env.local to enable the map.');
+        }
         return;
       }
 
@@ -57,7 +60,9 @@ const OnboardingFlow = () => {
       script.defer = true;
       script.onload = () => setMapLoaded(true);
       script.onerror = (e) => {
-        console.error('[Onboarding] Failed to load Google Maps script', e);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[Onboarding] Failed to load Google Maps script', e);
+        }
       };
       document.head.appendChild(script);
     }
@@ -101,7 +106,9 @@ const OnboardingFlow = () => {
             setSearchQuery(place.formatted_address || parsed.address || '');
           }
         } catch (err) {
-          console.warn('Reverse geocode failed', err);
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Reverse geocode failed', err);
+          }
         }
       });
 
@@ -200,8 +207,10 @@ const OnboardingFlow = () => {
   }
 
   // Geocode an address string and move the map/marker
+  // Geocode an address string and move the map/marker
   async function geocodeAddressAndMove(addr) {
     if (!map) return null;
+    setIsGeocoding(true);
     try {
       const geocoder = new google.maps.Geocoder();
       const res = await geocoder.geocode({ address: addr });
@@ -223,7 +232,11 @@ const OnboardingFlow = () => {
         return res[0];
       }
     } catch (err) {
-      console.error('Geocode failed', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Geocode failed', err);
+      }
+    } finally {
+      setIsGeocoding(false);
     }
     return null;
   }
@@ -408,9 +421,10 @@ const OnboardingFlow = () => {
                       if (!q) return;
                       await geocodeAddressAndMove(q);
                     }}
-                    className="px-4 py-2 bg-primary-600 text-white rounded-lg"
+                    disabled={isGeocoding}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Find on map
+                    {isGeocoding ? 'Finding...' : 'Find on map'}
                   </button>
                 </div>
               </div>

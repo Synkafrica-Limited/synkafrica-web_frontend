@@ -1,6 +1,7 @@
 import { api } from '../lib/fetchClient';
 import businessService from './business.service';
 import { parseApiError } from '../utils/errorParser';
+import logger from '@/utils/logger';
 
 class VerificationService {
   // Get verification status for a business
@@ -9,17 +10,17 @@ class VerificationService {
       // Try dedicated endpoint first
       try {
         const response = await api.get(`/api/business/${businessId}/verification`, { auth: true });
-        console.log('[verification.service] API response:', response);
+        logger.log('[verification.service] API response:', response);
         
         // Extract status from the correct field: response.data.verificationStatus
         const rawStatus = response?.data?.verificationStatus || response?.verificationStatus || response?.status;
-        console.log('[verification.service] Raw status from API:', rawStatus);
+        logger.log('[verification.service] Raw status from API:', rawStatus);
         
         // Normalize status values
         let normalizedStatus = 'not_started';
         if (rawStatus) {
           const statusLower = rawStatus.toLowerCase();
-          console.log('[verification.service] Before normalization:', rawStatus, '→', statusLower);
+          logger.log('[verification.service] Before normalization:', rawStatus, '→', statusLower);
           
           if (statusLower === 'pending' || statusLower === 'pending_review' || statusLower === 'under_review') {
             normalizedStatus = 'pending';
@@ -30,11 +31,11 @@ class VerificationService {
           } else if (statusLower === 'not_started') {
             normalizedStatus = 'not_started';
           } else {
-            console.warn('[verification.service] Unknown status value:', rawStatus);
+            logger.warn('[verification.service] Unknown status value:', rawStatus);
           }
         }
         
-        console.log('[verification.service] After normalization:', normalizedStatus);
+        logger.log('[verification.service] After normalization:', normalizedStatus);
         
         return {
           status: normalizedStatus,
@@ -48,8 +49,8 @@ class VerificationService {
         if (err.status === 404) {
           // Fallback: check business profile directly
           const business = await businessService.getBusinessById(businessId);
-          console.log('[verification.service] Fallback - business object:', business);
-          console.log('[verification.service] Fallback - verificationStatus field:', business?.verificationStatus);
+          logger.log('[verification.service] Fallback - business object:', business);
+          logger.log('[verification.service] Fallback - verificationStatus field:', business?.verificationStatus);
           
           // Determine status from business profile fields
           let status = 'not_started';
@@ -58,7 +59,7 @@ class VerificationService {
           if (business?.verificationStatus) {
             const rawStatus = business.verificationStatus;
             status = rawStatus.toLowerCase();
-            console.log('[verification.service] Fallback - raw status:', rawStatus, '→ lowercase:', status);
+            logger.log('[verification.service] Fallback - raw status:', rawStatus, '→ lowercase:', status);
             
             // Normalize status - handle ALL backend values
             if (status === 'pending_review' || status === 'pending' || status === 'under_review') {
@@ -71,14 +72,14 @@ class VerificationService {
               status = 'not_started';
             } else {
               // Unknown status - log it and default to not_started
-              console.warn('[verification.service] Unknown verification status:', rawStatus);
+              logger.warn('[verification.service] Unknown verification status:', rawStatus);
               status = 'not_started';
             }
           } else if (business?.isVerified) {
             status = 'verified';
           }
 
-          console.log('[verification.service] Fallback - final normalized status:', status);
+          logger.log('[verification.service] Fallback - final normalized status:', status);
 
           // Calculate progress based on filled fields
           const requiredFields = ['businessName', 'registrationNumber', 'bankName', 'accountNumber'];
@@ -160,7 +161,7 @@ class VerificationService {
         return await api.post(`/api/business/${businessId}/verification`, submissionPayload, { auth: true });
       } catch (err) {
         if (err.status === 404) {
-          console.log('Verification endpoint not found, updating business profile instead...');
+          logger.log('Verification endpoint not found, updating business profile instead...');
           // Fallback: Update Business Profile
           // Backend will handle the file upload via the business update endpoint
           return await api.patch(`/api/business/${businessId}`, submissionPayload, { auth: true });
@@ -169,7 +170,7 @@ class VerificationService {
       }
     } catch (error) {
       const message = parseApiError(error);
-      console.error('[verification.service] submit error:', message);
+      logger.error('[verification.service] submit error:', message);
       throw new Error(message);
     }
   }
@@ -185,7 +186,7 @@ class VerificationService {
       return await api.get(`/api/business/${businessId}/verification/details`, { auth: true });
     } catch (err) {
       const message = parseApiError(err);
-      console.error('[verification.service] getDetails error:', message);
+      logger.error('[verification.service] getDetails error:', message);
       return null;
     }
   }
@@ -196,7 +197,7 @@ class VerificationService {
       return await api.del(`/api/business/${businessId}/verification`, { auth: true });
     } catch (err) {
       const message = parseApiError(err);
-      console.error('[verification.service] cancel error:', message);
+      logger.error('[verification.service] cancel error:', message);
       throw new Error(message);
     }
   }
@@ -207,7 +208,7 @@ class VerificationService {
       return await api.get(`/api/business/${businessId}/verification/history`, { auth: true });
     } catch (err) {
       const message = parseApiError(err);
-      console.error('[verification.service] getHistory error:', message);
+      logger.error('[verification.service] getHistory error:', message);
       return [];
     }
   }
@@ -219,7 +220,7 @@ class VerificationService {
       return status.status === 'verified';
     } catch (err) {
       const message = parseApiError(err);
-      console.error('[verification.service] isVerified error:', message);
+      logger.error('[verification.service] isVerified error:', message);
       return false;
     }
   }

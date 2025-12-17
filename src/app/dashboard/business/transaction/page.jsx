@@ -24,6 +24,7 @@ import transactionsService from "@/services/transactions.service";
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 import DashboardHeader from '@/components/layout/DashboardHeader';
 import NotificationBell from "@/components/dashboard/vendor/NotificationBell";
+import { handleApiError } from "@/utils/errorParser";
 
 const PAYOUT_STATUS_CONFIG = {
   PENDING: {
@@ -185,8 +186,9 @@ export default function TransactionsPage() {
       setShowPayoutModal(false);
       setSelectedTransaction(null);
       refetch(); // Refresh the transactions list
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('dashboard:refresh'));
     } catch (err) {
-      addToast(err?.message || "Failed to submit payout request. Please try again.", "error");
+      handleApiError(err, addToast);
     } finally {
       setIsProcessing(false);
     }
@@ -223,11 +225,9 @@ export default function TransactionsPage() {
       );
       setShowBulkPayoutModal(false);
       refetch(); // Refresh the transactions list
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('dashboard:refresh'));
     } catch (err) {
-      addToast(
-        err?.message || "Failed to submit bulk payout request. Please try again.",
-        "error"
-      );
+      handleApiError(err, addToast);
     } finally {
       setIsProcessing(false);
     }
@@ -256,8 +256,8 @@ export default function TransactionsPage() {
       );
       setShowReminderConfirm(false);
       setSelectedTransaction(null);
-    } catch {
-      addToast("Failed to send reminder. Please try again.", "error");
+    } catch (err) {
+      handleApiError(err, addToast);
     } finally {
       setIsProcessing(false);
     }

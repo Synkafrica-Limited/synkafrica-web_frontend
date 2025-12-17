@@ -38,7 +38,9 @@ export const useUserProfile = () => {
       try {
         data = await response.json();
       } catch (parseError) {
-        console.error("Failed to parse response JSON", parseError);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Failed to parse response JSON", parseError);
+        }
         setError("Failed to parse server response");
         return null;
       }
@@ -59,12 +61,16 @@ export const useUserProfile = () => {
           localStorage.setItem("customerUserId", user.id);
         }
       } catch (e) {
-        console.error("Failed to update localStorage with user data:", e);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Failed to update localStorage with user data:", e);
+        }
       }
 
       return user;
     } catch (err) {
-      console.error("Profile fetch error:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Profile fetch error:", err);
+      }
       setError(
         err.message || "Unable to reach server. Please try again later."
       );
@@ -104,7 +110,9 @@ export const useUserProfile = () => {
       try {
         data = await response.json();
       } catch (parseError) {
-        console.error("Failed to parse response JSON", parseError);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Failed to parse response JSON", parseError);
+        }
         setError("Failed to parse server response");
         return false;
       }
@@ -129,7 +137,9 @@ export const useUserProfile = () => {
           localStorage.setItem("customerUser", JSON.stringify(updatedData));
         }
       } catch (e) {
-        console.error("Failed to update localStorage with user data:", e);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Failed to update localStorage with user data:", e);
+        }
       }
 
       // Trigger storage event for cross-tab sync
@@ -137,7 +147,9 @@ export const useUserProfile = () => {
 
       return true;
     } catch (err) {
-      console.error("Profile update error:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Profile update error:", err);
+      }
       setError(
         err.message || "Unable to reach server. Please try again later."
       );

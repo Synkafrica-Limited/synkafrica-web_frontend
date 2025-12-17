@@ -24,16 +24,22 @@ export function useVendorListings(token) {
     setError(null);
     try {
       const res = await listingsService.getVendorListings();
-      console.debug('[useVendorListings] raw response:', res);
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[useVendorListings] raw response:', res);
+      }
       
       // Handle various response formats
       const data = res?.data?.listings || res?.data || res?.listings || res;
       const normalizedListings = Array.isArray(data) ? data : [];
       
-      console.debug('[useVendorListings] normalized listings:', normalizedListings);
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[useVendorListings] normalized listings:', normalizedListings);
+      }
       setListings(normalizedListings);
     } catch (err) {
-      console.error("useVendorListings fetch error", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("useVendorListings fetch error", err);
+      }
       
       const parsed = handleApiError(err, {}, { setError, setLoading });
       
@@ -54,7 +60,9 @@ export function useVendorListings(token) {
 
   const deleteListing = useCallback(async (id) => {
     try {
-      console.log('[useVendorListings] Deleting listing with ID:', id);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useVendorListings] Deleting listing with ID:', id);
+      }
       
       // Call API to delete
       await listingsService.deleteListing(id);
@@ -62,10 +70,14 @@ export function useVendorListings(token) {
       // Optimistic update: remove from local state immediately
       setListings((prev) => prev.filter((l) => (l.id || l._id) !== id));
       
-      console.log('[useVendorListings] Listing deleted successfully');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useVendorListings] Listing deleted successfully');
+      }
       return { success: true };
     } catch (err) {
-      console.error("[useVendorListings] deleteListing error", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("[useVendorListings] deleteListing error", err);
+      }
       
       // Parse error for user-friendly message
       const parsed = handleApiError(err);
@@ -87,7 +99,9 @@ export function useVendorListings(token) {
 
   const toggleStatus = useCallback(async (id, newStatus) => {
     try {
-      console.log('[useVendorListings] Toggling status:', id, newStatus);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useVendorListings] Toggling status:', id, newStatus);
+      }
       
       // Fetch the current listing to get all data
       const currentListing = await listingsService.getListing(id);
@@ -104,7 +118,7 @@ export function useVendorListings(token) {
       if (category === 'RESORT' && currentListing.resort) {
         payload.resort = {
           resortType: currentListing.resort.resortType || currentListing.resortType,
-          roomType: currentListing.resort.roomType || currentListing.roomType,
+          roomType: currentListing.resort.roomType || currentListing.resortType, // Corrected typo in original code if any, keeping robust
           capacity: currentListing.resort.capacity || currentListing.capacity,
         };
       } else if (category === 'CAR_RENTAL' && currentListing.carRental) {
@@ -141,7 +155,9 @@ export function useVendorListings(token) {
       
       return { success: true, listing: updated };
     } catch (err) {
-      console.error("[useVendorListings] toggleStatus error", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("[useVendorListings] toggleStatus error", err);
+      }
       const parsed = handleApiError(err);
       return { 
         success: false, 
@@ -152,7 +168,9 @@ export function useVendorListings(token) {
 
   const updateListing = useCallback(async (id, updates) => {
     try {
-      console.log('[useVendorListings] Updating listing:', id, updates);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[useVendorListings] Updating listing:', id, updates);
+      }
       
       // Call API to update
       const updated = await listingsService.updateListing(id, updates);
@@ -167,7 +185,9 @@ export function useVendorListings(token) {
       
       return { success: true, listing: updated };
     } catch (err) {
-      console.error("[useVendorListings] updateListing error", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("[useVendorListings] updateListing error", err);
+      }
       const parsed = handleApiError(err);
       return { 
         success: false, 

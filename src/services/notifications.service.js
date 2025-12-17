@@ -23,18 +23,26 @@ class NotificationService {
       const queryString = queryParams.toString();
       const url = `/api/notifications${queryString ? `?${queryString}` : ''}`;
       
-      console.log('[notifications.service] Fetching notifications:', url);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Fetching notifications:', url);
+      }
       const response = await api.get(url, { auth: true });
-      console.log('[notifications.service] Full API response:', response);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Full API response:', response);
+      }
       
       // Handle wrapped response - API returns { data: { items: [...], unread: 40 } }
       const data = response?.data || response;
       const notifications = data?.items || data?.notifications || data || [];
       
-      console.log('[notifications.service] Fetched notifications:', notifications.length);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Fetched notifications:', notifications.length);
+      }
       return Array.isArray(notifications) ? notifications : [];
     } catch (error) {
-      console.error('[notifications.service] Error fetching notifications:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[notifications.service] Error fetching notifications:', error);
+      }
       // Return empty array instead of throwing to prevent UI breaks
       return [];
     }
@@ -47,14 +55,20 @@ class NotificationService {
    */
   async markAsRead(notificationId) {
     try {
-      console.log('[notifications.service] Marking notification as read:', notificationId);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Marking notification as read:', notificationId);
+      }
       const response = await api.patch(`/api/notifications/${notificationId}/read`, {}, { auth: true });
       
       const data = response?.data || response;
-      console.log('[notifications.service] Marked as read:', data);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Marked as read:', data);
+      }
       return data;
     } catch (error) {
-      console.error('[notifications.service] Error marking notification as read:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[notifications.service] Error marking notification as read:', error);
+      }
       throw error;
     }
   }
@@ -65,14 +79,20 @@ class NotificationService {
    */
   async markAllAsRead() {
     try {
-      console.log('[notifications.service] Marking all notifications as read');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Marking all notifications as read');
+      }
       const response = await api.patch('/api/notifications/mark-all-read', {}, { auth: true });
       
       const data = response?.data || response;
-      console.log('[notifications.service] All marked as read:', data);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] All marked as read:', data);
+      }
       return data;
     } catch (error) {
-      console.error('[notifications.service] Error marking all as read:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[notifications.service] Error marking all as read:', error);
+      }
       throw error;
     }
   }
@@ -84,14 +104,20 @@ class NotificationService {
    */
   async deleteNotification(notificationId) {
     try {
-      console.log('[notifications.service] Deleting notification:', notificationId);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Deleting notification:', notificationId);
+      }
       const response = await api.del(`/api/notifications/${notificationId}`, { auth: true });
       
       const data = response?.data || response;
-      console.log('[notifications.service] Deleted notification:', data);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Deleted notification:', data);
+      }
       return data;
     } catch (error) {
-      console.error('[notifications.service] Error deleting notification:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[notifications.service] Error deleting notification:', error);
+      }
       throw error;
     }
   }
@@ -102,16 +128,22 @@ class NotificationService {
    */
   async getUnreadCount() {
     try {
-      console.log('[notifications.service] Fetching unread count');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Fetching unread count');
+      }
       const response = await api.get('/api/notifications/unread/count', { auth: true });
       
       const data = response?.data || response;
       const count = data?.count || data?.unreadCount || 0;
       
-      console.log('[notifications.service] Unread count:', count);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[notifications.service] Unread count:', count);
+      }
       return count;
     } catch (error) {
-      console.error('[notifications.service] Error fetching unread count:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[notifications.service] Error fetching unread count:', error);
+      }
       return 0;
     }
   }
@@ -122,7 +154,9 @@ class NotificationService {
    */
   subscribeToNotifications() {
     // TODO: Implement WebSocket or SSE subscription when backend supports it
-    console.log('[notifications.service] Real-time notifications not yet implemented');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[notifications.service] Real-time notifications not yet implemented');
+    }
     return () => {}; // Return cleanup function
   }
 }

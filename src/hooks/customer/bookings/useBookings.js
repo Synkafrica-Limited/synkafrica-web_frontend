@@ -39,7 +39,9 @@ export const useBookings = () => {
       try {
         data = await response.json();
       } catch (parseError) {
-        console.error("Failed to parse response JSON", parseError);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Failed to parse response JSON", parseError);
+        }
         setError("Failed to parse server response");
         return null;
       }
@@ -53,7 +55,9 @@ export const useBookings = () => {
       setBookings(Array.isArray(data) ? data : []);
       return Array.isArray(data) ? data : [];
     } catch (err) {
-      console.error("Bookings fetch error:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Bookings fetch error:", err);
+      }
       setError(
         err.message || "Unable to reach server. Please try again later."
       );

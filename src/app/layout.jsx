@@ -1,10 +1,11 @@
 import { Montserrat, Montserrat_Alternates } from "next/font/google";
-import "../styles/globals.css"; 
+import "../styles/globals.css";
 import ToastProvider from "@/components/ui/ToastProvider";
 import LoadingProvider from "@/components/ui/LoadingProvider";
 import { Providers } from "@/components/Providers";
 import Analytics from '@/components/Analytics';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import ConsoleGuard from '@/components/ConsoleGuard';
 
 
 const montserratAlternates = Montserrat_Alternates({
@@ -67,16 +68,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-       <body className="font-sans bg-(--background) text-(--foreground)">
-          <ErrorBoundary>
-            <LoadingProvider>
-              <ToastProvider>
-                <Analytics />
-                {children}
-              </ToastProvider>
-            </LoadingProvider>
-          </ErrorBoundary>
-        </body>
+      <body className="font-sans bg-(--background) text-(--foreground)">
+        <ErrorBoundary>
+          <LoadingProvider>
+            <ToastProvider>
+              <ConsoleGuard />
+              <Analytics />
+              {children}
+            </ToastProvider>
+          </LoadingProvider>
+        </ErrorBoundary>
+      </body>
     </html>
   );
 }

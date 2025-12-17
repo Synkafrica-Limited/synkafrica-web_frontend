@@ -8,6 +8,7 @@ import AuthLayout from "@/components/layout/AuthLayout";
 import Buttons from "@/components/ui/Buttons";
 import { useLogin } from "@/hooks/customer/auth/useLogin";
 import { useSession } from "@/hooks/customer/auth/useSession";
+import logger from "@/utils/logger";
 
 export default function CustomerSignInScreen() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function CustomerSignInScreen() {
 
   // Use the login hook
   const { login, loading, error: serverError } = useLogin();
-  
+
   // Use session hook for checking if already logged in
   const { isLoggedIn, loading: sessionLoading } = useSession();
 
@@ -57,7 +58,7 @@ export default function CustomerSignInScreen() {
       try {
         localStorage.removeItem("oauthRemember");
         sessionStorage.removeItem("oauthRemember");
-      } catch {}
+      } catch { }
 
       router.replace("/dashboard");
     }
@@ -71,8 +72,8 @@ export default function CustomerSignInScreen() {
         !v.trim()
           ? "Email is required"
           : !validateEmail(v)
-          ? "Enter a valid email"
-          : ""
+            ? "Enter a valid email"
+            : ""
       );
   };
 
@@ -89,8 +90,8 @@ export default function CustomerSignInScreen() {
         !email.trim()
           ? "Email is required"
           : !validateEmail(email)
-          ? "Enter a valid email"
-          : ""
+            ? "Enter a valid email"
+            : ""
       );
     if (field === "password")
       setPasswordError(!password ? "Password is required" : "");
@@ -102,7 +103,7 @@ export default function CustomerSignInScreen() {
   const handleSignIn = async (e) => {
     e.preventDefault();
     if (!isValid) return;
-    
+
     await login(email.trim(), password);
     // Note: The login hook handles redirect on success
   };
@@ -114,13 +115,13 @@ export default function CustomerSignInScreen() {
       } else {
         sessionStorage.setItem("oauthRemember", "true");
       }
-    } catch (e) {}
+    } catch (e) { }
 
     window.location.href =
       "https://synkkafrica-backend-core.onrender.com/api/auth/google/login";
   };
 
-  const handleAppleSignIn = () => console.log("Apple sign in clicked");
+  const handleAppleSignIn = () => logger.log("Apple sign in clicked");
 
   // Show loading while checking session
   if (sessionLoading) {
@@ -160,11 +161,10 @@ export default function CustomerSignInScreen() {
             onChange={onEmailChange}
             onBlur={() => handleBlur("email")}
             placeholder="Email"
-            className={`w-full px-5 py-4 border-2 rounded-xl focus:outline-none focus:ring-0 transition-colors text-gray-900 placeholder-gray-400 ${
-              emailError
-                ? "border-red-500"
-                : "border-gray-300 focus:border-gray-900"
-            }`}
+            className={`w-full px-5 py-4 border-2 rounded-xl focus:outline-none focus:ring-0 transition-colors text-gray-900 placeholder-gray-400 ${emailError
+              ? "border-red-500"
+              : "border-gray-300 focus:border-gray-900"
+              }`}
           />
           {emailError && (
             <p className="mt-2 text-sm text-red-600">{emailError}</p>
@@ -180,11 +180,10 @@ export default function CustomerSignInScreen() {
               onChange={onPasswordChange}
               onBlur={() => handleBlur("password")}
               placeholder="Password"
-              className={`w-full px-5 py-4 pr-12 border-2 rounded-xl focus:outline-none focus:ring-0 transition-colors text-gray-900 placeholder-gray-400 ${
-                passwordError
-                  ? "border-red-500"
-                  : "border-gray-300 focus:border-gray-900"
-              }`}
+              className={`w-full px-5 py-4 pr-12 border-2 rounded-xl focus:outline-none focus:ring-0 transition-colors text-gray-900 placeholder-gray-400 ${passwordError
+                ? "border-red-500"
+                : "border-gray-300 focus:border-gray-900"
+                }`}
             />
             <button
               type="button"
@@ -206,11 +205,10 @@ export default function CustomerSignInScreen() {
         <Buttons
           type="submit"
           disabled={!isValid || loading}
-          className={`w-full py-4 px-4 rounded-xl font-medium text-white transition-all duration-200 ${
-            isValid
-              ? "bg-linear-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:to-primary-400 shadow-md"
-              : "bg-primary-200 cursor-not-allowed"
-          }`}
+          className={`w-full py-4 px-4 rounded-xl font-medium text-white transition-all duration-200 ${isValid
+            ? "bg-linear-to-r from-primary-400 to-primary-300 hover:from-primary-500 hover:to-primary-400 shadow-md"
+            : "bg-primary-200 cursor-not-allowed"
+            }`}
         >
           {loading ? "Signing in..." : "Log in"}
         </Buttons>

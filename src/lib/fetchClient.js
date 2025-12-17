@@ -1,4 +1,5 @@
 import authService from '@/services/authService';
+import logger from '@/utils/logger';
 
 const RAW_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_BASE_URL || '';
 // Normalize so BASE never includes trailing /api to avoid /api/api/... URLs
@@ -13,7 +14,7 @@ function buildUrl(path) {
 
 async function request(method, path, body = null, opts = {}) {
   const headers = opts.headers ? { ...opts.headers } : {};
-  if (!(body instanceof FormData)) {
+  if (!(body instanceof FormData) && !opts.multipart) {
     headers['Content-Type'] = headers['Content-Type'] || 'application/json';
   }
 
@@ -23,12 +24,14 @@ async function request(method, path, body = null, opts = {}) {
   }
 
   const fullUrl = buildUrl(path);
-  console.log(`API ${method} ${fullUrl}`, { body, headers: { ...headers, Authorization: headers.Authorization ? '[REDACTED]' : undefined } });
+  if (process.env.NODE_ENV === 'development') {
+    logger.log(`API ${method} ${fullUrl}`, { body, headers: { ...headers, Authorization: headers.Authorization ? '[REDACTED]' : undefined } });
+  }
 
   let res = await fetch(fullUrl, {
     method,
     headers,
-    body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+    body: (body instanceof FormData) ? body : (opts.multipart ? body : (body ? JSON.stringify(body) : undefined)),
   });
 
   let data = null;
@@ -47,7 +50,9 @@ async function request(method, path, body = null, opts = {}) {
   // If we get a 401 and this request requires auth, try to refresh the token
   if (res.status === 401 && opts.auth && authService.getRefreshToken?.()) {
     try {
-      console.log('Token expired, attempting refresh...');
+      if (process.env.NODE_ENV === 'development') {
+        logger.log('Token expired, attempting refresh...');
+      }
       await authService.refreshAccessToken();
       
       // Retry the request with the new token
@@ -55,12 +60,14 @@ async function request(method, path, body = null, opts = {}) {
       if (newToken) {
         headers['Authorization'] = `Bearer ${newToken}`;
         
-        console.log(`API ${method} ${fullUrl} (retry)`, { body, headers: { ...headers, Authorization: '[REDACTED]' } });
+        if (process.env.NODE_ENV === 'development') {
+          logger.log(`API ${method} ${fullUrl} (retry)`, { body, headers: { ...headers, Authorization: '[REDACTED]' } });
+        }
         
         res = await fetch(fullUrl, {
           method,
           headers,
-          body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+          body: (body instanceof FormData) ? body : (opts.multipart ? body : (body ? JSON.stringify(body) : undefined)),
         });
         
         // Re-parse the response
@@ -78,7 +85,9 @@ async function request(method, path, body = null, opts = {}) {
         }
       }
     } catch (refreshError) {
-      console.error('Token refresh failed:', refreshError);
+      if (process.env.NODE_ENV === 'development') {
+        logger.error('Token refresh failed:', refreshError);
+      }
       // If refresh fails, clear tokens and redirect to login
       authService.clearTokens();
       if (typeof window !== 'undefined') {
@@ -103,7 +112,7 @@ async function request(method, path, body = null, opts = {}) {
   const isVerificationEndpoint = fullUrl.includes('/verification');
   const shouldSkipLog = (res.status === 404 && isVerificationEndpoint);
   
-  if (!shouldSkipLog && (process.env.NODE_ENV === 'development' || (res.status !== 401 && res.status !== 404))) {
+  if (process.env.NODE_ENV === 'development' && !shouldSkipLog) {
     let headersObj = {};
     try {
       if (res && res.headers) {
@@ -122,7 +131,7 @@ async function request(method, path, body = null, opts = {}) {
       headersObj = { error: 'failed to read headers', message: String(hdrErr) };
     }
 
-    console.error(`API Error ${method} ${fullUrl}:`, {
+    logger.error(`API Error ${method} ${fullUrl}:`, {
       status: res && res.status,
       statusText: res && res.statusText,
       response: data,
@@ -133,8 +142,8 @@ async function request(method, path, body = null, opts = {}) {
   throw err;
   }
 
-  if (data !== null && data !== undefined) {
-    console.log(`API Success ${method} ${fullUrl}:`, data);
+  if (data !== null && data !== undefined && process.env.NODE_ENV === 'development') {
+    logger.log(`API Success ${method} ${fullUrl}:`, data);
   }
   return data;
 }
