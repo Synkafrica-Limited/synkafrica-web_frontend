@@ -11,9 +11,9 @@ import listingsService from '@/services/listings.service';
 import authService from '@/services/authService';
 import { useBusiness } from '@/hooks/business/useBusiness';
 import { handleApiError } from '@/utils/errorParser';
-import { validateImages } from '@/utils/listingValidation';
-import { buildListingPayload } from '@/utils/listingPayloadBuilder';
-import { enumToLabel } from '@/config/listingSchemas';
+import { buildListingPayload, buildUpdateListingPayload } from '@/utils/listingPayloadBuilder';
+import { enumToLabel, BACKEND_ENUMS } from '@/config/listingSchemas';
+import { INITIAL_FORM_STATES } from "@/utils/formStates";
 
 export default function EditResortListing() {
   const router = useRouter();
@@ -26,22 +26,9 @@ export default function EditResortListing() {
   const token = typeof window !== "undefined" ? authService.getAccessToken() : null;
   const { business, loading: businessLoading, error: businessError } = useBusiness(token);
 
-  const [form, setForm] = useState({
-    resortName: "",
-    packageType: "",
-    location: "",
-    duration: "",
-    capacity: "",
-    pricePerPerson: "",
-    pricePerGroup: "",
-    attractions: [],
-    inclusions: [],
-    description: "",
-    availableDates: "",
-    bookingAdvance: "24",
-    availability: "ACTIVE",
-    status: "ACTIVE",
-  });
+  // Initialize with strict form state
+  const [form, setForm] = useState(INITIAL_FORM_STATES.RESORT);
+  const [initialForm, setInitialForm] = useState(null); // Keep track of initial state for diffing
 
   const [images, setImages] = useState([]);
 
@@ -74,31 +61,53 @@ export default function EditResortListing() {
             }).filter(Boolean);
           };
 
-          // Map API response to form
+          // Map API response to strict form state
           const mapped = {
-            resortName: res.title || '',
-            packageType: enumToLabel('RESORT', 'packageType', res.resort?.resortType || res.resort?.packageType || res.packageType),
-            location: (res.location && (res.location.address || res.location.name)) ||
-              (typeof res.location === 'string' ? res.location : '') ||
-              res.address || '',
-            duration: res.resort?.duration || res.duration || '',
+            ...INITIAL_FORM_STATES.RESORT,
+            title: res.title || res.resortName || '',
+            description: res.description || '',
+            basePrice: res.basePrice || res.pricePerPerson || '',
+            currency: res.currency || 'NGN',
+
+            // Category fields (flatten from res or res.resort)
+            resortType: res.resort?.resortType || res.resortType || 'HOTEL',
+            roomType: res.resort?.roomType || res.roomType || 'STANDARD',
+            packageType: res.resort?.packageType || res.packageType || '',
+
             capacity: res.resort?.capacity || res.capacity || res.maxOccupancy || '',
-            pricePerPerson: res.basePrice || res.pricing?.perPerson || '',
+            duration: res.resort?.duration || res.duration || '',
+
+            availableDates: res.resort?.availableDates || res.availableDates || '',
+            checkInTime: res.resort?.checkInTime || res.checkInTime || '14:00',
+            checkOutTime: res.resort?.checkOutTime || res.checkOutTime || '11:00',
+            advanceBookingRequired: Boolean(res.resort?.advanceBookingRequired || res.advanceBookingRequired),
+            minimumAdvanceHours: res.resort?.minimumAdvanceHours || res.minimumAdvanceHours || 0,
+
             pricePerGroup: res.resort?.pricePerGroup || res.pricePerGroup || '',
-            attractions: Array.isArray(res.resort?.activities) ? res.resort.activities :
+            minimumGroupSize: res.resort?.minimumGroupSize || '',
+
+            activities: Array.isArray(res.resort?.activities) ? res.resort.activities :
               Array.isArray(res.resort?.attractions) ? res.resort.attractions :
                 Array.isArray(res.attractions) ? res.attractions : [],
+
             inclusions: Array.isArray(res.resort?.inclusions) ? res.resort.inclusions :
               Array.isArray(res.inclusions) ? res.inclusions :
                 Array.isArray(res.amenities) ? res.amenities : [],
-            description: res.description || res.summary || '',
-            availableDates: res.resort?.availableDates || res.availableDates || '',
-            bookingAdvance: res.resort?.bookingAdvanceHours || res.bookingAdvanceHours || '24',
-            availability: res.status || res.availability || 'ACTIVE',
+
+            amenities: res.amenities || [], // If backend stores amenities separately
+
+            location: (res.location && typeof res.location === 'object') ? res.location : {
+              address: (typeof res.location === 'string' ? res.location : '') || (res.address) || '',
+              city: res.city || 'Lagos',
+              state: res.state || 'Lagos',
+              country: res.country || 'Nigeria'
+            },
+
             status: res.status || res.availability || 'ACTIVE',
           };
 
           setForm(mapped);
+          setInitialForm(mapped); // Save initial state
 
           // Extract and set images
           const urls = extractImageUrls(res.images);
@@ -118,7 +127,9 @@ export default function EditResortListing() {
       }
     };
 
-    loadListing();
+    if (id) {
+      loadListing();
+    }
   }, [id]);
 
   const handleChange = (e) => {
@@ -160,9 +171,22 @@ export default function EditResortListing() {
         throw new Error('Business ID not found. Please ensure you have a valid business account.');
       }
 
-      // Build payload
+      // Generate Original Payload from Initial Form State (for accurate diffing)
       const category = loadedListing?.category || 'RESORT';
-      const payload = buildListingPayload(category, form, businessId, images);
+
+      // We reconstruct what the payload WOULD be for the initial state
+      // This normalizes structure and types (e.g. strings to numbers)
+      const originalPayload = buildListingPayload(category, initialForm, businessId, []);
+
+      // Build minimal update payload (diff only)
+      // Pass originalPayload as the "originalListing" source of truth
+      const payload = buildUpdateListingPayload(form, originalPayload);
+
+      if (!payload || (Object.keys(payload).length === 0 && !images.some(i => i.file instanceof File))) {
+        addToast({ message: 'No changes detected', type: 'info' });
+        setIsSubmitting(false);
+        return;
+      }
 
       // Update listing
       const hasNewFiles = images.some((i) => i.file instanceof File);
@@ -175,14 +199,7 @@ export default function EditResortListing() {
 
         res = await listingsService.updateListingMultipart(id, payload, newFiles);
       } else {
-        const existingImageUrls = images
-          .filter((i) => i.existing && i.preview)
-          .map((i) => i.preview);
-
-        if (existingImageUrls.length > 0) {
-          payload.images = existingImageUrls;
-        }
-
+        // For standard updates, payload includes 'images' array of URLs if changed
         res = await listingsService.updateListing(id, payload);
       }
 
@@ -196,19 +213,16 @@ export default function EditResortListing() {
         console.error('[EditResort] Update failed:', err);
       }
       handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const packageTypes = [
-    "Beach Party Package",
-    "Water Sports Package",
-    "Boat Cruise",
-    "Resort Day Pass",
-    "Weekend Getaway",
-    "Custom Package",
-  ];
+  const resortTypes = Object.values(BACKEND_ENUMS.RESORT_TYPE);
+  const packageTypes = Object.values(BACKEND_ENUMS.PACKAGE_TYPE);
+  const roomTypes = Object.values(BACKEND_ENUMS.ROOM_TYPE);
 
-  const attractionOptions = [
+  const activityOptions = [
     "Beach Access",
     "Jet Ski",
     "Boat Cruise",
@@ -268,7 +282,7 @@ export default function EditResortListing() {
           Back to Listings
         </Link>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-          Edit Resort Package
+          Edit Resort Listing
         </h1>
         <p className="text-gray-600 mt-1">Update your resort experience details</p>
       </div>
@@ -287,32 +301,32 @@ export default function EditResortListing() {
             </div>
             <div className="flex items-center gap-4">
               <span
-                className={`text-sm font-medium ${form.availability === "ACTIVE" || form.availability === "available"
+                className={`text-sm font-medium ${form.status === "ACTIVE"
                   ? "text-green-600"
                   : "text-gray-600"
                   }`}
               >
-                {form.availability === "ACTIVE" || form.availability === "available" ? "Active" : "Inactive"}
+                {form.status === "ACTIVE" ? "Active" : "Inactive"}
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  const isCurrentlyActive = form.availability === "ACTIVE" || form.availability === "available";
+                  const isCurrentlyActive = form.status === "ACTIVE";
                   const newStatus = isCurrentlyActive ? "INACTIVE" : "ACTIVE";
-                  setForm((prev) => ({ ...prev, availability: newStatus, status: newStatus }));
+                  setForm((prev) => ({ ...prev, status: newStatus }));
                   addToast({
                     message: `Listing ${isCurrentlyActive ? "deactivated" : "activated"}`,
                     type: "info",
                     duration: 2000
                   });
                 }}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.availability === "ACTIVE" || form.availability === "available"
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.status === "ACTIVE"
                   ? "bg-green-500"
                   : "bg-gray-300"
                   }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.availability === "ACTIVE" || form.availability === "available"
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.status === "ACTIVE"
                     ? "translate-x-7"
                     : "translate-x-1"
                     }`}
@@ -378,8 +392,8 @@ export default function EditResortListing() {
               </label>
               <input
                 type="text"
-                name="resortName"
-                value={form.resortName}
+                name="title"
+                value={form.title}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Luxury Beach Party Experience"
@@ -389,19 +403,58 @@ export default function EditResortListing() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Package Type *
+                Resort Type *
+              </label>
+              <select
+                name="resortType"
+                value={form.resortType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="">Select resort type</option>
+                {resortTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Room Type *
+              </label>
+              <select
+                name="roomType"
+                value={form.roomType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="">Select room type</option>
+                {roomTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Package Type
               </label>
               <select
                 name="packageType"
                 value={form.packageType}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                required
               >
-                <option value="">Select package type</option>
+                <option value="">Select package type (Optional)</option>
                 {packageTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
                 ))}
               </select>
@@ -413,9 +466,18 @@ export default function EditResortListing() {
               </label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
+                name="address"
+                value={form.location?.address || (typeof form.location === 'string' ? form.location : '')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm(prev => ({
+                    ...prev,
+                    location: {
+                      ...(typeof prev.location === 'object' ? prev.location : {}),
+                      address: val
+                    }
+                  }));
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Lekki Beach, Lagos"
                 required
@@ -465,8 +527,8 @@ export default function EditResortListing() {
               </label>
               <input
                 type="number"
-                name="pricePerPerson"
-                value={form.pricePerPerson}
+                name="basePrice"
+                value={form.basePrice}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="50000"
@@ -493,36 +555,36 @@ export default function EditResortListing() {
           </div>
         </div>
 
-        {/* Attractions */}
+        {/* Activities */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Attractions & Activities
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {attractionOptions.map((attraction) => (
-              <label key={attraction} className="flex items-center gap-2">
+            {activityOptions.map((activity) => (
+              <label key={activity} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={Array.isArray(form.attractions) && form.attractions.includes(attraction)}
+                  checked={Array.isArray(form.activities) && form.activities.includes(activity)}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setForm((prev) => ({
                         ...prev,
-                        attractions: [...(Array.isArray(prev.attractions) ? prev.attractions : []), attraction],
+                        activities: [...(Array.isArray(prev.activities) ? prev.activities : []), activity],
                       }));
                     } else {
                       setForm((prev) => ({
                         ...prev,
-                        attractions: (Array.isArray(prev.attractions) ? prev.attractions : []).filter(
-                          (a) => a !== attraction
+                        activities: (Array.isArray(prev.activities) ? prev.activities : []).filter(
+                          (a) => a !== activity
                         ),
                       }));
                     }
                   }}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">{attraction}</span>
+                <span className="text-sm text-gray-700">{activity}</span>
               </label>
             ))}
           </div>
@@ -599,22 +661,74 @@ export default function EditResortListing() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Booking Advance Notice (hours)
-              </label>
-              <select
-                name="bookingAdvance"
-                value={form.bookingAdvance}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="24">24 hours</option>
-                <option value="48">48 hours</option>
-                <option value="72">72 hours</option>
-                <option value="168">1 week</option>
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Check-in Time
+                </label>
+                <input
+                  type="time"
+                  name="checkInTime"
+                  value={form.checkInTime}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Check-out Time
+                </label>
+                <input
+                  type="time"
+                  name="checkOutTime"
+                  value={form.checkOutTime}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
             </div>
+
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <input
+                type="checkbox"
+                name="advanceBookingRequired"
+                id="advanceBookingRequired"
+                checked={form.advanceBookingRequired}
+                onChange={handleChange}
+                className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              />
+              <div>
+                <label htmlFor="advanceBookingRequired" className="block text-sm font-medium text-gray-900">
+                  Advance Booking Required
+                </label>
+                <p className="text-xs text-gray-500">
+                  Customers must book at least 24 hours in advance
+                </p>
+              </div>
+            </div>
+
+            {form.advanceBookingRequired && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Minimum Advance Notice (Hours)
+                </label>
+                <select
+                  name="minimumAdvanceHours"
+                  value={form.minimumAdvanceHours}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                >
+                  <option value="0">Select hours...</option>
+                  <option value="24">24 Hours</option>
+                  <option value="48">48 Hours</option>
+                  <option value="72">72 Hours</option>
+                  <option value="168">1 Week</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  How many hours in advance must a customer book?
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

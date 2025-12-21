@@ -8,28 +8,18 @@ import Buttons from "@/components/ui/Buttons";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useCreateConvenienceListing } from '@/hooks/business/useCreateConvenienceListing';
 import { Toast } from "@/components/ui/Toast";
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+import { INITIAL_FORM_STATES } from "@/utils/formStates";
+import { BACKEND_ENUMS } from "@/config/listingSchemas";
 
-export default function NewCont4venienceListing() {
+export default function NewConvenienceListing() {
   const router = useRouter();
-  const { toasts, addToast, removeToast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createConvenienceListing, isSubmitting: creating } = useCreateConvenienceListing();
-  const [form, setForm] = useState({
-    serviceName: "",
-    serviceType: "",
-    location: "", // Changed from 'coverage' to match what the hook expects
-    priceType: "fixed",
-    fixedPrice: "",
-    hourlyRate: "",
-    minimumOrder: "",
-    deliveryFee: "",
-    features: [],
-    availability: [],
-    description: "",
-    responseTime: "30",
-    advanceBooking: false,
-    status: "ACTIVE",
-  });
+  const { toasts, removeToast } = useToast();
+
+  const { createConvenienceListing, isSubmitting, businessLoading, businessError } = useCreateConvenienceListing();
+
+  // Initialize with strict form state
+  const [form, setForm] = useState(INITIAL_FORM_STATES.CONVENIENCE_SERVICE);
 
   const [images, setImages] = useState([]);
 
@@ -56,28 +46,17 @@ export default function NewCont4venienceListing() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      await createConvenienceListing(form, images);
-    } catch (err) {
-      // handled in hook
-    } finally {
-      setIsSubmitting(false);
-    }
+
+    // Ensure serviceDescription matches description if empty
+    const payloadForm = {
+      ...form,
+      serviceDescription: form.serviceDescription || form.description
+    };
+
+    await createConvenienceListing(payloadForm, images);
   };
 
-  const serviceTypes = [
-    "Delivery Service",
-    "Rent a Chef",
-    "Personal Shopping",
-    "Laundry Service",
-    "Cleaning Service",
-    "Pet Care",
-    "Babysitting",
-    "Home Maintenance",
-    "Event Planning",
-    "Other",
-  ];
+  const serviceTypes = Object.values(BACKEND_ENUMS.SERVICE_TYPE);
 
   const featureOptions = [
     "Same Day Service",
@@ -99,6 +78,34 @@ export default function NewCont4venienceListing() {
     "Saturday",
     "Sunday",
   ];
+
+  if (businessLoading) {
+    return <PageLoadingScreen message="Loading business information..." />;
+  }
+
+  if (businessError) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 mb-4">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load business</h3>
+            <p className="text-gray-600 mb-4">{businessError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
@@ -131,57 +138,6 @@ export default function NewCont4venienceListing() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Status Toggle */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">
-                Listing Status
-              </h2>
-              <p className="text-sm text-gray-600">
-                Control whether this listing is visible to customers
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span
-                className={`text-sm font-medium ${
-                  form.status === "ACTIVE"
-                    ? "text-green-600"
-                    : "text-gray-600"
-                }`}
-              >
-                {form.status === "ACTIVE" ? "Active" : "Inactive"}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  const isCurrentlyActive = form.status === "ACTIVE";
-                  const newStatus = isCurrentlyActive ? "INACTIVE" : "ACTIVE";
-                  setForm((prev) => ({ ...prev, status: newStatus }));
-                  addToast({
-                    message: `Listing set to ${newStatus.toLowerCase()}`,
-                    type: "info",
-                    duration: 2000
-                  });
-                }}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                  form.status === "ACTIVE"
-                    ? "bg-green-500"
-                    : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                    form.status === "ACTIVE"
-                      ? "translate-x-7"
-                      : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Images */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -233,8 +189,8 @@ export default function NewCont4venienceListing() {
               </label>
               <input
                 type="text"
-                name="serviceName"
-                value={form.serviceName}
+                name="title"
+                value={form.title}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Premium Home Chef Service"
@@ -256,7 +212,7 @@ export default function NewCont4venienceListing() {
                 <option value="">Select service type</option>
                 {serviceTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {type.replace(/_/g, ' ').replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase())}
                   </option>
                 ))}
               </select>
@@ -268,9 +224,18 @@ export default function NewCont4venienceListing() {
               </label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
+                name="address"
+                value={form.location?.address || (typeof form.location === 'string' ? form.location : '')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm(prev => ({
+                    ...prev,
+                    location: {
+                      ...(typeof prev.location === 'object' ? prev.location : {}),
+                      address: val
+                    }
+                  }));
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Lagos Island, Lekki"
                 required
@@ -292,9 +257,9 @@ export default function NewCont4venienceListing() {
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
-                    name="priceType"
-                    value="fixed"
-                    checked={form.priceType === "fixed"}
+                    name="pricingType"
+                    value="FIXED"
+                    checked={form.pricingType === "FIXED"}
                     onChange={handleChange}
                     className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
                   />
@@ -303,9 +268,9 @@ export default function NewCont4venienceListing() {
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
-                    name="priceType"
-                    value="hourly"
-                    checked={form.priceType === "hourly"}
+                    name="pricingType"
+                    value="HOURLY"
+                    checked={form.pricingType === "HOURLY"}
                     onChange={handleChange}
                     className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
                   />
@@ -315,37 +280,20 @@ export default function NewCont4venienceListing() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {form.priceType === "fixed" ? (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fixed Price (₦) *
-                  </label>
-                  <input
-                    type="number"
-                    name="fixedPrice"
-                    value={form.fixedPrice}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="30000"
-                    required
-                  />
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Hourly Rate (₦) *
-                  </label>
-                  <input
-                    type="number"
-                    name="hourlyRate"
-                    value={form.hourlyRate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="5000"
-                    required
-                  />
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {form.pricingType === "FIXED" ? "Fixed Price (₦) *" : "Hourly Rate (₦) *"}
+                </label>
+                <input
+                  type="number"
+                  name="basePrice"
+                  value={form.basePrice}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="5000"
+                  required
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -489,7 +437,7 @@ export default function NewCont4venienceListing() {
           </div>
         </div>
 
-        {/* Additional Details */}
+        {/* Description */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Service Description

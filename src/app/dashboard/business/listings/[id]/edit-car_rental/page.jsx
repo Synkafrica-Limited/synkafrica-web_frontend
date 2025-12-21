@@ -11,9 +11,9 @@ import listingsService from '@/services/listings.service';
 import authService from '@/services/authService';
 import { useBusiness } from '@/hooks/business/useBusiness';
 import { handleApiError } from '@/utils/errorParser';
-import { validateImages } from '@/utils/listingValidation';
 import { buildListingPayload } from '@/utils/listingPayloadBuilder';
-import { enumToLabel } from '@/config/listingSchemas';
+import { enumToLabel, BACKEND_ENUMS } from '@/config/listingSchemas';
+import { INITIAL_FORM_STATES } from "@/utils/formStates";
 
 export default function EditCarRentalListing() {
   const router = useRouter();
@@ -26,25 +26,8 @@ export default function EditCarRentalListing() {
   const token = typeof window !== "undefined" ? authService.getAccessToken() : null;
   const { business, loading: businessLoading, error: businessError } = useBusiness(token);
 
-  const [form, setForm] = useState({
-    vehicleName: "",
-    brand: "",
-    model: "",
-    year: "",
-    seats: "",
-    transmission: "",
-    fuelType: "",
-    pricePerDay: "",
-    pricePerHour: "",
-    chauffeurIncluded: false,
-    chauffeurPrice: "",
-    features: [],
-    description: "",
-    location: "",
-    carPlateNumber: "",
-    availability: "ACTIVE",
-    status: "ACTIVE",
-  });
+  // Initialize with strict form state
+  const [form, setForm] = useState(INITIAL_FORM_STATES.CAR_RENTAL);
 
   const [images, setImages] = useState([]);
 
@@ -77,27 +60,38 @@ export default function EditCarRentalListing() {
             }).filter(Boolean);
           };
 
-          // Map API response to form
+          // Map API response to strict form state
           const mapped = {
-            vehicleName: res.title || '',
-            brand: res.carMake || res.carRental?.carMake || '',
-            model: res.carModel || res.carRental?.carModel || '',
-            year: res.carYear || res.carRental?.carYear || '',
-            seats: res.carSeats || res.carRental?.carSeats || '',
-            transmission: enumToLabel('CAR_RENTAL', 'carTransmission', res.carTransmission || res.carRental?.carTransmission),
-            fuelType: enumToLabel('CAR_RENTAL', 'carFuelType', res.carFuelType || res.carRental?.carFuelType),
-            pricePerDay: res.basePrice || '',
-            pricePerHour: res.chauffeurPricePerHour || res.carRental?.chauffeurPricePerHour || '',
-            chauffeurIncluded: Boolean(res.chauffeurIncluded || res.carRental?.chauffeurIncluded),
-            chauffeurPrice: res.chauffeurPricePerDay || res.carRental?.chauffeurPricePerDay || '',
-            features: Array.isArray(res.carFeatures) ? res.carFeatures :
-              Array.isArray(res.carRental?.carFeatures) ? res.carRental?.carFeatures : [],
+            ...INITIAL_FORM_STATES.CAR_RENTAL, // ensure defaults
+            title: res.title || res.vehicleName || '',
             description: res.description || '',
-            location: (res.location && (res.location.address || res.location.name)) ||
-              (typeof res.location === 'string' ? res.location : '') ||
-              res.address || '',
+            basePrice: res.basePrice || res.pricePerDay || '',
+            currency: res.currency || 'NGN',
+
+            // Category fields (flatten from res or res.carRental)
+            carMake: res.carMake || res.brand || res.carRental?.carMake || '',
+            carModel: res.carModel || res.model || res.carRental?.carModel || '',
+            carYear: res.carYear || res.year || res.carRental?.carYear || '',
+            carSeats: res.carSeats || res.seats || res.carRental?.carSeats || '',
+            carTransmission: res.carTransmission || res.transmission || res.carRental?.carTransmission || '', // Enum value
+            carFuelType: res.carFuelType || res.fuelType || res.carRental?.carFuelType || '', // Enum value
             carPlateNumber: res.carPlateNumber || res.carRental?.carPlateNumber || '',
-            availability: res.status || res.availability || 'ACTIVE',
+
+            carFeatures: Array.isArray(res.carFeatures) ? res.carFeatures :
+              Array.isArray(res.features) ? res.features :
+                Array.isArray(res.carRental?.carFeatures) ? res.carRental?.carFeatures : [],
+
+            chauffeurIncluded: Boolean(res.chauffeurIncluded || res.carRental?.chauffeurIncluded),
+            chauffeurPricePerDay: res.chauffeurPricePerDay || res.carRental?.chauffeurPricePerDay || '',
+            chauffeurPricePerHour: res.chauffeurPricePerHour || res.carRental?.chauffeurPricePerHour || '',
+
+            location: (res.location && typeof res.location === 'object') ? res.location : {
+              address: (typeof res.location === 'string' ? res.location : '') || (res.address) || '',
+              city: res.city || 'Lagos',
+              state: res.state || 'Lagos',
+              country: res.country || 'Nigeria'
+            },
+
             status: res.status || res.availability || 'ACTIVE',
           };
 
@@ -121,7 +115,9 @@ export default function EditCarRentalListing() {
       }
     };
 
-    loadListing();
+    if (id) {
+      loadListing();
+    }
   }, [id]);
 
   const handleChange = (e) => {
@@ -199,11 +195,14 @@ export default function EditCarRentalListing() {
         console.error('[EditCarRental] Update failed:', err);
       }
       handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const transmissionTypes = ["Automatic", "Manual"];
-  const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid"];
+  const transmissionTypes = Object.values(BACKEND_ENUMS.CAR_TRANSMISSION);
+  const fuelTypes = Object.values(BACKEND_ENUMS.CAR_FUEL_TYPE);
+
   const featureOptions = [
     "Air Conditioning",
     "GPS",
@@ -268,32 +267,32 @@ export default function EditCarRentalListing() {
             </div>
             <div className="flex items-center gap-4">
               <span
-                className={`text-sm font-medium ${form.availability === "ACTIVE" || form.availability === "available"
+                className={`text-sm font-medium ${form.status === "ACTIVE"
                   ? "text-green-600"
                   : "text-gray-600"
                   }`}
               >
-                {form.availability === "ACTIVE" || form.availability === "available" ? "Active" : "Inactive"}
+                {form.status === "ACTIVE" ? "Active" : "Inactive"}
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  const isCurrentlyActive = form.availability === "ACTIVE" || form.availability === "available";
+                  const isCurrentlyActive = form.status === "ACTIVE";
                   const newStatus = isCurrentlyActive ? "INACTIVE" : "ACTIVE";
-                  setForm((prev) => ({ ...prev, availability: newStatus, status: newStatus }));
+                  setForm((prev) => ({ ...prev, status: newStatus }));
                   addToast({
                     message: `Listing ${isCurrentlyActive ? "deactivated" : "activated"}`,
                     type: "info",
                     duration: 2000
                   });
                 }}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.availability === "ACTIVE" || form.availability === "available"
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.status === "ACTIVE"
                   ? "bg-green-500"
                   : "bg-gray-300"
                   }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.availability === "ACTIVE" || form.availability === "available"
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.status === "ACTIVE"
                     ? "translate-x-7"
                     : "translate-x-1"
                     }`}
@@ -359,8 +358,8 @@ export default function EditCarRentalListing() {
               </label>
               <input
                 type="text"
-                name="vehicleName"
-                value={form.vehicleName}
+                name="title"
+                value={form.title}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Mercedes Benz S-Class"
@@ -374,8 +373,8 @@ export default function EditCarRentalListing() {
               </label>
               <input
                 type="text"
-                name="brand"
-                value={form.brand}
+                name="carMake"
+                value={form.carMake}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Mercedes Benz"
@@ -389,8 +388,8 @@ export default function EditCarRentalListing() {
               </label>
               <input
                 type="text"
-                name="model"
-                value={form.model}
+                name="carModel"
+                value={form.carModel}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., S-Class"
@@ -404,8 +403,8 @@ export default function EditCarRentalListing() {
               </label>
               <input
                 type="number"
-                name="year"
-                value={form.year}
+                name="carYear"
+                value={form.carYear}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="2024"
@@ -436,8 +435,8 @@ export default function EditCarRentalListing() {
               </label>
               <input
                 type="number"
-                name="seats"
-                value={form.seats}
+                name="carSeats"
+                value={form.carSeats}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="4"
@@ -452,8 +451,8 @@ export default function EditCarRentalListing() {
                 Transmission *
               </label>
               <select
-                name="transmission"
-                value={form.transmission}
+                name="carTransmission"
+                value={form.carTransmission}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
@@ -461,7 +460,7 @@ export default function EditCarRentalListing() {
                 <option value="">Select transmission</option>
                 {transmissionTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
                 ))}
               </select>
@@ -472,8 +471,8 @@ export default function EditCarRentalListing() {
                 Fuel Type *
               </label>
               <select
-                name="fuelType"
-                value={form.fuelType}
+                name="carFuelType"
+                value={form.carFuelType}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
@@ -481,7 +480,7 @@ export default function EditCarRentalListing() {
                 <option value="">Select fuel type</option>
                 {fuelTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
                 ))}
               </select>
@@ -500,8 +499,8 @@ export default function EditCarRentalListing() {
               </label>
               <input
                 type="number"
-                name="pricePerDay"
-                value={form.pricePerDay}
+                name="basePrice"
+                value={form.basePrice}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="25000"
@@ -511,12 +510,12 @@ export default function EditCarRentalListing() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price per Hour (₦)
+                Chauffeur Price per Hour (₦)
               </label>
               <input
                 type="number"
-                name="pricePerHour"
-                value={form.pricePerHour}
+                name="chauffeurPricePerHour"
+                value={form.chauffeurPricePerHour}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="5000"
@@ -545,8 +544,8 @@ export default function EditCarRentalListing() {
                 </label>
                 <input
                   type="number"
-                  name="chauffeurPrice"
-                  value={form.chauffeurPrice}
+                  name="chauffeurPricePerDay"
+                  value={form.chauffeurPricePerDay}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="10000"
@@ -567,17 +566,17 @@ export default function EditCarRentalListing() {
               <label key={feature} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={Array.isArray(form.features) && form.features.includes(feature)}
+                  checked={Array.isArray(form.carFeatures) && form.carFeatures.includes(feature)}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setForm((prev) => ({
                         ...prev,
-                        features: [...(Array.isArray(prev.features) ? prev.features : []), feature],
+                        carFeatures: [...(Array.isArray(prev.carFeatures) ? prev.carFeatures : []), feature],
                       }));
                     } else {
                       setForm((prev) => ({
                         ...prev,
-                        features: (Array.isArray(prev.features) ? prev.features : []).filter((f) => f !== feature),
+                        carFeatures: (Array.isArray(prev.carFeatures) ? prev.carFeatures : []).filter((f) => f !== feature),
                       }));
                     }
                   }}
@@ -617,9 +616,18 @@ export default function EditCarRentalListing() {
               </label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
+                name="address"
+                value={form.location?.address || (typeof form.location === 'string' ? form.location : '')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm(prev => ({
+                    ...prev,
+                    location: {
+                      ...(typeof prev.location === 'object' ? prev.location : {}),
+                      address: val
+                    }
+                  }));
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Lekki Phase 1, Lagos"
                 required

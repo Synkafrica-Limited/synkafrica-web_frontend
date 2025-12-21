@@ -75,6 +75,8 @@ export const useCreateResortListing = () => {
       // Build payload using category-aware builder
       const payload = buildResortPayload(form, businessId, images);
       
+      console.log('[DEBUG] Full Payload to be sent:', JSON.stringify(payload, null, 2));
+
       if (process.env.NODE_ENV === 'development') {
         console.log('[useCreateResortListing] Payload:', payload);
       }

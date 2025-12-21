@@ -6,29 +6,20 @@ import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
 import { useToast } from "@/components/ui/ToastProvider";
-import { useCreateFineDiningListing } from '@/hooks/business/useCreateFineDiningListing';
 import { Toast } from "@/components/ui/Toast";
+import { useCreateFineDiningListing } from '@/hooks/business/useCreateFineDiningListing';
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+import { INITIAL_FORM_STATES } from "@/utils/formStates";
+import { BACKEND_ENUMS } from "@/config/listingSchemas";
 
 export default function NewFineDiningListing() {
   const router = useRouter();
-  const { toasts, addToast, removeToast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createFineDiningListing, isSubmitting: creating } = useCreateFineDiningListing();
-  const [form, setForm] = useState({
-    restaurantName: "",
-    cuisineType: [],
-    diningType: "",
-    location: "",
-    capacity: "",
-    priceRange: "",
-    reservationRequired: true,
-    menuItems: [{ name: "", description: "", price: "" }],
-    specialties: [],
-    amenities: [],
-    description: "",
-    openingHours: "",
-    dressCode: "",
-  });
+  const { toasts, removeToast } = useToast();
+
+  const { createFineDiningListing, isSubmitting, businessLoading, businessError } = useCreateFineDiningListing();
+
+  // Initialize with strict form state
+  const [form, setForm] = useState(INITIAL_FORM_STATES.FINE_DINING);
 
   const [images, setImages] = useState([]);
 
@@ -53,39 +44,38 @@ export default function NewFineDiningListing() {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const handleMenuItemChange = (index, field, value) => {
-    const updatedItems = [...form.menuItems];
-    updatedItems[index][field] = value;
-    setForm((prev) => ({ ...prev, menuItems: updatedItems }));
-  };
-
-  const addMenuItem = () => {
-    setForm((prev) => ({
-      ...prev,
-      menuItems: [...prev.menuItems, { name: "", description: "", price: "" }],
-    }));
-  };
-
-  const removeMenuItem = (index) => {
-    if (form.menuItems.length > 1) {
-      setForm((prev) => ({
-        ...prev,
-        menuItems: prev.menuItems.filter((_, i) => i !== index),
-      }));
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      await createFineDiningListing(form, images);
-    } catch (err) {
-      // handled in hook
-    } finally {
-      setIsSubmitting(false);
-    }
+    await createFineDiningListing(form, images);
   };
+
+  if (businessLoading) {
+    return <PageLoadingScreen message="Loading business information..." />;
+  }
+
+  if (businessError) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 mb-4">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load business</h3>
+            <p className="text-gray-600 mb-4">{businessError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const cuisineTypes = [
     "Nigerian",
@@ -97,24 +87,13 @@ export default function NewFineDiningListing() {
     "Seafood",
     "Steakhouse",
     "Fusion",
-    "Vegan/Vegetarian",
+    "Vegan",
+    "Vegetarian",
   ];
 
-  const diningTypes = [
-    "Fine Dining",
-    "Casual Dining",
-    "Bistro",
-    "Cafe",
-    "Lounge",
-  ];
-  const priceRanges = [
-    "₦₦₦₦ (Luxury)",
-    "₦₦₦ (Upscale)",
-    "₦₦ (Moderate)",
-    "₦ (Budget-Friendly)",
-  ];
+  const diningTypes = Object.values(BACKEND_ENUMS.DINING_TYPE);
 
-  const specialtyOptions = [
+  const featureOptions = [
     "Chef's Tasting Menu",
     "Wine Pairing",
     "Private Dining Room",
@@ -123,9 +102,6 @@ export default function NewFineDiningListing() {
     "Sunday Brunch",
     "Cocktail Bar",
     "Dessert Bar",
-  ];
-
-  const amenityOptions = [
     "Air Conditioning",
     "Wi-Fi",
     "Parking",
@@ -134,6 +110,14 @@ export default function NewFineDiningListing() {
     "Takeout Available",
     "Delivery Service",
     "Bar/Lounge",
+  ];
+
+  const daysOpenOptions = [
+    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+  ];
+
+  const dietaryOptions = [
+    "Vegan", "Vegetarian", "Gluten-Free", "Halal", "Kosher", "Nut-Free"
   ];
 
   return (
@@ -218,8 +202,8 @@ export default function NewFineDiningListing() {
               </label>
               <input
                 type="text"
-                name="restaurantName"
-                value={form.restaurantName}
+                name="title"
+                value={form.title}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., The Golden Fork"
@@ -241,7 +225,7 @@ export default function NewFineDiningListing() {
                 <option value="">Select type</option>
                 {diningTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
                 ))}
               </select>
@@ -253,9 +237,18 @@ export default function NewFineDiningListing() {
               </label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
+                name="address"
+                value={form.location?.address || (typeof form.location === 'string' ? form.location : '')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm(prev => ({
+                    ...prev,
+                    location: {
+                      ...(typeof prev.location === 'object' ? prev.location : {}),
+                      address: val
+                    }
+                  }));
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Victoria Island, Lagos"
                 required
@@ -264,7 +257,7 @@ export default function NewFineDiningListing() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Seating Capacity *
+                Seating Capacity
               </label>
               <input
                 type="number"
@@ -274,50 +267,44 @@ export default function NewFineDiningListing() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="50"
                 min="1"
-                required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price Range *
+                Average Price per Person (₦) *
               </label>
-              <select
-                name="priceRange"
-                value={form.priceRange}
+              <input
+                type="number"
+                name="basePrice"
+                value={form.basePrice}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="15000"
                 required
-              >
-                <option value="">Select price range</option>
-                {priceRanges.map((range) => (
-                  <option key={range} value={range}>
-                    {range}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cuisine Types *
+                Cuisine Types
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {cuisineTypes.map((cuisine) => (
                   <label key={cuisine} className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      checked={form.cuisineType.includes(cuisine)}
+                      checked={form.cuisine.includes(cuisine)}
                       onChange={(e) => {
                         if (e.target.checked) {
                           setForm((prev) => ({
                             ...prev,
-                            cuisineType: [...prev.cuisineType, cuisine],
+                            cuisine: [...prev.cuisine, cuisine],
                           }));
                         } else {
                           setForm((prev) => ({
                             ...prev,
-                            cuisineType: prev.cuisineType.filter(
+                            cuisine: prev.cuisine.filter(
                               (c) => c !== cuisine
                             ),
                           }));
@@ -330,153 +317,111 @@ export default function NewFineDiningListing() {
                 ))}
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Menu */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Menu Items *
-            </h2>
-            <button
-              type="button"
-              onClick={addMenuItem}
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-            >
-              + Add Item
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {form.menuItems.map((item, index) => (
-              <div
-                key={index}
-                className="border border-gray-200 rounded-lg p-4 relative"
-              >
-                {form.menuItems.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeMenuItem(index)}
-                    className="absolute top-2 right-2 p-1 text-red-500 hover:bg-red-50 rounded"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dish Name *
-                    </label>
+            <div className="md:col-span-2 mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Days Open
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {daysOpenOptions.map((day) => (
+                  <label key={day} className={`px-3 py-1.5 rounded-full text-sm cursor-pointer border transition-colors ${form.daysOpen.includes(day)
+                      ? 'bg-primary-50 border-primary-500 text-primary-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                    }`}>
                     <input
-                      type="text"
-                      value={item.name}
-                      onChange={(e) =>
-                        handleMenuItemChange(index, "name", e.target.value)
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="e.g., Grilled Salmon"
-                      required
+                      type="checkbox"
+                      className="hidden"
+                      checked={form.daysOpen.includes(day)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setForm(prev => ({ ...prev, daysOpen: [...prev.daysOpen, day] }));
+                        } else {
+                          setForm(prev => ({ ...prev, daysOpen: prev.daysOpen.filter(d => d !== day) }));
+                        }
+                      }}
                     />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Description
-                    </label>
-                    <textarea
-                      value={item.description}
-                      onChange={(e) =>
-                        handleMenuItemChange(index, "description", e.target.value)
-                      }
-                      rows={2}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Brief description of the dish..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Price (₦) *
-                    </label>
-                    <input
-                      type="number"
-                      value={item.price}
-                      onChange={(e) =>
-                        handleMenuItemChange(index, "price", e.target.value)
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="5000"
-                      min="0"
-                      required
-                    />
-                  </div>
-                </div>
+                    {day}
+                  </label>
+                ))}
               </div>
-            ))}
+            </div>
+
+            <div className="md:col-span-2 mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Menu URL (Optional)
+              </label>
+              <input
+                type="text"
+                name="menuUrl"
+                value={form.menuUrl}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="https://example.com/menu.pdf"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Specialties & Amenities */}
+        {/* Features & Dietary */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Specialties
+            Features & Dietary
           </h2>
 
+          <h3 className="text-md font-semibold text-gray-900 mb-3 block">Features & Amenities</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-            {specialtyOptions.map((specialty) => (
-              <label key={specialty} className="flex items-center gap-2">
+            {featureOptions.map((feature) => (
+              <label key={feature} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={form.specialties.includes(specialty)}
+                  checked={form.features.includes(feature)}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setForm((prev) => ({
                         ...prev,
-                        specialties: [...prev.specialties, specialty],
+                        features: [...prev.features, feature],
                       }));
                     } else {
                       setForm((prev) => ({
                         ...prev,
-                        specialties: prev.specialties.filter(
-                          (s) => s !== specialty
+                        features: prev.features.filter(
+                          (f) => f !== feature
                         ),
                       }));
                     }
                   }}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">{specialty}</span>
+                <span className="text-sm text-gray-700">{feature}</span>
               </label>
             ))}
           </div>
 
-          <h3 className="text-md font-semibold text-gray-900 mb-3 mt-6">
-            Amenities
-          </h3>
+          <h3 className="text-md font-semibold text-gray-900 mb-3 block mt-6">Dietary Provisions</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {amenityOptions.map((amenity) => (
-              <label key={amenity} className="flex items-center gap-2">
+            {dietaryOptions.map((provision) => (
+              <label key={provision} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={form.amenities.includes(amenity)}
+                  checked={form.dietaryProvisions.includes(provision)}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setForm((prev) => ({
                         ...prev,
-                        amenities: [...prev.amenities, amenity],
+                        dietaryProvisions: [...prev.dietaryProvisions, provision],
                       }));
                     } else {
                       setForm((prev) => ({
                         ...prev,
-                        amenities: prev.amenities.filter((a) => a !== amenity),
+                        dietaryProvisions: prev.dietaryProvisions.filter(
+                          (p) => p !== provision
+                        ),
                       }));
                     }
                   }}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">{amenity}</span>
+                <span className="text-sm text-gray-700">{provision}</span>
               </label>
             ))}
           </div>
@@ -515,7 +460,7 @@ export default function NewFineDiningListing() {
                   value={form.openingHours}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="e.g., Mon-Sun: 11AM - 11PM"
+                  placeholder="e.g., 11AM - 11PM"
                 />
               </div>
 

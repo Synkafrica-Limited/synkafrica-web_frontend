@@ -1,5 +1,5 @@
 import { api } from '../lib/fetchClient';
-import { appendNested } from '@/utils/appendNested';
+
 
 // Create a full listing (JSON)
 export async function createListing(payload) {
@@ -44,26 +44,51 @@ export async function createQuickListing(payload) {
 }
 
 // Create listing with multipart form data (images/files)
+// Create listing with multipart form data (images/files)
 export async function createListingMultipart(payload, files = []) {
 	try {
 		const form = new FormData();
 
-		// 1) Append primitive top-level fields
-		Object.entries(payload || {}).forEach(([key, value]) => {
-			if (value === undefined || value === null) return;
-			if (typeof value !== 'object') {
-				form.append(key, String(value));
+		// Helper to flatten payload into FormData
+		const appendToForm = (data, parentKey = '') => {
+			if (data === null || data === undefined) return;
+
+			if (data instanceof Date) {
+				form.append(parentKey, data.toISOString());
+				return;
 			}
-		});
 
-		// 2) Append nested objects using bracketed notation
-		if (payload.location) appendNested(form, 'location', payload.location);
-		if (payload.resort) appendNested(form, 'resort', payload.resort);
-		if (payload.carRental) appendNested(form, 'carRental', payload.carRental);
-		if (payload.convenience) appendNested(form, 'convenience', payload.convenience);
-		if (payload.dining) appendNested(form, 'dining', payload.dining);
+			if (Array.isArray(data)) {
+				data.forEach((item, index) => {
+					// Use bracket notation for arrays: key[] or key[index]
+					// Using repeated keys for arrays is safer for some backends, 
+					// but bracket notation is standard for body-parser extended
+					const key = `${parentKey}[]`;
+					if (typeof item === 'object' && !(item instanceof File)) {
+						appendToForm(item, `${parentKey}[${index}]`);
+					} else {
+						form.append(parentKey, item); // Repeated key pattern often safest for simple arrays
+					}
+				});
+				return;
+			}
 
-		// 3) Attach image files - only send actual File objects
+			if (typeof data === 'object' && !(data instanceof File)) {
+				Object.keys(data).forEach((key) => {
+					const value = data[key];
+					const formKey = parentKey ? `${parentKey}[${key}]` : key;
+					appendToForm(value, formKey);
+				});
+				return;
+			}
+
+			form.append(parentKey, String(data));
+		};
+
+		// Flatten the payload
+		appendToForm(payload);
+
+		// Attach image files - only send actual File objects
 		const validFiles = files.filter((f) => {
 			const file = f instanceof File ? f : f?.file || f;
 			return file instanceof File;
@@ -75,7 +100,10 @@ export async function createListingMultipart(payload, files = []) {
 		});
 
 		console.log('[listings.service] Creating listing multipart:', payload.category, 'files:', validFiles.length);
-		console.log('[listings.service] Payload:', payload);
+		if (process.env.NODE_ENV === 'development') {
+			console.log('[listings.service] Payload structure flattened.');
+		}
+		
 		const res = await api.post('/api/listings', form, { auth: true, multipart: true });
 		console.log('[listings.service] Create multipart response:', res);
 		

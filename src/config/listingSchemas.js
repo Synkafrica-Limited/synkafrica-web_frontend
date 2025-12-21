@@ -185,7 +185,7 @@ export const LISTING_SCHEMAS = {
   RESORT: {
     requiredBase: ['title', 'description', 'basePrice', 'currency', 'images', 'businessId', 'status'],
     requiredCategory: ['resortType', 'roomType', 'capacity'],
-    optionalCategory: ['packageType', 'checkInTime', 'checkOutTime', 'amenities', 'maxCapacity', 'activities', 'inclusions', 'pricePerGroup', 'minimumGroupSize', 'duration', 'availableDates', 'bookingAdvanceHours'],
+    optionalCategory: ['packageType', 'checkInTime', 'checkOutTime', 'amenities', 'maxCapacity', 'activities', 'inclusions', 'pricePerGroup', 'minimumGroupSize', 'duration', 'availableDates', 'advanceBookingRequired', 'minimumAdvanceHours'],
     enums: {
       resortType: BACKEND_ENUMS.RESORT_TYPE,
       packageType: BACKEND_ENUMS.PACKAGE_TYPE,

@@ -12,128 +12,127 @@ import authService from "@/services/authService";
 import { useBusiness } from "@/hooks/business/useBusiness";
 import { buildListingPayload } from "@/utils/listingPayloadBuilder";
 import { handleApiError } from "@/utils/errorParser";
-import { enumToLabel } from "@/config/listingSchemas";
+import { enumToLabel, BACKEND_ENUMS } from "@/config/listingSchemas";
+import { INITIAL_FORM_STATES } from "@/utils/formStates";
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
 
 export default function EditConvenienceListing() {
   const router = useRouter();
   const params = useParams();
-  const listingId = params.id;
+  const listingId = params?.id;
   const { toasts, addToast, removeToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedListing, setLoadedListing] = useState(null);
 
   const token = typeof window !== "undefined" ? authService.getAccessToken() : null;
-  const { business, loading: businessLoading, error: businessError } = useBusiness(token);
-  const [form, setForm] = useState({
-    serviceName: "",
-    serviceType: "",
-    location: "",
-    priceType: "fixed",
-    fixedPrice: "",
-    hourlyRate: "",
-    minimumOrder: "",
-    deliveryFee: "",
-    features: [],
-    availability: [],
-    description: "",
-    responseTime: "30",
-    advanceBooking: false,
-    status: "ACTIVE",
-  });
+  const { business, loading: businessLoading } = useBusiness(token);
+
+  // Initialize with strict form state
+  const [form, setForm] = useState(INITIAL_FORM_STATES.CONVENIENCE_SERVICE);
 
   const [images, setImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
 
   useEffect(() => {
-    const fetchListing = async () => {
-      try {
-        setIsLoading(true);
-        const response = await listingsService.getListing(listingId);
-        const listing = response.data || response;
-
-        console.log('[EditConvenience] Loaded listing:', listing);
-
-        // Store the full listing
-        setLoadedListing(listing);
-
-        // Extract location
-        const locationStr = (listing.location && (listing.location.address || listing.location.name)) ||
-          (typeof listing.location === 'string' ? listing.location : '') ||
-          listing.address || '';
-
-        // Extract features and availability arrays
-        const featuresArray = Array.isArray(listing.convenience?.features)
-          ? listing.convenience.features
-          : Array.isArray(listing.features)
-            ? listing.features
-            : [];
-
-        const availabilityArray = Array.isArray(listing.convenience?.availability)
-          ? listing.convenience.availability
-          : Array.isArray(listing.availability)
-            ? listing.availability
-            : [];
-
-        setForm({
-          serviceName: listing.title || listing.serviceName || "",
-          serviceType: enumToLabel('CONVENIENCE_SERVICE', 'serviceType', listing.convenience?.serviceType || listing.serviceType),
-          location: locationStr,
-          priceType: enumToLabel('CONVENIENCE_SERVICE', 'priceType', listing.convenience?.priceType || listing.priceType || "fixed"),
-          fixedPrice: listing.convenience?.priceType === 'fixed'
-            ? (listing.basePrice || listing.convenience?.fixedPrice || listing.fixedPrice || "")
-            : (listing.convenience?.fixedPrice || listing.fixedPrice || ""),
-          hourlyRate: listing.convenience?.priceType === 'hourly'
-            ? (listing.basePrice || listing.convenience?.hourlyRate || listing.hourlyRate || "")
-            : (listing.convenience?.hourlyRate || listing.hourlyRate || ""),
-          minimumOrder: listing.convenience?.minimumOrder || listing.minimumOrder || "",
-          deliveryFee: listing.convenience?.deliveryFee || listing.deliveryFee || "",
-          features: featuresArray,
-          availability: availabilityArray,
-          description: listing.description || listing.summary || "",
-          responseTime: listing.convenience?.responseTime || listing.responseTime || "30",
-          advanceBooking: listing.convenience?.advanceBooking || listing.advanceBooking || false,
-          status: listing.status || (typeof listing.availability === 'string' ? listing.availability : "ACTIVE"),
-        });
-
-        // Handle existing images with proper extraction
-        const extractImageUrls = (images) => {
-          if (!images) return [];
-          if (typeof images === 'string') {
-            try {
-              images = JSON.parse(images);
-            } catch {
-              return [];
-            }
-          }
-          if (!Array.isArray(images)) return [];
-
-          return images.map(img => {
-            if (typeof img === 'string' && img.trim()) return img;
-            if (img && typeof img === 'object' && img.secure_url) {
-              return img.secure_url;
-            }
-            return null;
-          }).filter(Boolean);
-        };
-
-        const urls = extractImageUrls(listing.images);
-        setExistingImages(urls);
-      } catch (error) {
-        console.error("Error fetching listing:", error);
-        addToast({
-          message: "Failed to load listing data",
-          type: "error",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (listingId) {
-      fetchListing();
+      loadListing();
     }
-  }, [listingId, addToast]);
+  }, [listingId]);
+
+  const loadListing = async () => {
+    try {
+      setIsLoading(true);
+      const listing = await listingsService.getListing(listingId);
+      console.log('[EditConvenience] Loaded listing:', listing);
+
+      // Store the full listing
+      setLoadedListing(listing);
+
+      // Extract location
+      const locationObj = (listing.location && typeof listing.location === 'object') ? listing.location : {
+        address: (typeof listing.location === 'string' ? listing.location : '') || (listing.address) || '',
+        city: listing.city || 'Lagos',
+        state: listing.state || 'Lagos',
+        country: listing.country || 'Nigeria'
+      };
+
+      // Extract pricing
+      const pricingType = listing.convenience?.pricingType || listing.priceType || (listing.hourlyRate ? "HOURLY" : "FIXED");
+      let basePriceVal = listing.basePrice;
+      if (!basePriceVal) {
+        if (pricingType === 'HOURLY') basePriceVal = listing.hourlyRate;
+        else basePriceVal = listing.fixedPrice || listing.price;
+      }
+
+      const mapped = {
+        ...INITIAL_FORM_STATES.CONVENIENCE_SERVICE,
+        title: listing.title || listing.serviceName || "",
+        description: listing.description || listing.summary || "",
+        serviceDescription: listing.convenience?.serviceDescription || listing.description || "",
+        basePrice: basePriceVal || "",
+        currency: listing.currency || "NGN",
+
+        serviceType: enumToLabel('CONVENIENCE_SERVICE', 'serviceType', listing.convenience?.serviceType || listing.serviceType) || "",
+        pricingType: enumToLabel('CONVENIENCE_SERVICE', 'pricingType', pricingType).toUpperCase().replace(' ', '_'), // Ensure enum value
+
+        // If pricingType logic was loose in backend, align it here
+        // Actually, let's keep it rigorous. If it's "Fixed Price" label, convert to "FIXED".
+        // But here I'm mapping to state. Let's rely on string values mostly.
+        // However, the form checks against "FIXED" / "HOURLY".
+
+        serviceArea: listing.convenience?.serviceArea || listing.coverageArea || locationObj.address || "",
+
+        minimumOrder: listing.convenience?.minimumOrder || listing.minimumDuration || "",
+        deliveryFee: listing.convenience?.deliveryServiceFee || listing.deliveryFee || "",
+
+        features: listing.convenience?.serviceFeatures || listing.features || [],
+        availability: listing.convenience?.availableDays || listing.availability || [], // Note: availability vs status
+
+        responseTime: listing.convenience?.responseTime || "30",
+        advanceBooking: listing.convenience?.advanceBookingRequired || false,
+
+        location: locationObj,
+        status: listing.status || "ACTIVE",
+      };
+
+      // Fix pricingType if it came back as label or undefined
+      if (!['FIXED', 'HOURLY'].includes(mapped.pricingType)) {
+        mapped.pricingType = mapped.pricingType === 'Hourly Rate' ? 'HOURLY' : 'FIXED';
+      }
+
+      setForm(mapped);
+
+      // Handle existing images
+      const extractImageUrls = (images) => {
+        if (!images) return [];
+        if (typeof images === 'string') {
+          try {
+            images = JSON.parse(images);
+          } catch {
+            return [];
+          }
+        }
+        if (!Array.isArray(images)) return [];
+
+        return images.map(img => {
+          if (typeof img === 'string' && img.trim()) return img;
+          if (img && typeof img === 'object' && img.secure_url) {
+            return img.secure_url;
+          }
+          return null;
+        }).filter(Boolean);
+      };
+
+      const urls = extractImageUrls(listing.images);
+      setExistingImages(urls);
+    } catch (error) {
+      console.error("Error fetching listing:", error);
+      addToast({ message: "Failed to load listing data", type: "error" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -184,14 +183,27 @@ export default function EditConvenienceListing() {
       // Combine existing and new images for payload
       const allImagePreviews = [
         ...existingImages,
-        ...images.map(img => img.preview)
+        ...images.map(img => img.preview || img)
       ];
 
-      const payload = buildListingPayload(category, form, businessId, allImagePreviews);
+      const payloadForm = {
+        ...form,
+        // Ensure map legacy pricing fields if strictly needed, though backend builder should handle basePrice + mapping
+        // But strict state uses basePrice.
+        serviceDescription: form.serviceDescription || form.description,
+      };
+
+      const payload = buildListingPayload(category, payloadForm, businessId, allImagePreviews);
 
       // Update listing
       const hasNewFiles = images.some((i) => i.file instanceof File);
       let res;
+
+      // Ensure pricing type is set if missing
+      if (!payload.convenience) payload.convenience = {};
+
+      // Force correct payload structure for pricing
+      // Note: listingPayloadBuilder should handle this, but let's be safe
 
       if (hasNewFiles) {
         const newFiles = images
@@ -209,10 +221,8 @@ export default function EditConvenienceListing() {
         res = await listingsService.updateListing(listingId, payload);
       }
 
-      addToast({
-        message: "Listing updated successfully",
-        type: "success",
-      });
+      console.log('[EditConvenience] Update result:', res);
+      addToast({ message: "Listing updated successfully", type: "success" });
 
       setTimeout(() => {
         router.push("/dashboard/business/listings");
@@ -220,21 +230,12 @@ export default function EditConvenienceListing() {
     } catch (error) {
       console.error("Error updating listing:", error);
       handleApiError(error, { addToast }, { setLoading: setIsSubmitting });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const serviceTypes = [
-    "Delivery Service",
-    "Rent a Chef",
-    "Personal Shopping",
-    "Laundry Service",
-    "Cleaning Service",
-    "Pet Care",
-    "Babysitting",
-    "Home Maintenance",
-    "Event Planning",
-    "Other",
-  ];
+  const serviceTypes = Object.values(BACKEND_ENUMS.SERVICE_TYPE);
 
   const featureOptions = [
     "Same Day Service",
@@ -248,39 +249,11 @@ export default function EditConvenienceListing() {
   ];
 
   const availabilityOptions = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
+    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-4">
-          <svg className="animate-spin h-12 w-12 text-primary-500" viewBox="0 0 24 24">
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-              fill="none"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          <p className="text-gray-600 font-medium">Loading listing...</p>
-        </div>
-      </div>
-    );
+  if (isLoading || businessLoading) {
+    return <PageLoadingScreen message="Loading listing..." />;
   }
 
   return (
@@ -328,8 +301,8 @@ export default function EditConvenienceListing() {
             <div className="flex items-center gap-4">
               <span
                 className={`text-sm font-medium ${form.status === "ACTIVE"
-                    ? "text-green-600"
-                    : "text-gray-600"
+                  ? "text-green-600"
+                  : "text-gray-600"
                   }`}
               >
                 {form.status === "ACTIVE" ? "Active" : "Inactive"}
@@ -347,14 +320,14 @@ export default function EditConvenienceListing() {
                   });
                 }}
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.status === "ACTIVE"
-                    ? "bg-green-500"
-                    : "bg-gray-300"
+                  ? "bg-green-500"
+                  : "bg-gray-300"
                   }`}
               >
                 <span
                   className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.status === "ACTIVE"
-                      ? "translate-x-7"
-                      : "translate-x-1"
+                    ? "translate-x-7"
+                    : "translate-x-1"
                     }`}
                 />
               </button>
@@ -430,8 +403,8 @@ export default function EditConvenienceListing() {
               </label>
               <input
                 type="text"
-                name="serviceName"
-                value={form.serviceName}
+                name="title"
+                value={form.title}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Premium Home Chef Service"
@@ -453,7 +426,7 @@ export default function EditConvenienceListing() {
                 <option value="">Select service type</option>
                 {serviceTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {type.replace(/_/g, ' ').replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase())}
                   </option>
                 ))}
               </select>
@@ -465,9 +438,18 @@ export default function EditConvenienceListing() {
               </label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
+                name="address"
+                value={form.location?.address || (typeof form.location === 'string' ? form.location : '')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm(prev => ({
+                    ...prev,
+                    location: {
+                      ...(typeof prev.location === 'object' ? prev.location : {}),
+                      address: val
+                    }
+                  }));
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Lagos Island, Lekki"
                 required
@@ -489,10 +471,10 @@ export default function EditConvenienceListing() {
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
-                    name="priceType"
-                    value="fixed"
-                    checked={form.priceType === "fixed"}
-                    onChange={handleChange}
+                    name="pricingType"
+                    value="FIXED"
+                    checked={form.pricingType === "FIXED"}
+                    onChange={(e) => setForm(prev => ({ ...prev, pricingType: "FIXED" }))}
                     className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">Fixed Price</span>
@@ -500,10 +482,10 @@ export default function EditConvenienceListing() {
                 <label className="flex items-center gap-2">
                   <input
                     type="radio"
-                    name="priceType"
-                    value="hourly"
-                    checked={form.priceType === "hourly"}
-                    onChange={handleChange}
+                    name="pricingType"
+                    value="HOURLY"
+                    checked={form.pricingType === "HOURLY"}
+                    onChange={(e) => setForm(prev => ({ ...prev, pricingType: "HOURLY" }))}
                     className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-700">Hourly Rate</span>
@@ -512,37 +494,20 @@ export default function EditConvenienceListing() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {form.priceType === "fixed" ? (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fixed Price (₦) *
-                  </label>
-                  <input
-                    type="number"
-                    name="fixedPrice"
-                    value={form.fixedPrice}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="30000"
-                    required
-                  />
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Hourly Rate (₦) *
-                  </label>
-                  <input
-                    type="number"
-                    name="hourlyRate"
-                    value={form.hourlyRate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="5000"
-                    required
-                  />
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {form.pricingType === "FIXED" ? "Fixed Price (₦) *" : "Hourly Rate (₦) *"}
+                </label>
+                <input
+                  type="number"
+                  name="basePrice"
+                  value={form.basePrice}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="5000"
+                  required
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -686,7 +651,7 @@ export default function EditConvenienceListing() {
           </div>
         </div>
 
-        {/* Additional Details */}
+        {/* Description */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Service Description
@@ -724,20 +689,8 @@ export default function EditConvenienceListing() {
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
                 Updating...
               </span>
