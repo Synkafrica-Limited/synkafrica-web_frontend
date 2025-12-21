@@ -4,7 +4,7 @@
  */
 
 import { normalizeStatus } from './listingValidation';
-import { labelToEnum } from '../config/listingSchemas';
+import { labelToEnum, LISTING_SCHEMAS } from '../config/listingSchemas';
 
 /**
  * Strip undefined, null, and empty string values from object recursively
@@ -86,10 +86,10 @@ export function buildCarRentalPayload(form, businessId, images = []) {
 
   const payload = {
     businessId,
-    title: form.vehicleName || form.title,
+    title: form.title || form.vehicleName,
     description: form.description || '',
     category: 'CAR_RENTAL',
-    basePrice: parseInt(form.pricePerDay || form.basePrice, 10) || 0,
+    basePrice: parseInt(form.basePrice || form.pricePerDay, 10) || 0,
     currency: form.currency || 'NGN',
     status: normalizeStatus(form.status || form.availability),
     ...(!hasNewFiles && images.length > 0 ? { images: images.map((i) => i.preview || i) } : {}),
@@ -100,17 +100,17 @@ export function buildCarRentalPayload(form, businessId, images = []) {
       country: form.location?.country || 'Nigeria',
     },
     carRental: {
-      carMake: form.brand || form.carMake,
-      carModel: form.model || form.carModel,
-      carYear: parseInt(form.year || form.carYear, 10) || undefined,
+      carMake: form.carMake || form.brand,
+      carModel: form.carModel || form.model,
+      carYear: parseInt(form.carYear || form.year, 10) || undefined,
       carPlateNumber: form.carPlateNumber,
-      carSeats: parseInt(form.seats || form.carSeats, 10) || undefined,
-      carTransmission: labelToEnum('CAR_RENTAL', 'carTransmission', form.transmission || form.carTransmission),
-      carFuelType: labelToEnum('CAR_RENTAL', 'carFuelType', form.fuelType || form.carFuelType),
-      carFeatures: form.features || form.carFeatures || [],
+      carSeats: parseInt(form.carSeats || form.seats, 10) || undefined,
+      carTransmission: labelToEnum('CAR_RENTAL', 'carTransmission', form.carTransmission || form.transmission),
+      carFuelType: labelToEnum('CAR_RENTAL', 'carFuelType', form.carFuelType || form.fuelType),
+      carFeatures: form.carFeatures || form.features || [],
       chauffeurIncluded: Boolean(form.chauffeurIncluded),
-      chauffeurPricePerDay: form.chauffeurIncluded ? parseInt(form.chauffeurPrice || form.chauffeurPricePerDay || 0, 10) : undefined,
-      chauffeurPricePerHour: parseInt(form.pricePerHour || form.chauffeurPricePerHour || 0, 10) || undefined,
+      chauffeurPricePerDay: form.chauffeurIncluded ? parseInt(form.chauffeurPricePerDay || form.chauffeurPrice || 0, 10) : undefined,
+      chauffeurPricePerHour: parseInt(form.chauffeurPricePerHour || form.pricePerHour || 0, 10) || undefined,
       insuranceCoverage: Boolean(form.insuranceCoverage !== undefined ? form.insuranceCoverage : true),
     },
   };
@@ -125,14 +125,15 @@ export function buildResortPayload(form, businessId, images = []) {
   const hasNewFiles = images.some((i) => i?.file instanceof File || i instanceof File);
 
   // Convert packageType UI label to backend enum
-  const packageTypeEnum = labelToEnum('RESORT', 'packageType', form.packageType || form.resortType);
+  const packageTypeEnum = labelToEnum('RESORT', 'packageType', form.packageType);
+  const resortTypeEnum = labelToEnum('RESORT', 'resortType', form.resortType);
 
   const payload = {
     businessId,
-    title: form.resortName || form.title,
+    title: form.title || form.resortName,
     description: form.description || '',
     category: 'RESORT',
-    basePrice: parseInt(form.pricePerPerson || form.basePrice, 10) || 0,
+    basePrice: parseInt(form.basePrice || form.pricePerPerson, 10) || 0,
     currency: form.currency || 'NGN',
     status: normalizeStatus(form.status || (typeof form.availability === 'string' ? form.availability : 'ACTIVE')),
     ...(!hasNewFiles && images.length > 0 ? { images: images.map((i) => i.preview || i) } : {}),
@@ -142,17 +143,37 @@ export function buildResortPayload(form, businessId, images = []) {
       state: form.location?.state || '',
       country: form.location?.country || 'Nigeria',
     },
+    pricePerGroup: parseInt(form.pricePerGroup, 10) || undefined,
+    advanceBookingRequired: Boolean(form.advanceBookingRequired),
+    minimumAdvanceHours: parseInt(form.minimumAdvanceHours, 10) || 0,
+
+    // Duplicate fields to root as backend might expect them there (hybrid schema)
+    // based on Listing.json showing them at root
+    resortType: resortTypeEnum,
+    packageType: packageTypeEnum,
+    roomType: labelToEnum('RESORT', 'roomType', form.roomType || 'Standard'),
+    checkInTime: form.checkInTime,
+    checkOutTime: form.checkOutTime,
+    duration: form.duration,
+    capacity: parseInt(form.capacity || form.maxOccupancy, 10) || undefined,
+    inclusions: form.inclusions || [],
+    activities: form.activities || [],
+    availableDates: form.availableDates,
+    
     resort: {
-      resortType: packageTypeEnum, // Backend expects resortType field
-      packageType: packageTypeEnum, // Also include packageType for compatibility
+      resortType: resortTypeEnum, // Strict mapping, no fallback to packageType
+      packageType: packageTypeEnum,
       roomType: labelToEnum('RESORT', 'roomType', form.roomType || 'Standard'),
+      checkInTime: form.checkInTime,
+      checkOutTime: form.checkOutTime,
       duration: form.duration,
       capacity: parseInt(form.capacity || form.maxOccupancy, 10) || undefined,
-      inclusions: form.inclusions || form.amenities || [],
-      activities: form.attractions || form.activities || [],
+      inclusions: form.inclusions || [],
+      activities: form.activities || [],
       availableDates: form.availableDates,
       pricePerGroup: parseInt(form.pricePerGroup, 10) || undefined,
-      bookingAdvanceHours: parseInt(form.bookingAdvance || form.bookingAdvanceHours || 24, 10),
+      advanceBookingRequired: Boolean(form.advanceBookingRequired),
+      minimumAdvanceHours: parseInt(form.minimumAdvanceHours, 10) || 0,
     },
   };
 
@@ -171,8 +192,8 @@ export function buildFineDiningPayload(form, businessId, images = []) {
       price: parseInt(item.price, 10),
     }));
 
-  // Calculate basePrice: use provided value, or minimum menu item price, or 0
-  let basePrice = parseInt(form.priceRange || form.basePrice, 10) || 0;
+  // Calculate basePrice: use provided basePrice, or priceRange used as basePrice, or minimum menu item price, or 0
+  let basePrice = parseInt(form.basePrice || form.priceRange, 10) || 0;
   
   if (basePrice === 0 && menuItems.length > 0) {
     // Set basePrice to minimum menu item price
@@ -182,7 +203,7 @@ export function buildFineDiningPayload(form, businessId, images = []) {
 
   const payload = {
     businessId,
-    title: form.restaurantName || form.title,
+    title: form.title || form.restaurantName,
     description: form.description || '',
     category: 'FINE_DINING',
     basePrice: basePrice,
@@ -196,18 +217,27 @@ export function buildFineDiningPayload(form, businessId, images = []) {
       country: form.location?.country || 'Nigeria',
     },
     dining: {
-      cuisineType: normalizeEnumArray('FINE_DINING', 'cuisineType', form.cuisineType),
-      diningType: labelToEnum('FINE_DINING', 'diningType', form.diningType),
-      seatingCapacity: parseInt(form.capacity, 10) || undefined,
-      diningAmenities: form.amenities || [],
-      specialties: form.specialties || [],
+      cuisineType: normalizeEnumArray('FINE_DINING', 'cuisineType', form.cuisine || form.cuisineType),
+      diningType: labelToEnum('FINE_DINING', 'diningType', form.diningType), // Strict form uses diningType
+      seatingCapacity: parseInt(form.capacity || form.seatingCapacity, 10) || undefined,
+      diningAmenities: form.features || form.amenities || [], // form.features is consolidated
+      specialties: form.specialties || [], // legacy
+      features: form.features || [], // new generic field mapped to features often? Backend schema has 'specialties' and 'diningAmenities'.
       openingHours: form.openingHours,
+      daysOpen: form.daysOpen || [],
+      dietaryProvisions: form.dietaryProvisions || [],
       dressCode: labelToEnum('FINE_DINING', 'dressCode', form.dressCode),
-      priceRange: form.priceRange,
-      reservationRequired: form.reservationRequired,
+      priceRange: form.priceRange, // Legacy field
+      reservationRequired: Boolean(form.reservationRequired),
+      menuUrl: form.menuUrl,
       menuItems: menuItems.length > 0 ? menuItems : undefined,
     },
   };
+   
+  // Fix for features mapping: if features exists and diningAmenities is empty, use features
+  if (payload.dining.diningAmenities.length === 0 && Array.isArray(form.features)) {
+       payload.dining.diningAmenities = form.features;
+  }
 
   return stripEmptyDeep(payload);
 }
@@ -217,13 +247,16 @@ export function buildFineDiningPayload(form, businessId, images = []) {
  */
 export function buildConveniencePayload(form, businessId, images = []) {
   const hasNewFiles = images.some((i) => i?.file instanceof File || i instanceof File);
+  
+  const pricingType = labelToEnum('CONVENIENCE_SERVICE', 'pricingType', form.pricingType || form.priceType) || 'FIXED';
+  const basePrice = parseInt(form.basePrice || (pricingType === 'FIXED' ? form.fixedPrice : form.hourlyRate), 10) || 0;
 
   const payload = {
     businessId,
-    title: form.serviceName || form.title,
+    title: form.title || form.serviceName,
     description: form.description || '',
     category: 'CONVENIENCE_SERVICE',
-    basePrice: parseInt(form.priceType === 'fixed' ? form.fixedPrice : form.hourlyRate, 10) || 0,
+    basePrice: basePrice,
     currency: form.currency || 'NGN',
     status: normalizeStatus(form.status || (typeof form.availability === 'string' ? form.availability : 'ACTIVE')),
     ...(!hasNewFiles && images.length > 0 ? { images: images.map((i) => i.preview || i) } : {}),
@@ -235,16 +268,18 @@ export function buildConveniencePayload(form, businessId, images = []) {
     },
     convenience: {
       serviceType: labelToEnum('CONVENIENCE_SERVICE', 'serviceType', form.serviceType),
-      serviceDescription: form.description || form.serviceDescription || '', // Required by backend
-      priceType: labelToEnum('CONVENIENCE_SERVICE', 'priceType', form.priceType),
-      fixedPrice: form.priceType === 'fixed' ? parseInt(form.fixedPrice, 10) : undefined,
-      hourlyRate: form.priceType === 'hourly' ? parseInt(form.hourlyRate, 10) : undefined,
-      minimumOrder: form.minimumOrder,
-      deliveryFee: parseInt(form.deliveryFee || 0, 10),
-      serviceFeatures: form.features || [],
-      availableDays: Array.isArray(form.availability) ? form.availability : [],
+      serviceDescription: form.serviceDescription || form.description || '', // Required by backend category validations often
+      pricingType: pricingType, // Strict backend key
+      priceType: pricingType, // Legacy compatibility if needed? No, strict schema.
+      fixedPrice: pricingType === 'FIXED' ? basePrice : undefined,
+      hourlyRate: pricingType === 'HOURLY' ? basePrice : undefined,
+      minimumDuration: form.minimumOrder || form.minimumDuration, // Schema uses minimumDuration? form uses minimumOrder
+      minimumOrder: form.minimumOrder, // Legacy?
+      deliveryServiceFee: parseInt(form.deliveryFee || form.deliveryServiceFee || 0, 10),
+      serviceFeatures: form.features || form.serviceFeatures || [],
+      availableDays: Array.isArray(form.availability) ? form.availability : (Array.isArray(form.availableDays) ? form.availableDays : []),
       responseTime: parseInt(form.responseTime, 10) || 30,
-      advanceBooking: Boolean(form.advanceBooking),
+      advanceBookingRequired: Boolean(form.advanceBooking !== undefined ? form.advanceBooking : form.advanceBookingRequired),
     },
   };
 
@@ -296,18 +331,92 @@ export function buildCreateListingPayload(formState) {
 }
 
 /**
- * Build payload for update operation
- * Only includes changed fields, preserves original values
+ * Deep diff between two objects
+ * Returns only fields in 'current' that are different from 'original'
+ */
+function getChangedFields(original, current) {
+  if (current === undefined || current === null) return undefined;
+  if (original === undefined || original === null) return current;
+
+  // Handle arrays: strictly different if length or content mismatch
+  // For simplicity: if arrays differ, send the whole new array
+  if (Array.isArray(current)) {
+    if (!Array.isArray(original)) return current;
+    if (current.length !== original.length) return current;
+    
+    // Sort and stringify for comparison to handle order-agnostic arrays (like amenities)
+    // simplistic approach: JSON stringify matching
+    const copyCurr = [...current].sort();
+    const copyOrig = [...original].sort();
+    if (JSON.stringify(copyCurr) !== JSON.stringify(copyOrig)) return current;
+    
+    return undefined; // No change
+  }
+
+  // Handle objects
+  if (typeof current === 'object') {
+    if (typeof original !== 'object') return current;
+
+    const diff = {};
+    let hasChanges = false;
+
+    for (const key of Object.keys(current)) {
+      const changed = getChangedFields(original[key], current[key]);
+      if (changed !== undefined) {
+        diff[key] = changed;
+        hasChanges = true;
+      }
+    }
+
+    return hasChanges ? diff : undefined;
+  }
+
+  // Handle primitives
+  return current !== original ? current : undefined;
+}
+
+/**
+ * Build STRICT payload for update operation (PATCH)
+ * Only includes changed fields, validated against backend schema
  */
 export function buildUpdateListingPayload(formState, originalListing) {
   const category = originalListing.category;
   const businessId = originalListing.businessId;
   const images = formState.images || [];
   
-  // Build full payload
-  const fullPayload = buildListingPayload(category, formState, businessId, images);
+  // 1. Build full 'target' payload as if we were creating it
+  // This ensures all transformations (enums, numbers) are applied
+  const targetPayload = buildListingPayload(category, formState, businessId, images);
   
-  // For updates, we send the full payload but backend will merge
-  // The stripEmptyDeep already removed null/undefined values
-  return fullPayload;
+  // 2. Diff against original listing
+  // strict diffing ensures we don't send unchanged fields
+  const updates = getChangedFields(originalListing, targetPayload);
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[PayloadBuilder] Original:', originalListing);
+    console.log('[PayloadBuilder] Target:', targetPayload);
+    console.log('[PayloadBuilder] Diff/Updates:', updates);
+  }
+
+  // 3. Safety checks
+  if (!updates) return {};
+
+  // 4. Category Object Integrity
+  // If the category specific object (e.g. 'resort') has ANY changes (is present in updates),
+  // we must replace the partial diff with the FULL target object.
+  // This is because backend validation often requires all mandatory fields (like resortType, capacity)
+  // to be present if the object key exists, and doesn't verify individual fields in isolation.
+  const schema = LISTING_SCHEMAS[category];
+  if (schema && schema.categoryObject) {
+    const key = schema.categoryObject;
+    if (updates[key]) {
+      // Revert strict partial diff to full valid object for this key
+      if (process.env.NODE_ENV === 'development') {
+         console.log(`[PayloadBuilder] Detected change in ${key}, sending full object to satisfy validation.`);
+      }
+      updates[key] = targetPayload[key];
+    }
+  }
+
+  return updates;
 }

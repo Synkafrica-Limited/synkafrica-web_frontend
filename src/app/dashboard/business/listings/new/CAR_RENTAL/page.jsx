@@ -9,33 +9,17 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { Toast } from "@/components/ui/Toast";
 import { useCreateCarListing } from "@/hooks/business/useCreateCarListing";
 import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+import { INITIAL_FORM_STATES } from "@/utils/formStates";
+import { BACKEND_ENUMS, ENUM_MAPPINGS } from "@/config/listingSchemas";
 
 export default function NewCarRentalListing() {
   const router = useRouter();
   const { toasts, removeToast } = useToast();
 
-  // Use the custom hook for creating car listings - UPDATED: now uses business data
   const { createCarListing, isSubmitting, businessLoading, businessError } = useCreateCarListing();
 
-  const [form, setForm] = useState({
-    vehicleName: "",
-    vehicleType: "",
-    brand: "",
-    model: "",
-    year: "",
-    seats: "",
-    transmission: "",
-    fuelType: "",
-    pricePerDay: "",
-    pricePerHour: "",
-    chauffeurIncluded: true,
-    chauffeurPrice: "",
-    features: [],
-    description: "",
-    location: "",
-    carPlateNumber: "", // Required field
-    availability: "available",
-  });
+  // Initialize with strict form state
+  const [form, setForm] = useState(INITIAL_FORM_STATES.CAR_RENTAL);
 
   const [images, setImages] = useState([]);
 
@@ -65,12 +49,10 @@ export default function NewCarRentalListing() {
     await createCarListing(form, images);
   };
 
-  // UPDATED: Show loading state while business data is loading
   if (businessLoading) {
     return <PageLoadingScreen message="Loading business information..." />;
   }
 
-  // UPDATED: Show error state if business data failed to load
   if (businessError) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
@@ -98,9 +80,9 @@ export default function NewCarRentalListing() {
     );
   }
 
-  const vehicleTypes = ["Sedan", "SUV", "Luxury", "Van", "Bus", "Sports Car"];
-  const transmissionTypes = ["AUTOMATIC", "MANUAL"];
-  const fuelTypes = ["PETROL", "DIESEL", "ELECTRIC", "HYBRID"];
+  const transmissionTypes = Object.values(BACKEND_ENUMS.CAR_TRANSMISSION);
+  const fuelTypes = Object.values(BACKEND_ENUMS.CAR_FUEL_TYPE);
+
   const featureOptions = [
     "Air Conditioning",
     "GPS",
@@ -195,8 +177,8 @@ export default function NewCarRentalListing() {
               </label>
               <input
                 type="text"
-                name="vehicleName"
-                value={form.vehicleName}
+                name="title"
+                value={form.title}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Mercedes Benz S-Class"
@@ -204,25 +186,7 @@ export default function NewCarRentalListing() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vehicle Type *
-              </label>
-              <select
-                name="vehicleType"
-                value={form.vehicleType}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                required
-              >
-                <option value="">Select type</option>
-                {vehicleTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* REMOVED: vehicleType (not in backend schema) */}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -230,8 +194,8 @@ export default function NewCarRentalListing() {
               </label>
               <input
                 type="text"
-                name="brand"
-                value={form.brand}
+                name="carMake"
+                value={form.carMake}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Mercedes Benz"
@@ -245,8 +209,8 @@ export default function NewCarRentalListing() {
               </label>
               <input
                 type="text"
-                name="model"
-                value={form.model}
+                name="carModel"
+                value={form.carModel}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., S-Class"
@@ -260,8 +224,8 @@ export default function NewCarRentalListing() {
               </label>
               <input
                 type="number"
-                name="year"
-                value={form.year}
+                name="carYear"
+                value={form.carYear}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="2024"
@@ -277,8 +241,8 @@ export default function NewCarRentalListing() {
               </label>
               <input
                 type="number"
-                name="seats"
-                value={form.seats}
+                name="carSeats"
+                value={form.carSeats}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="4"
@@ -309,8 +273,8 @@ export default function NewCarRentalListing() {
                 Transmission *
               </label>
               <select
-                name="transmission"
-                value={form.transmission}
+                name="carTransmission"
+                value={form.carTransmission}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
@@ -318,7 +282,7 @@ export default function NewCarRentalListing() {
                 <option value="">Select transmission</option>
                 {transmissionTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type === "AUTOMATIC" ? "Automatic" : "Manual"}
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
                 ))}
               </select>
@@ -329,8 +293,8 @@ export default function NewCarRentalListing() {
                 Fuel Type *
               </label>
               <select
-                name="fuelType"
-                value={form.fuelType}
+                name="carFuelType"
+                value={form.carFuelType}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
@@ -338,7 +302,7 @@ export default function NewCarRentalListing() {
                 <option value="">Select fuel type</option>
                 {fuelTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type.charAt(0) + type.slice(1).toLowerCase()}
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
                 ))}
               </select>
@@ -357,8 +321,8 @@ export default function NewCarRentalListing() {
               </label>
               <input
                 type="number"
-                name="pricePerDay"
-                value={form.pricePerDay}
+                name="basePrice"
+                value={form.basePrice}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="25000"
@@ -368,12 +332,12 @@ export default function NewCarRentalListing() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price per Hour (₦)
+                Chauffeur Price per Hour (₦)
               </label>
               <input
                 type="number"
-                name="pricePerHour"
-                value={form.pricePerHour}
+                name="chauffeurPricePerHour"
+                value={form.chauffeurPricePerHour}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="5000"
@@ -402,8 +366,8 @@ export default function NewCarRentalListing() {
                 </label>
                 <input
                   type="number"
-                  name="chauffeurPrice"
-                  value={form.chauffeurPrice}
+                  name="chauffeurPricePerDay"
+                  value={form.chauffeurPricePerDay}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="10000"
@@ -424,17 +388,17 @@ export default function NewCarRentalListing() {
               <label key={feature} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={form.features.includes(feature)}
+                  checked={form.carFeatures.includes(feature)}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setForm((prev) => ({
                         ...prev,
-                        features: [...prev.features, feature],
+                        carFeatures: [...prev.carFeatures, feature],
                       }));
                     } else {
                       setForm((prev) => ({
                         ...prev,
-                        features: prev.features.filter((f) => f !== feature),
+                        carFeatures: prev.carFeatures.filter((f) => f !== feature),
                       }));
                     }
                   }}
@@ -474,29 +438,22 @@ export default function NewCarRentalListing() {
               </label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
+                name="address"
+                value={form.location?.address || (typeof form.location === 'string' ? form.location : '')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm(prev => ({
+                    ...prev,
+                    location: {
+                      ...(typeof prev.location === 'object' ? prev.location : {}),
+                      address: val
+                    }
+                  }));
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Lagos, Victoria Island"
                 required
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Availability Status
-              </label>
-              <select
-                name="availability"
-                value={form.availability}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="available">Available</option>
-                <option value="booked">Currently Booked</option>
-                <option value="maintenance">Under Maintenance</option>
-              </select>
             </div>
           </div>
         </div>

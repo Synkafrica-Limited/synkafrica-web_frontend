@@ -12,7 +12,8 @@ import authService from "@/services/authService";
 import { useBusiness } from "@/hooks/business/useBusiness";
 import { buildListingPayload } from "@/utils/listingPayloadBuilder";
 import { handleApiError } from "@/utils/errorParser";
-import { enumToLabel } from "@/config/listingSchemas";
+import { enumToLabel, BACKEND_ENUMS } from "@/config/listingSchemas";
+import { INITIAL_FORM_STATES } from "@/utils/formStates";
 
 export default function EditFineDiningListing() {
   const router = useRouter();
@@ -26,22 +27,8 @@ export default function EditFineDiningListing() {
   const token = typeof window !== 'undefined' ? authService.getAccessToken() : null;
   const { business, loading: businessLoading } = useBusiness(token);
 
-  const [form, setForm] = useState({
-    restaurantName: "",
-    cuisineType: [],
-    diningType: "",
-    location: "",
-    capacity: "",
-    priceRange: "",
-    reservationRequired: true,
-    menuItems: [{ name: "", description: "", price: "" }],
-    specialties: [],
-    amenities: [],
-    description: "",
-    openingHours: "",
-    dressCode: "",
-    availability: "ACTIVE",
-  });
+  // Initialize with strict form state
+  const [form, setForm] = useState(INITIAL_FORM_STATES.FINE_DINING);
 
   const [images, setImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
@@ -62,63 +49,59 @@ export default function EditFineDiningListing() {
       setLoadedListing(listing);
 
       // Extract location
-      const locationStr = (listing.location && (listing.location.address || listing.location.name)) ||
-        (typeof listing.location === 'string' ? listing.location : '') ||
-        listing.address || '';
+      const locationObj = (listing.location && typeof listing.location === 'object') ? listing.location : {
+        address: (typeof listing.location === 'string' ? listing.location : '') || (listing.address) || '',
+        city: listing.city || 'Lagos',
+        state: listing.state || 'Lagos',
+        country: listing.country || 'Nigeria'
+      };
 
-      // Map API response to form state with comprehensive field extraction
-      const cuisineTypeArray = Array.isArray(listing.dining?.cuisineType)
-        ? listing.dining.cuisineType
-        : Array.isArray(listing.cuisineType)
-          ? listing.cuisineType
-          : (listing.dining?.cuisineType || listing.cuisineType)
-            ? [listing.dining?.cuisineType || listing.cuisineType]
-            : [];
+      // Map API response to strict form state
+      // Helper to consolidate arrays
+      const consolidateArray = (...arrays) => {
+        return arrays.flat().filter(Boolean);
+      };
 
-      const menuItemsArray = Array.isArray(listing.dining?.menuItems)
-        ? listing.dining.menuItems
-        : Array.isArray(listing.menuItems)
-          ? listing.menuItems
-          : [];
-
-      const specialtiesArray = Array.isArray(listing.dining?.specialties)
-        ? listing.dining.specialties
-        : Array.isArray(listing.specialties)
-          ? listing.specialties
-          : [];
-
-      const amenitiesArray = Array.isArray(listing.dining?.amenities)
-        ? listing.dining.amenities
-        : Array.isArray(listing.amenities)
-          ? listing.amenities
-          : Array.isArray(listing.facilities)
-            ? listing.facilities
-            : [];
-
-      setForm({
-        restaurantName: listing.title || listing.restaurantName || "",
-        cuisineType: cuisineTypeArray.map(c => enumToLabel('FINE_DINING', 'cuisineType', c)),
-        diningType: enumToLabel('FINE_DINING', 'diningType', listing.dining?.diningType || listing.diningType),
-        location: locationStr,
-        capacity: listing.dining?.seatingCapacity || listing.dining?.capacity || listing.capacity || listing.maxGuests || "",
-        priceRange: listing.basePrice || listing.pricing?.range || listing.priceRange || "",
-        reservationRequired: listing.dining?.reservationRequired !== false && listing.reservationRequired !== false,
-        menuItems: menuItemsArray.length > 0
-          ? menuItemsArray.map(item => ({
-            name: item.name || "",
-            description: item.description || "",
-            price: item.price || "",
-          }))
-          : [{ name: "", description: "", price: "" }],
-        specialties: specialtiesArray,
-        amenities: amenitiesArray,
+      const mapped = {
+        ...INITIAL_FORM_STATES.FINE_DINING,
+        title: listing.title || listing.restaurantName || "",
         description: listing.description || listing.summary || "",
-        openingHours: listing.dining?.openingHours || listing.openingHours || listing.hours || "",
-        dressCode: enumToLabel('FINE_DINING', 'dressCode', listing.dining?.dressCode || listing.dressCode),
-        availability: listing.status || listing.availability || "ACTIVE",
-      });
+        basePrice: listing.basePrice || listing.avgPrice || listing.priceRange || "", // Best effort map
+        currency: listing.currency || "NGN",
 
-      // Handle existing images with proper extraction
+        diningType: enumToLabel('FINE_DINING', 'diningType', listing.dining?.diningType || listing.diningType) || "RESTAURANT",
+
+        cuisine: Array.isArray(listing.dining?.cuisine) ? listing.dining.cuisine :
+          Array.isArray(listing.cuisineType) ? listing.cuisineType : [],
+
+        menuUrl: listing.dining?.menuUrl || listing.menuUrl || "",
+
+        reservationRequired: listing.dining?.reservationRequired !== false && listing.reservationRequired !== false,
+
+        openingHours: listing.dining?.openingHours || listing.openingHours || listing.hours || "",
+        daysOpen: listing.dining?.daysOpen || [],
+
+        dietaryProvisions: listing.dining?.dietaryProvisions || [],
+        dressCode: listing.dining?.dressCode || listing.dressCode || "",
+
+        capacity: listing.dining?.capacity || listing.capacity || listing.maxGuests || "",
+
+        features: consolidateArray(
+          listing.dining?.features,
+          listing.features,
+          listing.dining?.specialties,
+          listing.specialties,
+          listing.dining?.amenities,
+          listing.amenities
+        ),
+
+        location: locationObj,
+        status: listing.status || listing.availability || "ACTIVE",
+      };
+
+      setForm(mapped);
+
+      // Handle existing images
       const extractImageUrls = (images) => {
         if (!images) return [];
         if (typeof images === 'string') {
@@ -172,28 +155,6 @@ export default function EditFineDiningListing() {
 
   const removeExistingImage = (index) => {
     setExistingImages(existingImages.filter((_, i) => i !== index));
-  };
-
-  const handleMenuItemChange = (index, field, value) => {
-    const updatedItems = [...form.menuItems];
-    updatedItems[index][field] = value;
-    setForm((prev) => ({ ...prev, menuItems: updatedItems }));
-  };
-
-  const addMenuItem = () => {
-    setForm((prev) => ({
-      ...prev,
-      menuItems: [...prev.menuItems, { name: "", description: "", price: "" }],
-    }));
-  };
-
-  const removeMenuItem = (index) => {
-    if (form.menuItems.length > 1) {
-      setForm((prev) => ({
-        ...prev,
-        menuItems: prev.menuItems.filter((_, i) => i !== index),
-      }));
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -256,6 +217,8 @@ export default function EditFineDiningListing() {
     } catch (err) {
       console.error('[EditFineDining] Update error:', err);
       handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -269,25 +232,13 @@ export default function EditFineDiningListing() {
     "Seafood",
     "Steakhouse",
     "Fusion",
-    "Vegan/Vegetarian",
+    "Vegan",
+    "Vegetarian",
   ];
 
-  const diningTypes = [
-    "Fine Dining",
-    "Casual Dining",
-    "Bistro",
-    "Cafe",
-    "Lounge",
-  ];
+  const diningTypes = Object.values(BACKEND_ENUMS.DINING_TYPE);
 
-  const priceRanges = [
-    "₦₦₦₦ (Luxury)",
-    "₦₦₦ (Upscale)",
-    "₦₦ (Moderate)",
-    "₦ (Budget-Friendly)",
-  ];
-
-  const specialtyOptions = [
+  const featureOptions = [
     "Chef's Tasting Menu",
     "Wine Pairing",
     "Private Dining Room",
@@ -296,9 +247,6 @@ export default function EditFineDiningListing() {
     "Sunday Brunch",
     "Cocktail Bar",
     "Dessert Bar",
-  ];
-
-  const amenityOptions = [
     "Air Conditioning",
     "Wi-Fi",
     "Parking",
@@ -307,6 +255,14 @@ export default function EditFineDiningListing() {
     "Takeout Available",
     "Delivery Service",
     "Bar/Lounge",
+  ];
+
+  const daysOpenOptions = [
+    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+  ];
+
+  const dietaryOptions = [
+    "Vegan", "Vegetarian", "Gluten-Free", "Halal", "Kosher", "Nut-Free"
   ];
 
   if (isLoading || businessLoading) {
@@ -379,34 +335,34 @@ export default function EditFineDiningListing() {
             </div>
             <div className="flex items-center gap-4">
               <span
-                className={`text-sm font-medium ${form.availability === "ACTIVE"
-                    ? "text-green-600"
-                    : "text-gray-600"
+                className={`text-sm font-medium ${form.status === "ACTIVE"
+                  ? "text-green-600"
+                  : "text-gray-600"
                   }`}
               >
-                {form.availability === "ACTIVE" ? "Active" : "Inactive"}
+                {form.status === "ACTIVE" ? "Active" : "Inactive"}
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  const isCurrentlyActive = form.availability === "ACTIVE";
+                  const isCurrentlyActive = form.status === "ACTIVE";
                   const newStatus = isCurrentlyActive ? "INACTIVE" : "ACTIVE";
-                  setForm((prev) => ({ ...prev, availability: newStatus }));
+                  setForm((prev) => ({ ...prev, status: newStatus }));
                   addToast({
                     message: `Listing ${isCurrentlyActive ? "deactivated" : "activated"}`,
                     type: "info",
                     duration: 2000
                   });
                 }}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.availability === "ACTIVE"
-                    ? "bg-green-500"
-                    : "bg-gray-300"
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${form.status === "ACTIVE"
+                  ? "bg-green-500"
+                  : "bg-gray-300"
                   }`}
               >
                 <span
-                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.availability === "ACTIVE"
-                      ? "translate-x-7"
-                      : "translate-x-1"
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${form.status === "ACTIVE"
+                    ? "translate-x-7"
+                    : "translate-x-1"
                     }`}
                 />
               </button>
@@ -484,8 +440,8 @@ export default function EditFineDiningListing() {
               </label>
               <input
                 type="text"
-                name="restaurantName"
-                value={form.restaurantName}
+                name="title"
+                value={form.title}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., The Golden Fork"
@@ -507,7 +463,7 @@ export default function EditFineDiningListing() {
                 <option value="">Select type</option>
                 {diningTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
                 ))}
               </select>
@@ -519,9 +475,18 @@ export default function EditFineDiningListing() {
               </label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
+                name="address"
+                value={form.location?.address || (typeof form.location === 'string' ? form.location : '')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm(prev => ({
+                    ...prev,
+                    location: {
+                      ...(typeof prev.location === 'object' ? prev.location : {}),
+                      address: val
+                    }
+                  }));
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Victoria Island, Lagos"
                 required
@@ -546,22 +511,17 @@ export default function EditFineDiningListing() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price Range *
+                Average Price per Person (₦) *
               </label>
-              <select
-                name="priceRange"
-                value={form.priceRange}
+              <input
+                type="number"
+                name="basePrice"
+                value={form.basePrice}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="15000"
                 required
-              >
-                <option value="">Select price range</option>
-                {priceRanges.map((range) => (
-                  <option key={range} value={range}>
-                    {range}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="md:col-span-2">
@@ -573,17 +533,17 @@ export default function EditFineDiningListing() {
                   <label key={cuisine} className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      checked={Array.isArray(form.cuisineType) && form.cuisineType.includes(cuisine)}
+                      checked={Array.isArray(form.cuisine) && form.cuisine.includes(cuisine)}
                       onChange={(e) => {
                         if (e.target.checked) {
                           setForm((prev) => ({
                             ...prev,
-                            cuisineType: [...(Array.isArray(prev.cuisineType) ? prev.cuisineType : []), cuisine],
+                            cuisine: [...(Array.isArray(prev.cuisine) ? prev.cuisine : []), cuisine],
                           }));
                         } else {
                           setForm((prev) => ({
                             ...prev,
-                            cuisineType: (Array.isArray(prev.cuisineType) ? prev.cuisineType : []).filter(
+                            cuisine: (Array.isArray(prev.cuisine) ? prev.cuisine : []).filter(
                               (c) => c !== cuisine
                             ),
                           }));
@@ -596,153 +556,111 @@ export default function EditFineDiningListing() {
                 ))}
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Menu */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Menu Items *
-            </h2>
-            <button
-              type="button"
-              onClick={addMenuItem}
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-            >
-              + Add Item
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {form.menuItems.map((item, index) => (
-              <div
-                key={index}
-                className="border border-gray-200 rounded-lg p-4 relative"
-              >
-                {form.menuItems.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeMenuItem(index)}
-                    className="absolute top-2 right-2 p-1 text-red-500 hover:bg-red-50 rounded"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dish Name *
-                    </label>
+            <div className="md:col-span-2 mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Days Open
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {daysOpenOptions.map((day) => (
+                  <label key={day} className={`px-3 py-1.5 rounded-full text-sm cursor-pointer border transition-colors ${(Array.isArray(form.daysOpen) && form.daysOpen.includes(day))
+                      ? 'bg-primary-50 border-primary-500 text-primary-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                    }`}>
                     <input
-                      type="text"
-                      value={item.name}
-                      onChange={(e) =>
-                        handleMenuItemChange(index, "name", e.target.value)
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="e.g., Grilled Salmon"
-                      required
+                      type="checkbox"
+                      className="hidden"
+                      checked={Array.isArray(form.daysOpen) && form.daysOpen.includes(day)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setForm(prev => ({ ...prev, daysOpen: [...(Array.isArray(prev.daysOpen) ? prev.daysOpen : []), day] }));
+                        } else {
+                          setForm(prev => ({ ...prev, daysOpen: (Array.isArray(prev.daysOpen) ? prev.daysOpen : []).filter(d => d !== day) }));
+                        }
+                      }}
                     />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Description
-                    </label>
-                    <textarea
-                      value={item.description}
-                      onChange={(e) =>
-                        handleMenuItemChange(index, "description", e.target.value)
-                      }
-                      rows={2}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Brief description of the dish..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Price (₦) *
-                    </label>
-                    <input
-                      type="number"
-                      value={item.price}
-                      onChange={(e) =>
-                        handleMenuItemChange(index, "price", e.target.value)
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="5000"
-                      min="0"
-                      required
-                    />
-                  </div>
-                </div>
+                    {day}
+                  </label>
+                ))}
               </div>
-            ))}
+            </div>
+
+            <div className="md:col-span-2 mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Menu URL (Optional)
+              </label>
+              <input
+                type="text"
+                name="menuUrl"
+                value={form.menuUrl}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="https://example.com/menu.pdf"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Specialties & Amenities */}
+        {/* Features & Dietary */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Specialties
+            Features & Dietary
           </h2>
 
+          <h3 className="text-md font-semibold text-gray-900 mb-3 block">Features & Amenities</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-            {specialtyOptions.map((specialty) => (
-              <label key={specialty} className="flex items-center gap-2">
+            {featureOptions.map((feature) => (
+              <label key={feature} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={Array.isArray(form.specialties) && form.specialties.includes(specialty)}
+                  checked={Array.isArray(form.features) && form.features.includes(feature)}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setForm((prev) => ({
                         ...prev,
-                        specialties: [...(Array.isArray(prev.specialties) ? prev.specialties : []), specialty],
+                        features: [...(Array.isArray(prev.features) ? prev.features : []), feature],
                       }));
                     } else {
                       setForm((prev) => ({
                         ...prev,
-                        specialties: (Array.isArray(prev.specialties) ? prev.specialties : []).filter(
-                          (s) => s !== specialty
+                        features: (Array.isArray(prev.features) ? prev.features : []).filter(
+                          (f) => f !== feature
                         ),
                       }));
                     }
                   }}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">{specialty}</span>
+                <span className="text-sm text-gray-700">{feature}</span>
               </label>
             ))}
           </div>
 
-          <h3 className="text-md font-semibold text-gray-900 mb-3 mt-6">
-            Amenities
-          </h3>
+          <h3 className="text-md font-semibold text-gray-900 mb-3 block mt-6">Dietary Provisions</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {amenityOptions.map((amenity) => (
-              <label key={amenity} className="flex items-center gap-2">
+            {dietaryOptions.map((provision) => (
+              <label key={provision} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={Array.isArray(form.amenities) && form.amenities.includes(amenity)}
+                  checked={Array.isArray(form.dietaryProvisions) && form.dietaryProvisions.includes(provision)}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setForm((prev) => ({
                         ...prev,
-                        amenities: [...(Array.isArray(prev.amenities) ? prev.amenities : []), amenity],
+                        dietaryProvisions: [...(Array.isArray(prev.dietaryProvisions) ? prev.dietaryProvisions : []), provision],
                       }));
                     } else {
                       setForm((prev) => ({
                         ...prev,
-                        amenities: (Array.isArray(prev.amenities) ? prev.amenities : []).filter((a) => a !== amenity),
+                        dietaryProvisions: (Array.isArray(prev.dietaryProvisions) ? prev.dietaryProvisions : []).filter(
+                          (p) => p !== provision
+                        ),
                       }));
                     }
                   }}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">{amenity}</span>
+                <span className="text-sm text-gray-700">{provision}</span>
               </label>
             ))}
           </div>
