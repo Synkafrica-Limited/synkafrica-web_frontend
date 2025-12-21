@@ -6,10 +6,6 @@
 import { normalizeStatus } from './listingValidation';
 import { labelToEnum, LISTING_SCHEMAS } from '../config/listingSchemas';
 
-// ... (previous functions remain the same) ...
-
-
-
 /**
  * Strip undefined, null, and empty string values from object recursively
  */
@@ -85,9 +81,6 @@ function extractCityFromAddress(address) {
 /**
  * Build CAR_RENTAL payload
  */
-/**
- * Build CAR_RENTAL payload
- */
 export function buildCarRentalPayload(form, businessId, images = []) {
   const hasNewFiles = images.some((i) => i?.file instanceof File || i instanceof File);
 
@@ -131,7 +124,6 @@ export function buildCarRentalPayload(form, businessId, images = []) {
 export function buildResortPayload(form, businessId, images = []) {
   const hasNewFiles = images.some((i) => i?.file instanceof File || i instanceof File);
 
-  // Convert packageType UI label to backend enum
   // Convert packageType UI label to backend enum
   const packageTypeEnum = labelToEnum('RESORT', 'packageType', form.packageType);
   const resortTypeEnum = labelToEnum('RESORT', 'resortType', form.resortType);
@@ -231,13 +223,6 @@ export function buildFineDiningPayload(form, businessId, images = []) {
       diningAmenities: form.features || form.amenities || [], // form.features is consolidated
       specialties: form.specialties || [], // legacy
       features: form.features || [], // new generic field mapped to features often? Backend schema has 'specialties' and 'diningAmenities'.
-      // If form.features contains mixed items, we might need to split them or just send as diningAmenities if backend supports it.
-      // But listingSchemas says: optionalCategory: [..., 'specialties', 'diningAmenities', ...]
-      // It doesn't seem to have 'features' in dining object strictly?
-      // Wait, INITIAL_FORM_STATES mapping consolidated them.
-      // I should map form.features to one of them or both if I can't distinguish.
-      // I will map all to diningAmenities for now as it's safer than specialties which implies specific food.
-      // Actually, let's keep it simple: mapped to diningAmenities.
       openingHours: form.openingHours,
       daysOpen: form.daysOpen || [],
       dietaryProvisions: form.dietaryProvisions || [],
@@ -346,10 +331,6 @@ export function buildCreateListingPayload(formState) {
 }
 
 /**
- * Build payload for update operation
- * Only includes changed fields, preserves original values
- */
-/**
  * Deep diff between two objects
  * Returns only fields in 'current' that are different from 'original'
  */
@@ -418,9 +399,6 @@ export function buildUpdateListingPayload(formState, originalListing) {
   }
 
   // 3. Safety checks
-  // Always preserve businessId if it somehow got lost or if we just want to be safe (though PATCH usually doesn't need it if auth'd)
-  // But strict PATCH might reject extra fields. 
-  // If 'updates' is undefined (no changes), return empty object or null?
   if (!updates) return {};
 
   // 4. Category Object Integrity

@@ -63,7 +63,7 @@ export async function createListingMultipart(payload, files = []) {
 					// Use bracket notation for arrays: key[] or key[index]
 					// Using repeated keys for arrays is safer for some backends, 
 					// but bracket notation is standard for body-parser extended
-					const key = `${parentKey}[]`;
+
 					if (typeof item === 'object' && !(item instanceof File)) {
 						appendToForm(item, `${parentKey}[${index}]`);
 					} else {
