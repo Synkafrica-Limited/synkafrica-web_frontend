@@ -69,47 +69,41 @@ export default function EditResortListing() {
             basePrice: res.basePrice || res.pricePerPerson || '',
             currency: res.currency || 'NGN',
 
-            // Category fields (flatten from res or res.resort)
             resortType: res.resort?.resortType || res.resortType || 'HOTEL',
             roomType: res.resort?.roomType || res.roomType || 'STANDARD',
             packageType: res.resort?.packageType || res.packageType || '',
+            experienceType: res.resort?.experienceType || res.experienceType || '',
 
             capacity: res.resort?.capacity || res.capacity || res.maxOccupancy || '',
             duration: res.resort?.duration || res.duration || '',
 
+            pricePerGroup: res.resort?.pricePerGroup || res.pricePerGroup || '',
+
+            activities: res.resort?.activities || res.activities || [],
+            inclusions: res.resort?.inclusions || res.inclusions || [],
+
             availableDates: res.resort?.availableDates || res.availableDates || '',
             checkInTime: res.resort?.checkInTime || res.checkInTime || '14:00',
             checkOutTime: res.resort?.checkOutTime || res.checkOutTime || '11:00',
-            advanceBookingRequired: Boolean(res.resort?.advanceBookingRequired || res.advanceBookingRequired),
+
+            advanceBookingRequired: res.resort?.advanceBookingRequired ?? res.advanceBookingRequired ?? false,
             minimumAdvanceHours: res.resort?.minimumAdvanceHours || res.minimumAdvanceHours || 0,
 
-            pricePerGroup: res.resort?.pricePerGroup || res.pricePerGroup || '',
-            minimumGroupSize: res.resort?.minimumGroupSize || '',
+            amenities: res.resort?.amenities || res.amenities || [],
 
-            activities: Array.isArray(res.resort?.activities) ? res.resort.activities :
-              Array.isArray(res.resort?.attractions) ? res.resort.attractions :
-                Array.isArray(res.attractions) ? res.attractions : [],
-
-            inclusions: Array.isArray(res.resort?.inclusions) ? res.resort.inclusions :
-              Array.isArray(res.inclusions) ? res.inclusions :
-                Array.isArray(res.amenities) ? res.amenities : [],
-
-            amenities: res.amenities || [], // If backend stores amenities separately
-
-            location: (res.location && typeof res.location === 'object') ? res.location : {
-              address: (typeof res.location === 'string' ? res.location : '') || (res.address) || '',
-              city: res.city || 'Lagos',
-              state: res.state || 'Lagos',
-              country: res.country || 'Nigeria'
+            location: {
+              address: res.location?.address || res.address || '',
+              city: res.location?.city || res.city || '',
+              state: res.location?.state || res.state || 'Lagos',
+              country: res.location?.country || res.country || 'Nigeria',
             },
-
-            status: res.status || res.availability || 'ACTIVE',
+            status: res.status || 'ACTIVE',
           };
 
           setForm(mapped);
           setInitialForm(mapped); // Save initial state
 
-          // Extract and set images
+          // Extract and set images (existing code...)
           const urls = extractImageUrls(res.images);
           const existing = urls.map((url) => ({
             preview: url,
@@ -118,10 +112,7 @@ export default function EditResortListing() {
           setImages(existing);
         }
       } catch (err) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Failed to load listing:', err);
-        }
-        addToast({ message: 'Failed to load listing. Please try again.', type: 'error' });
+        // ...
       } finally {
         setIsLoading(false);
       }
@@ -211,6 +202,7 @@ export default function EditResortListing() {
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         console.error('[EditResort] Update failed:', err);
+        if (err.response) console.error('[EditResort] Response:', err.response);
       }
       handleApiError(err, { addToast }, { setLoading: setIsSubmitting });
     } finally {
@@ -220,6 +212,7 @@ export default function EditResortListing() {
 
   const resortTypes = Object.values(BACKEND_ENUMS.RESORT_TYPE);
   const packageTypes = Object.values(BACKEND_ENUMS.PACKAGE_TYPE);
+  const experienceTypes = Object.values(BACKEND_ENUMS.EXPERIENCE_TYPE);
   const roomTypes = Object.values(BACKEND_ENUMS.ROOM_TYPE);
 
   const activityOptions = [
@@ -443,7 +436,7 @@ export default function EditResortListing() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Package Type
+                Accommodation Package Type
               </label>
               <select
                 name="packageType"
@@ -453,6 +446,25 @@ export default function EditResortListing() {
               >
                 <option value="">Select package type (Optional)</option>
                 {packageTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Experience / Event Type
+              </label>
+              <select
+                name="experienceType"
+                value={form.experienceType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">Select experience type (Optional)</option>
+                {experienceTypes.map((type) => (
                   <option key={type} value={type}>
                     {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
@@ -513,11 +525,11 @@ export default function EditResortListing() {
                 required
               />
             </div>
-          </div>
-        </div>
+          </div >
+        </div >
 
         {/* Pricing */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Pricing</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -553,10 +565,10 @@ export default function EditResortListing() {
               </p>
             </div>
           </div>
-        </div>
+        </div >
 
         {/* Activities */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Attractions & Activities
           </h2>
@@ -588,10 +600,10 @@ export default function EditResortListing() {
               </label>
             ))}
           </div>
-        </div>
+        </div >
 
         {/* Inclusions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Package Inclusions
           </h2>
@@ -623,10 +635,10 @@ export default function EditResortListing() {
               </label>
             ))}
           </div>
-        </div>
+        </div >
 
         {/* Additional Details */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Additional Details
           </h2>
@@ -730,10 +742,10 @@ export default function EditResortListing() {
               </div>
             )}
           </div>
-        </div>
+        </div >
 
         {/* Action Buttons */}
-        <div className="flex gap-4">
+        < div className="flex gap-4" >
           <Link
             href="/dashboard/business/listings"
             className="flex-1 sm:flex-none px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-center"
@@ -769,8 +781,8 @@ export default function EditResortListing() {
               "Update Listing"
             )}
           </Buttons>
-        </div>
-      </form>
-    </div>
+        </div >
+      </form >
+    </div >
   );
 }
