@@ -6,34 +6,29 @@ import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Buttons from "@/components/ui/Buttons";
 import { useToast } from "@/components/ui/ToastProvider";
-import { useCreateResortListing } from '@/hooks/business/useCreateResortListing';
 import { Toast } from "@/components/ui/Toast";
+import { useCreateResortListing } from '@/hooks/business/useCreateResortListing';
+import { PageLoadingScreen } from "@/components/ui/LoadingScreen";
+import { INITIAL_FORM_STATES } from "@/utils/formStates";
+import { BACKEND_ENUMS } from "@/config/listingSchemas";
 
 export default function NewResortListing() {
   const router = useRouter();
-  const { toasts, addToast, removeToast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createResortListing, isSubmitting: creating, businessLoading, businessError } = useCreateResortListing();
-  const [form, setForm] = useState({
-    resortName: "",
-    packageType: "",
-    location: "",
-    duration: "",
-    capacity: "",
-    pricePerPerson: "",
-    pricePerGroup: "",
-    attractions: [],
-    inclusions: [],
-    description: "",
-    availableDates: "",
-    bookingAdvance: "24",
-  });
+  const { toasts, removeToast } = useToast();
+
+  const { createResortListing, isSubmitting, businessLoading, businessError } = useCreateResortListing();
+
+  // Initialize with strict form state
+  const [form, setForm] = useState(INITIAL_FORM_STATES.RESORT);
 
   const [images, setImages] = useState([]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleImageUpload = (e) => {
@@ -51,26 +46,43 @@ export default function NewResortListing() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      await createResortListing(form, images);
-    } catch (err) {
-      // createResortListing already shows toasts
-    } finally {
-      setIsSubmitting(false);
-    }
+    await createResortListing(form, images);
   };
 
-  const packageTypes = [
-    "Beach Party Package",
-    "Water Sports Package",
-    "Boat Cruise",
-    "Resort Day Pass",
-    "Weekend Getaway",
-    "Custom Package",
-  ];
+  if (businessLoading) {
+    return <PageLoadingScreen message="Loading business information..." />;
+  }
 
-  const attractionOptions = [
+  if (businessError) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 mb-4">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load business</h3>
+            <p className="text-gray-600 mb-4">{businessError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Get enums from config
+  const resortTypes = Object.values(BACKEND_ENUMS.RESORT_TYPE);
+  const packageTypes = Object.values(BACKEND_ENUMS.PACKAGE_TYPE);
+  const roomTypes = Object.values(BACKEND_ENUMS.ROOM_TYPE);
+
+  const activityOptions = [
     "Beach Access",
     "Jet Ski",
     "Boat Cruise",
@@ -119,10 +131,10 @@ export default function NewResortListing() {
           Back to Listings
         </Link>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-          Add Resort Package
+          Add Resort Listing
         </h1>
         <p className="text-gray-600 mt-1">
-          Create a new resort experience with beach attractions
+          Create a new resort experience or package
         </p>
       </div>
 
@@ -178,8 +190,8 @@ export default function NewResortListing() {
               </label>
               <input
                 type="text"
-                name="resortName"
-                value={form.resortName}
+                name="title"
+                value={form.title}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Luxury Beach Party Experience"
@@ -189,19 +201,58 @@ export default function NewResortListing() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Package Type *
+                Resort Type *
+              </label>
+              <select
+                name="resortType"
+                value={form.resortType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="">Select resort type</option>
+                {resortTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Room Type *
+              </label>
+              <select
+                name="roomType"
+                value={form.roomType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+              >
+                <option value="">Select room type</option>
+                {roomTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Package Type
               </label>
               <select
                 name="packageType"
                 value={form.packageType}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                required
               >
-                <option value="">Select package type</option>
+                <option value="">Select package type (Optional)</option>
                 {packageTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
                 ))}
               </select>
@@ -213,9 +264,18 @@ export default function NewResortListing() {
               </label>
               <input
                 type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
+                name="address"
+                value={form.location?.address || (typeof form.location === 'string' ? form.location : '')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm(prev => ({
+                    ...prev,
+                    location: {
+                      ...(typeof prev.location === 'object' ? prev.location : {}),
+                      address: val
+                    }
+                  }));
+                }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="e.g., Lekki Beach, Lagos"
                 required
@@ -261,12 +321,12 @@ export default function NewResortListing() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price per Person (₦) *
+                Price per Person/Night (₦) *
               </label>
               <input
                 type="number"
-                name="pricePerPerson"
-                value={form.pricePerPerson}
+                name="basePrice"
+                value={form.basePrice}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="50000"
@@ -293,36 +353,36 @@ export default function NewResortListing() {
           </div>
         </div>
 
-        {/* Attractions */}
+        {/* Activities */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Attractions & Activities
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {attractionOptions.map((attraction) => (
-              <label key={attraction} className="flex items-center gap-2">
+            {activityOptions.map((activity) => (
+              <label key={activity} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={form.attractions.includes(attraction)}
+                  checked={form.activities.includes(activity)}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setForm((prev) => ({
                         ...prev,
-                        attractions: [...prev.attractions, attraction],
+                        activities: [...prev.activities, activity],
                       }));
                     } else {
                       setForm((prev) => ({
                         ...prev,
-                        attractions: prev.attractions.filter(
-                          (a) => a !== attraction
+                        activities: prev.activities.filter(
+                          (a) => a !== activity
                         ),
                       }));
                     }
                   }}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">{attraction}</span>
+                <span className="text-sm text-gray-700">{activity}</span>
               </label>
             ))}
           </div>
@@ -399,21 +459,50 @@ export default function NewResortListing() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Booking Advance Notice (hours)
-              </label>
-              <select
-                name="bookingAdvance"
-                value={form.bookingAdvance}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Check-in Time
+                </label>
+                <input
+                  type="time"
+                  name="checkInTime"
+                  value={form.checkInTime}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Check-out Time
+                </label>
+                <input
+                  type="time"
+                  name="checkOutTime"
+                  value={form.checkOutTime}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <input
+                type="checkbox"
+                name="advanceBookingRequired"
+                id="advanceBookingRequired"
+                checked={form.advanceBookingRequired}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="24">24 hours</option>
-                <option value="48">48 hours</option>
-                <option value="72">72 hours</option>
-                <option value="168">1 week</option>
-              </select>
+                className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              />
+              <div>
+                <label htmlFor="advanceBookingRequired" className="block text-sm font-medium text-gray-900">
+                  Advance Booking Required
+                </label>
+                <p className="text-xs text-gray-500">
+                  Customers must book at least 24 hours in advance
+                </p>
+              </div>
             </div>
           </div>
         </div>
