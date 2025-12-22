@@ -80,6 +80,7 @@ export default function NewResortListing() {
   // Get enums from config
   const resortTypes = Object.values(BACKEND_ENUMS.RESORT_TYPE);
   const packageTypes = Object.values(BACKEND_ENUMS.PACKAGE_TYPE);
+  const experienceTypes = Object.values(BACKEND_ENUMS.EXPERIENCE_TYPE);
   const roomTypes = Object.values(BACKEND_ENUMS.ROOM_TYPE);
 
   const activityOptions = [
@@ -241,7 +242,7 @@ export default function NewResortListing() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Package Type
+                Accommodation Package Type
               </label>
               <select
                 name="packageType"
@@ -251,6 +252,25 @@ export default function NewResortListing() {
               >
                 <option value="">Select package type (Optional)</option>
                 {packageTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Experience / Event Type
+              </label>
+              <select
+                name="experienceType"
+                value={form.experienceType}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">Select experience type (Optional)</option>
+                {experienceTypes.map((type) => (
                   <option key={type} value={type}>
                     {type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, ' ')}
                   </option>
@@ -311,11 +331,11 @@ export default function NewResortListing() {
                 required
               />
             </div>
-          </div>
-        </div>
+          </div >
+        </div >
 
         {/* Pricing */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Pricing</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -351,10 +371,10 @@ export default function NewResortListing() {
               </p>
             </div>
           </div>
-        </div>
+        </div >
 
         {/* Activities */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Attractions & Activities
           </h2>
@@ -386,10 +406,10 @@ export default function NewResortListing() {
               </label>
             ))}
           </div>
-        </div>
+        </div >
 
         {/* Inclusions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Package Inclusions
           </h2>
@@ -421,10 +441,10 @@ export default function NewResortListing() {
               </label>
             ))}
           </div>
-        </div>
+        </div >
 
         {/* Additional Details */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Additional Details
           </h2>
@@ -504,11 +524,34 @@ export default function NewResortListing() {
                 </p>
               </div>
             </div>
+
+            {form.advanceBookingRequired && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Minimum Advance Notice (Hours)
+                </label>
+                <select
+                  name="minimumAdvanceHours"
+                  value={form.minimumAdvanceHours}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                >
+                  <option value="0">Select hours...</option>
+                  <option value="24">24 Hours</option>
+                  <option value="48">48 Hours</option>
+                  <option value="72">72 Hours</option>
+                  <option value="168">1 Week</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  How many hours in advance must a customer book?
+                </p>
+              </div>
+            )}
           </div>
-        </div>
+        </div >
 
         {/* Action Buttons */}
-        <div className="flex gap-4">
+        < div className="flex gap-4" >
           <Link
             href="/dashboard/business/listings"
             className="flex-1 sm:flex-none px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-center"
@@ -544,8 +587,8 @@ export default function NewResortListing() {
               "Create Listing"
             )}
           </Buttons>
-        </div>
-      </form>
-    </div>
+        </div >
+      </form >
+    </div >
   );
 }

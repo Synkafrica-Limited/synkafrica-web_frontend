@@ -55,7 +55,8 @@ export const INITIAL_FORM_STATES = {
     capacity: "", // number
     
     // Frontend logic / Optional
-    packageType: "", // enum (mapped to resortType often)
+    packageType: "", // enum (Accommodation)
+    experienceType: "", // enum (Experience)
     duration: "",
     pricePerGroup: "",
     activities: [], // replaces attractions
@@ -63,10 +64,8 @@ export const INITIAL_FORM_STATES = {
     availableDates: "",
     checkInTime: "14:00",
     checkOutTime: "11:00",
-    availableDates: "",
-    checkInTime: "14:00",
-    checkOutTime: "11:00",
     advanceBookingRequired: false,
+    minimumAdvanceHours: 0,
     amenities: [],
   },
 

@@ -15,17 +15,19 @@ export const BACKEND_ENUMS = {
     RESORT: 'RESORT',
   },
   PACKAGE_TYPE: {
+    FULL_BOARD: 'FULL_BOARD',
+    HALF_BOARD: 'HALF_BOARD',
+    BED_AND_BREAKFAST: 'BED_AND_BREAKFAST',
+    ROOM_ONLY: 'ROOM_ONLY',
+    ALL_INCLUSIVE: 'ALL_INCLUSIVE',
+  },
+  EXPERIENCE_TYPE: {
     BEACH_PARTY_PACKAGE: 'BEACH_PARTY_PACKAGE',
     WATER_SPORTS_PACKAGE: 'WATER_SPORTS_PACKAGE',
     BOAT_CRUISE: 'BOAT_CRUISE',
     RESORT_DAY_PASS: 'RESORT_DAY_PASS',
     WEEKEND_GETAWAY: 'WEEKEND_GETAWAY',
     CUSTOM_PACKAGE: 'CUSTOM_PACKAGE',
-    FULL_BOARD: 'FULL_BOARD',
-    HALF_BOARD: 'HALF_BOARD',
-    BED_AND_BREAKFAST: 'BED_AND_BREAKFAST',
-    ROOM_ONLY: 'ROOM_ONLY',
-    ALL_INCLUSIVE: 'ALL_INCLUSIVE',
   },
   ROOM_TYPE: {
     STANDARD: 'STANDARD',
@@ -106,6 +108,13 @@ export const BACKEND_ENUMS = {
 export const ENUM_MAPPINGS = {
   RESORT: {
     packageType: {
+      'Full Board': 'FULL_BOARD',
+      'Half Board': 'HALF_BOARD',
+      'Bed and Breakfast': 'BED_AND_BREAKFAST',
+      'Room Only': 'ROOM_ONLY',
+      'All Inclusive': 'ALL_INCLUSIVE',
+    },
+    experienceType: {
       'Beach Party Package': 'BEACH_PARTY_PACKAGE',
       'Water Sports Package': 'WATER_SPORTS_PACKAGE',
       'Boat Cruise': 'BOAT_CRUISE',
@@ -185,10 +194,11 @@ export const LISTING_SCHEMAS = {
   RESORT: {
     requiredBase: ['title', 'description', 'basePrice', 'currency', 'images', 'businessId', 'status'],
     requiredCategory: ['resortType', 'roomType', 'capacity'],
-    optionalCategory: ['packageType', 'checkInTime', 'checkOutTime', 'amenities', 'maxCapacity', 'activities', 'inclusions', 'pricePerGroup', 'minimumGroupSize', 'duration', 'availableDates', 'advanceBookingRequired', 'minimumAdvanceHours'],
+    optionalCategory: ['packageType', 'experienceType', 'checkInTime', 'checkOutTime', 'amenities', 'maxCapacity', 'activities', 'inclusions', 'pricePerGroup', 'minimumGroupSize', 'duration', 'availableDates', 'advanceBookingRequired', 'minimumAdvanceHours'],
     enums: {
       resortType: BACKEND_ENUMS.RESORT_TYPE,
       packageType: BACKEND_ENUMS.PACKAGE_TYPE,
+      experienceType: BACKEND_ENUMS.EXPERIENCE_TYPE,
       roomType: BACKEND_ENUMS.ROOM_TYPE,
     },
     categoryObject: 'resort',

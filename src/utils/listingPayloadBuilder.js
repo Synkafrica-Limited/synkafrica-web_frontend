@@ -6,32 +6,78 @@
 import { normalizeStatus } from './listingValidation';
 import { labelToEnum, LISTING_SCHEMAS } from '../config/listingSchemas';
 
+export const VALID_PACKAGE_TYPES = [
+  'FULL_BOARD',
+  'HALF_BOARD',
+  'BED_AND_BREAKFAST',
+  'ROOM_ONLY',
+  'ALL_INCLUSIVE',
+];
+
+export const VALID_EXPERIENCE_TYPES = [
+  'BEACH_PARTY_PACKAGE',
+  'WATER_SPORTS_PACKAGE',
+  'BOAT_CRUISE',
+  'RESORT_DAY_PASS',
+  'WEEKEND_GETAWAY',
+  'CUSTOM_PACKAGE',
+];
+
+/**
+ * Normalize an enum value against an allowed list
+ * @param {string} value - The value to normalize
+ * @param {string[]} allowedValues - Array of valid enum strings
+ * @returns {string|undefined} - The valid enum or undefined
+ */
+function normalizeEnum(value, allowedValues) {
+  if (!value || typeof value !== 'string') return undefined;
+  
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  // Direct match
+  if (allowedValues.includes(trimmed)) return trimmed;
+
+  // Case-insensitive match or mapped value (if simple upper case)
+  const upper = trimmed.toUpperCase().replace(/\s+/g, '_');
+  if (allowedValues.includes(upper)) return upper;
+
+  return undefined;
+}
+
 /**
  * Strip undefined, null, and empty string values from object recursively
  */
 function stripEmptyDeep(obj) {
   if (obj === null || obj === undefined) return undefined;
   if (typeof obj !== 'object') return obj;
+  
   if (Array.isArray(obj)) {
+    // Filter out null/undefined, and empty strings from arrays? 
+    // Usually arrays of strings like activities shouldn't have empty strings
     const filtered = obj.filter(item => item !== null && item !== undefined && item !== '');
-    return filtered.length > 0 ? filtered : undefined;
+    // Return array even if empty, to allow clearing lists
+    return filtered;
   }
 
   const cleaned = {};
   Object.entries(obj).forEach(([key, value]) => {
+    // Remove null, undefined, AND empty strings (to avoid backend 400 errors)
     if (value === null || value === undefined || value === '') return;
     
     if (typeof value === 'object' && !Array.isArray(value)) {
       const nested = stripEmptyDeep(value);
+      // Keep nested object only if it has keys
       if (nested && Object.keys(nested).length > 0) {
         cleaned[key] = nested;
       }
     } else if (Array.isArray(value)) {
       const arr = stripEmptyDeep(value);
-      if (arr && arr.length > 0) {
-        cleaned[key] = arr;
+      if (arr !== undefined) {
+         cleaned[key] = arr;
       }
     } else {
+      // Keep value (boolean false, 0, etc are preserved by checks above)
       cleaned[key] = value;
     }
   });
@@ -53,7 +99,10 @@ function normalizeEnumArray(category, field, values) {
 function extractCityFromAddress(address) {
   if (!address) return 'Lagos';
 
-  const parts = address.split(',');
+  const addrStr = typeof address === 'object' ? (address?.address || '') : String(address);
+  if (!addrStr || addrStr === '[object Object]') return 'Lagos';
+
+  const parts = addrStr.split(',');
   if (parts.length > 1) {
     return parts[0].trim();
   }
@@ -124,9 +173,28 @@ export function buildCarRentalPayload(form, businessId, images = []) {
 export function buildResortPayload(form, businessId, images = []) {
   const hasNewFiles = images.some((i) => i?.file instanceof File || i instanceof File);
 
-  // Convert packageType UI label to backend enum
-  const packageTypeEnum = labelToEnum('RESORT', 'packageType', form.packageType);
+  // Enum conversion & Validation
   const resortTypeEnum = labelToEnum('RESORT', 'resortType', form.resortType);
+  
+  // Strict Package Type & Experience Type Normalization
+  // We now have two separate fields.
+  const rawPackageType = labelToEnum('RESORT', 'packageType', form.packageType);
+  const packageTypeEnum = normalizeEnum(rawPackageType, VALID_PACKAGE_TYPES);
+
+  const rawExperienceType = labelToEnum('RESORT', 'experienceType', form.experienceType);
+  const experienceTypeEnum = normalizeEnum(rawExperienceType, VALID_EXPERIENCE_TYPES);
+
+  const roomTypeEnum = labelToEnum('RESORT', 'roomType', form.roomType || 'Standard');
+
+  // Logic for minimumAdvanceHours
+  const advanceBookingRequired = Boolean(form.advanceBookingRequired);
+  let minimumAdvanceHours = undefined;
+  if (advanceBookingRequired) {
+    const val = parseInt(form.minimumAdvanceHours, 10);
+    if (!isNaN(val) && val > 0) {
+        minimumAdvanceHours = val;
+    }
+  }
 
   const payload = {
     businessId,
@@ -143,27 +211,29 @@ export function buildResortPayload(form, businessId, images = []) {
       state: form.location?.state || '',
       country: form.location?.country || 'Nigeria',
     },
+    // Root level fields for hybrid schema persistence
     pricePerGroup: parseInt(form.pricePerGroup, 10) || undefined,
-    advanceBookingRequired: Boolean(form.advanceBookingRequired),
-    minimumAdvanceHours: parseInt(form.minimumAdvanceHours, 10) || 0,
-
-    // Duplicate fields to root as backend might expect them there (hybrid schema)
-    // based on Listing.json showing them at root
+    advanceBookingRequired: advanceBookingRequired,
+    minimumAdvanceHours: minimumAdvanceHours,
+    
+    // Duplicate fields to root 
     resortType: resortTypeEnum,
     packageType: packageTypeEnum,
-    roomType: labelToEnum('RESORT', 'roomType', form.roomType || 'Standard'),
+    experienceType: experienceTypeEnum,
+    roomType: roomTypeEnum,
     checkInTime: form.checkInTime,
     checkOutTime: form.checkOutTime,
     duration: form.duration,
     capacity: parseInt(form.capacity || form.maxOccupancy, 10) || undefined,
     inclusions: form.inclusions || [],
-    activities: form.activities || [],
+    activities: form.activities || [], // Ensure stable array
     availableDates: form.availableDates,
     
     resort: {
-      resortType: resortTypeEnum, // Strict mapping, no fallback to packageType
+      resortType: resortTypeEnum, 
       packageType: packageTypeEnum,
-      roomType: labelToEnum('RESORT', 'roomType', form.roomType || 'Standard'),
+      experienceType: experienceTypeEnum,
+      roomType: roomTypeEnum,
       checkInTime: form.checkInTime,
       checkOutTime: form.checkOutTime,
       duration: form.duration,
@@ -172,8 +242,8 @@ export function buildResortPayload(form, businessId, images = []) {
       activities: form.activities || [],
       availableDates: form.availableDates,
       pricePerGroup: parseInt(form.pricePerGroup, 10) || undefined,
-      advanceBookingRequired: Boolean(form.advanceBookingRequired),
-      minimumAdvanceHours: parseInt(form.minimumAdvanceHours, 10) || 0,
+      advanceBookingRequired: advanceBookingRequired,
+      minimumAdvanceHours: minimumAdvanceHours,
     },
   };
 
@@ -290,10 +360,6 @@ export function buildConveniencePayload(form, businessId, images = []) {
  * Main payload builder - routes to appropriate category builder
  */
 export function buildListingPayload(category, form, businessId, images = []) {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[PayloadBuilder] Building payload for ${category}`, { form, businessId });
-  }
-
   let payload;
   switch (category) {
     case 'CAR_RENTAL':
@@ -311,11 +377,6 @@ export function buildListingPayload(category, form, businessId, images = []) {
     default:
       throw new Error(`Unsupported category: ${category}`);
   }
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[PayloadBuilder] Final payload:`, payload);
-  }
-
   return payload;
 }
 
@@ -342,10 +403,8 @@ function getChangedFields(original, current) {
   // For simplicity: if arrays differ, send the whole new array
   if (Array.isArray(current)) {
     if (!Array.isArray(original)) return current;
-    if (current.length !== original.length) return current;
     
-    // Sort and stringify for comparison to handle order-agnostic arrays (like amenities)
-    // simplistic approach: JSON stringify matching
+    // Sort and compare to avoid false positives on order changes
     const copyCurr = [...current].sort();
     const copyOrig = [...original].sort();
     if (JSON.stringify(copyCurr) !== JSON.stringify(copyOrig)) return current;
@@ -372,6 +431,7 @@ function getChangedFields(original, current) {
   }
 
   // Handle primitives
+  // Strict inequality
   return current !== original ? current : undefined;
 }
 
@@ -384,18 +444,18 @@ export function buildUpdateListingPayload(formState, originalListing) {
   const businessId = originalListing.businessId;
   const images = formState.images || [];
   
-  // 1. Build full 'target' payload as if we were creating it
+  // 1. Build full 'target' payload
   // This ensures all transformations (enums, numbers) are applied
   const targetPayload = buildListingPayload(category, formState, businessId, images);
   
-  // 2. Diff against original listing
+  // 2. Diff against original listing (which should also be normalized!)
   // strict diffing ensures we don't send unchanged fields
   const updates = getChangedFields(originalListing, targetPayload);
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('[PayloadBuilder] Original:', originalListing);
-    console.log('[PayloadBuilder] Target:', targetPayload);
-    console.log('[PayloadBuilder] Diff/Updates:', updates);
+    console.log('[PayloadBuilder] Original (Normalized):', originalListing);
+    console.log('[PayloadBuilder] Target (Normalized):', targetPayload);
+    console.log('[PayloadBuilder] Updates:', updates);
   }
 
   // 3. Safety checks
@@ -404,8 +464,6 @@ export function buildUpdateListingPayload(formState, originalListing) {
   // 4. Category Object Integrity
   // If the category specific object (e.g. 'resort') has ANY changes (is present in updates),
   // we must replace the partial diff with the FULL target object.
-  // This is because backend validation often requires all mandatory fields (like resortType, capacity)
-  // to be present if the object key exists, and doesn't verify individual fields in isolation.
   const schema = LISTING_SCHEMAS[category];
   if (schema && schema.categoryObject) {
     const key = schema.categoryObject;
