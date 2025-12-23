@@ -22,6 +22,8 @@ import FAQComponent from "./components/FaqSection.jsx";
 import ExploreOtherServices from "./components/ExploreOtherServicesSection";
 import VendorBanner from "./components/BecomeVendorSection";
 import TrendingSection from "./components/TrendingSection";
+import CustomerReviewsSection from "./components/CustomerReviewsSection";
+import VendorCTASection from "./components/VendorCTASection";
 
 // Service-specific content configuration
 const serviceContent = {
@@ -998,7 +1000,9 @@ export default function HomePage() {
 
         {/* Common Components (shown for all services) */}
         {/* <VendorBanner /> */}
+        <CustomerReviewsSection />
         <FAQComponent />
+        <VendorCTASection />
       </div>
       
       {/* Smooth scrolling styles */}
