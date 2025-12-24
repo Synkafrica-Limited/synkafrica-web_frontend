@@ -21,10 +21,13 @@ import OtherServices from "./components/OtherServiceSection";
 import FAQComponent from "./components/FaqSection.jsx";
 import ExploreOtherServices from "./components/ExploreOtherServicesSection";
 import VendorBanner from "./components/BecomeVendorSection";
+import TrendingSection from "./components/TrendingSection";
+import CustomerReviewsSection from "./components/CustomerReviewsSection";
+import VendorCTASection from "./components/VendorCTASection";
 
 // Service-specific content configuration
 const serviceContent = {
-  car: {
+  transportation: {
     heading: "Chauffeur-driven experience",
     features: [
       "Pickup from anywhere",
@@ -40,8 +43,8 @@ const serviceContent = {
       { value: "100%", label: "Customer Support" },
     ],
   },
-  water: {
-    heading: "Find your perfect\nwater adventure",
+  experience: {
+    heading: "Find your perfect\nadventure",
     features: [
       "Best price guarantee",
       "Flexible schedules",
@@ -56,7 +59,7 @@ const serviceContent = {
       { value: "4.9★", label: "Experience Rating" },
     ],
   },
-  resort: {
+  resorts: {
     heading: "Your dream resort\nescape starts here",
     features: [
       "World-class beachfront stays",
@@ -72,7 +75,7 @@ const serviceContent = {
       { value: "24/7", label: "Concierge Service" },
     ],
   },
-  dining: {
+  restaurant: {
     heading: "Exquisite dining\nexperiences await!",
     features: [
       "Top-rated restaurants",
@@ -88,7 +91,23 @@ const serviceContent = {
       { value: "100%", label: "Satisfaction" },
     ],
   },
-  flights: {
+  accommodation: {
+    heading: "Comfortable stays\naway from home",
+    features: [
+      "Verified properties",
+      "Secure locations",
+      "Amenities included",
+      "Flexible booking",
+    ],
+    stats: [
+      { value: "500+", label: "Apartments" },
+      { value: "50+", label: "Locations" },
+      { value: "4.8★", label: "User Rating" },
+      { value: "24/7", label: "Support" },
+      { value: "100%", label: "Satisfaction" },
+    ],
+  },
+  flight: {
     heading: "Flight bookings\ncoming soon!",
     features: [
       "Domestic & international flights",
@@ -104,13 +123,13 @@ const serviceContent = {
       { value: "Best", label: "Prices" },
     ],
   },
-  other: {
-    heading: "Discover more\nservices for you!",
+  convenience: {
+    heading: "Services for\nyour convenience",
     features: [
-      "Custom experiences",
-      "Local guides",
-      "Event planning",
-      "Concierge service",
+      "Verified professionals",
+      "Quality guaranteed",
+      "On-time delivery",
+      "Support available",
     ],
     stats: [
       { value: "100+", label: "Services" },
@@ -124,23 +143,27 @@ const serviceContent = {
 
 // Service-specific components configuration
 const serviceComponents = {
-  car: {
+  transportation: {
     about: <AboutService service="car" />,
     main: <CarRentalService />,
   },
-  water: {
+  experience: {
     about: <AboutService service="water" />,
     main: <WaterRecreation />,
   },
-  resort: {
+  resorts: {
     about: <AboutService service="resort" />,
     main: <ResortHouseService />,
   },
-  dining: {
+  restaurant: {
     about: <AboutService service="dining" />,
     main: <DiningService />,
   },
-  flights: {
+  accommodation: {
+    about: <AboutService service="resort" />, // Reuse resort about for now
+    main: <ResortHouseService />,
+  },
+  flight: {
     about: (
       <div className="bg-gray-50 rounded-lg p-8 border border-gray-200 text-center">
         <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-4">
@@ -154,15 +177,20 @@ const serviceComponents = {
     ),
     main: null,
   },
-  other: {
+  convenience: {
     about: <AboutService service="other" />,
     main: <OtherServices />,
   },
+  // Keep 'other' for backward compatibility if needed, or redirect
+  other: {
+    about: <AboutService service="other" />,
+    main: <OtherServices />,
+  }
 };
 
 export default function HomePage() {
-  const [activeService, setActiveService] = useState("car");
-  const [listingFilter, setListingFilter] = useState("car"); // For listing section filter
+  const [activeService, setActiveService] = useState("transportation");
+  const [listingFilter, setListingFilter] = useState("transportation"); // For listing section filter
   const [searchResults, setSearchResults] = useState(null);
   const [hideFirstHero, setHideFirstHero] = useState(false);
   
@@ -197,11 +225,107 @@ export default function HomePage() {
         const response = await getListings();
         console.log('API Response:', response);
         
-        // Transform API response to match UI format
-        const transformedListings = (response?.data || []).map(listing => {
-          console.log('Transforming listing:', listing.id, listing.title, listing.category);
-          
-          // Extract image URL (handle both object and string formats)
+        const rawListings = response?.data || [];
+        console.log(`Processing ${rawListings.length} listings with new rules...`);
+        
+        const transformedListings = rawListings.map(listing => {
+           let frontendCategory = 'other';
+           let displayTag = listing.category; // Default fallback
+
+           const cat = listing.category;
+           const titleLower = listing.title?.toLowerCase() || '';
+
+           if (cat === 'CAR_RENTAL') {
+             frontendCategory = 'transportation';
+             displayTag = listing.carModel || 'Car Rental';
+           } 
+           else if (cat === 'FINE_DINING') {
+             frontendCategory = 'restaurant';
+             // Use cuisine type or default
+             displayTag = listing.cuisineType || 'Fine Dining';
+           }
+           else if (cat === 'RESORT') {
+              // Check specifically for Accommodation vs Resorts (Experience)
+              const resortType = listing.resortType;
+              const roomType = listing.roomType;
+              
+              if (['APARTMENT', 'SHORTLET'].includes(roomType) || resortType === 'HOTEL') {
+                  frontendCategory = 'accommodation';
+                  displayTag = roomType || 'Apartment';
+              } else {
+                  // Default to Resorts/Experiences (Beach House, etc.)
+                  frontendCategory = 'resorts';
+                  displayTag = resortType === 'BEACH_HOUSE' ? 'Beach House' : (resortType === 'BEACH' ? 'Beach' : 'Resort');
+                  
+                  // Double check if title implies a beach house if types are missing
+                  if (titleLower.includes('beach house')) displayTag = 'Beach House';
+              }
+           }
+           else if (cat === 'CONVENIENCE_SERVICE') {
+             frontendCategory = 'convenience';
+             // Keyword matching for specific service types 
+             const keywords = [
+                { key: 'make up', label: 'Makeup' },
+                { key: 'makeup', label: 'Makeup' }, 
+                { key: 'shampoo', label: 'Hairstyling' },
+                { key: 'hair', label: 'Hairstyling' },
+                { key: 'pedicure', label: 'Pedicure & Manicure' },
+                { key: 'manicure', label: 'Pedicure & Manicure' },
+                { key: 'laundry', label: 'Laundry' },
+                { key: 'photo', label: 'Photography' },
+                { key: 'video', label: 'Videography' },
+                { key: 'chef', label: 'Private Chef' }
+             ];
+             
+             const match = keywords.find(k => titleLower.includes(k.key) || (listing.description?.toLowerCase().includes(k.key)));
+             displayTag = match ? match.label : 'Convenience';
+           }
+           else if (cat === 'WATER_RECREATION' || 
+                    (listing.activities && (listing.activities.includes('Jet Ski') || listing.activities.includes('Boat')))) {
+             frontendCategory = 'experience';
+             if (titleLower.includes('jet ski') || (listing.activities && listing.activities.includes('Jet Ski'))) {
+                 displayTag = 'Jet Ski';
+             } else if (titleLower.includes('boat') || titleLower.includes('cruise')) {
+                 displayTag = 'Boat Cruise';
+             } else {
+                 displayTag = 'Water Experience';
+             }
+           }
+           
+           // Special handling: Move any 'Experience' like Beach Houses that might have fallen into 'resorts' to 'experience' if consistent with UI desired structure? 
+           // User asked for "Experiences" bin which lists: Beach houses, Beaches, Jet ski, Boat cruise.
+           // So if we classified as 'resorts' (Beach House/Beach), we map it to 'experience' tab effectively?
+           // The User's list puts "Experience" as a header for: Beach houses, Beaches, Jet ski, Boat cruise.
+           // So, my mapping of 'resorts' category might need to be 'experience' IF the UI expects that.
+           // Let's check the Requested Service Structure:
+           // "Experiences -> Beach houses, Beaches, Jet ski, Boat cruize"
+           // So YES, I should map Beach House/Beach to 'experience' frontend category.
+           
+           if (frontendCategory === 'resorts') {
+               // Per user request: Beach houses/Beaches go to Experiences.
+               // We kept 'resorts' as separate ID previously, but user grouped them.
+               // Let's map 'resorts' -> 'experience' if it matches beach items.
+               // Wait, user also listed "Resorts" in previous sessions. But user message here specifically says:
+               // "Experiences * Beach houses * Beaches * Jet ski * Boat cruize"
+               // It does NOT list "Resorts" as a top level category in this specific message.
+               // However, I should probably keep 'resorts' ID if the TAB exists, or merge them.
+               // The implementation plan said: `RESORT` -> `resorts` (Experiences).
+               // So let's map it to `experience` if the tab is intended to cover these.
+               
+               // Actually, looking at the previous file content, we had 'resorts' and 'experience'.
+               // User request groups them. Let's use 'experience' for Beach Houses/Beaches too.
+               
+               // But wait, the user instructions: "4. Resorts (Refined to Beach Houses/Beaches)" in my own summary? 
+               // No, User says: "Experiences * Beach houses * Beaches * Jet ski * Boat cruize"
+               // So I should map these to 'experience'.
+               
+               if (displayTag === 'Beach House' || displayTag === 'Beach' || displayTag === 'Resort') {
+                   frontendCategory = 'experience';
+               }
+           }
+
+
+          // Extract image URL
           let imageUrl = '';
           if (listing.images && listing.images.length > 0) {
             const firstImage = listing.images[0];
@@ -209,59 +333,33 @@ export default function HomePage() {
               ? firstImage 
               : firstImage?.secure_url || '';
           }
-          
-          // Determine service type for filtering
-          let serviceType = 'other';
-          if (listing.category === 'CAR_RENTAL') {
-            serviceType = 'car';
-          } else if (listing.category === 'FINE_DINING') {
-            serviceType = 'dining';
-          } else if (listing.category === 'RESORT_STAY' || listing.category === 'WATER_RECREATION') {
-            serviceType = 'resort';
-          } else if (listing.category === 'CONVENIENCE_SERVICE') {
-            serviceType = 'other';
-          }
-          
+
           // Format price
           const formattedPrice = listing.currency === 'NGN' 
             ? `₦${listing.basePrice?.toLocaleString() || '0'}`
             : `${listing.currency} ${listing.basePrice?.toLocaleString() || '0'}`;
-          
-          // Build location string
+
+          // Location
           const locationParts = [];
           if (listing.location?.address) locationParts.push(listing.location.address);
           if (listing.location?.city) locationParts.push(listing.location.city);
           const locationString = locationParts.join(', ') || 'Location not specified';
-          
-          return {
-            id: listing.id,
-            type: serviceType,
-            serviceType: serviceType,
-            category: listing.category,
-            title: listing.title,
-            image: imageUrl,
-            price: formattedPrice,
-            period: 'Per Day',
-            location: locationString,
-            // Car-specific fields
-            make: listing.carMake,
-            model: listing.carModel,
-            year: listing.carYear,
-            transmission: listing.carTransmission,
-            seats: listing.carSeats,
-            // Resort-specific fields
-            beds: listing.capacity,
-            baths: listing.maxCapacity,
-            propertyType: listing.resortType || listing.roomType,
-            // Dining-specific fields
-            cuisine: listing.cuisineType,
-            capacity: listing.seatingCapacity,
-            rating: 4.5, // Default rating since not in API
-            // Water activity fields
-            activity: listing.serviceType,
-            duration: listing.serviceDuration,
-            difficulty: 'Beginner'
-          };
+
+           return {
+             // Keep raw fields but allow overwrites
+             ...listing,
+             
+             id: listing.id,
+             type: frontendCategory, // This drives the tab filtering
+             serviceType: frontendCategory, // Ensure consistency
+             category: listing.category,
+             displayTag: displayTag, // New field for UI Tag
+             title: listing.title,
+             image: imageUrl,
+             price: formattedPrice,
+             period: frontendCategory === 'accommodation' ? 'Per Night' : 'Per Day', 
+             location: locationString,
+           };
         });
         
         console.log('Transformed listings:', transformedListings.length, 'items');
@@ -278,55 +376,61 @@ export default function HomePage() {
   }, []);
 
   const services = [
-    { id: "car", label: "Car rental", icon: Car },
-    { id: "dining", label: "Dining", icon: Utensils },
-    { id: "resort", label: "Resorts & Recreation", icon: Home },
-    { id: "flights", label: "Flights", icon: Plane },
-    { id: "other", label: "Other services", icon: MoreHorizontal },
+    { id: "transportation", label: "Transportation", icon: Car },
+    { id: "experience", label: "Experience", icon: Sailboat },
+    { id: "restaurant", label: "Restaurant", icon: Utensils },
+    { id: "resorts", label: "Resorts", icon: Home },
+    { id: "accommodation", label: "Accommodation", icon: Home }, // Use Home icon for now
+    { id: "flight", label: "Flight", icon: Plane },
+    { id: "convenience", label: "Convenience services", icon: MoreHorizontal },
   ];
 
   // Handle search action from booking components
   const handleSearch = (data) => {
     // Water Recreation (Jet Ski, Boat Rental, Experiences)
-    if (data.service === "water-recreation") {
+    if (data.service === "water-recreation" || data.service === "experience" || data.service === "water") {
       const queryParams = new URLSearchParams({
         activity: data.activity,
         date: data.bookingDate,
         time: data.bookingTime,
+        serviceType: 'WATER_RECREATION'
       }).toString();
       window.location.href = `/result/?${queryParams}`;
       return;
     }
 
     // Car Rental
-    if (data.service === "car") {
+    if (data.service === "car" || data.service === "transportation") {
       const queryParams = new URLSearchParams({
         location: data.pickupLocation,
         date: data.pickupDate,
         time: data.pickupTime,
+        serviceType: 'CAR_RENTAL'
       }).toString();
       window.location.href = `/result/?${queryParams}`;
       return;
     }
 
     // Resort House / Beach House
-    if (data.service === "resort") {
+    if (data.service === "resort" || data.service === "resorts" || data.service === "accommodation") {
       const queryParams = new URLSearchParams({
         destination: data.destination,
         checkin: data.checkInDate,
         time: data.checkInTime,
+        serviceType: 'RESORT_STAY'
       }).toString();
       window.location.href = `/result/?${queryParams}`;
       return;
     }
 
     // Dining / Restaurant Booking
-    if (data.service === "dining") {
+    if (data.service === "dining" || data.service === "restaurant") {
       const queryParams = new URLSearchParams({
         restaurant: data.restaurant,
         date: data.bookingDate,
         time: data.bookingTime,
         guests: data.guests,
+        serviceType: 'DINING'
       }).toString();
       window.location.href = `/result/?${queryParams}`;
       return;
@@ -353,10 +457,12 @@ export default function HomePage() {
       
       // Map frontend service types to backend enum values
       const serviceTypeMap = {
-        'car': 'CAR_RENTAL',
-        'water': 'WATER_RECREATION',
-        'dining': 'DINING',
-        'resort': 'RESORT_STAY'
+        'transportation': 'CAR_RENTAL',
+        'experience': 'WATER_RECREATION',
+        'restaurant': 'DINING',
+        'resorts': 'RESORT_STAY',
+        'accommodation': 'RESORT_STAY', // Map to RESORT_STAY for now, API handles distinction or we pass extra
+        'convenience': 'CONVENIENCE_SERVICE'
       };
       
       // Build search params according to backend spec
@@ -403,12 +509,15 @@ export default function HomePage() {
   // Handle View All Listings navigation
   const handleViewAllListings = () => {
     // Map filter state to service type for URL
+    // Map filter state to service type for URL
     const serviceTypeMap = {
       'all': '',
-      'car': 'CAR_RENTAL',
-      'resort': 'RESORT_STAY',
-      'dining': 'DINING',
-      'water': 'WATER_RECREATION',
+      'transportation': 'CAR_RENTAL',
+      'resorts': 'RESORT_STAY',
+      'accommodation': 'RESORT_STAY',
+      'restaurant': 'DINING',
+      'experience': 'WATER_RECREATION',
+      'convenience': 'CONVENIENCE_SERVICE',
       'other': 'OTHER'
     };
 
@@ -428,9 +537,8 @@ export default function HomePage() {
   const currentServiceComponents = serviceComponents[activeService];
 
   // Filter listings based on selected category using API data
-  const filteredListings = listingFilter === 'resort'
-    ? apiListings.filter(listing => listing.type === 'resort' || listing.type === 'water')
-    : apiListings.filter(listing => listing.type === listingFilter);
+  // Filter listings based on selected category
+  const filteredListings = apiListings.filter(listing => listing.type === listingFilter);
 
   return (
     <main className="min-h-screen bg-white">
@@ -484,26 +592,26 @@ export default function HomePage() {
 
               {/* Search Inputs */}
               <div className="p-6 relative rounded-b-lg">
-                {activeService === "flights" && currentServiceComponents.about}
-                {activeService !== "flights" && (
+                {activeService === "flight" && currentServiceComponents.about}
+                {activeService !== "flight" && (
                   <>
-                    {activeService === "car" && (
+                    {activeService === "transportation" && (
                   <CarRentalBookingInputs 
                     onSearch={handleSearch} 
                     onQuickSearch={handleQuickSearch}
                     showBorder={false} 
                   />
                 )}
-                {activeService === "dining" && (
+                {activeService === "restaurant" && (
                   <DiningBookingInputs onSearch={handleSearch} showBorder={false} />
                 )}
-                {activeService === "resort" && (
+                {(activeService === "resorts" || activeService === "accommodation") && (
                   <ResortHouseBookingInputs onSearch={handleSearch} showBorder={false} />
                 )}
-                {activeService === "water" && (
+                {activeService === "experience" && (
                   <WaterRecreationBookingInputs onSearch={handleSearch} showBorder={false} />
                 )}
-                {activeService === "other" && (
+                {(activeService === "other" || activeService === "convenience") && (
                   <OtherServicesBookingInputs onSearch={handleSearch} showBorder={false} />
                 )}
                   </>
@@ -671,6 +779,9 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Trending Destinations Section */}
+        <TrendingSection />
+
         {/* Dynamic Listing Cards Section */}
         <div className="bg-gray-50 py-12">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
@@ -684,46 +795,19 @@ export default function HomePage() {
               {/* Category Filter Tabs */}
               <div className="border-b border-gray-200">
                 <div className="flex gap-6 overflow-x-auto scrollbar-hide">
-                  <button
-                    onClick={() => setListingFilter('car')}
-                    className={`pb-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                      listingFilter === 'car'
-                        ? 'border-[#E05D3D] text-[#E05D3D]'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    Car Rentals
-                  </button>
-                  <button
-                    onClick={() => setListingFilter('dining')}
-                    className={`pb-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                      listingFilter === 'dining'
-                        ? 'border-[#E05D3D] text-[#E05D3D]'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    Dining
-                  </button>
-                  <button
-                    onClick={() => setListingFilter('resort')}
-                    className={`pb-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                      listingFilter === 'resort'
-                        ? 'border-[#E05D3D] text-[#E05D3D]'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    Resorts & Recreation
-                  </button>
-                  <button
-                    onClick={() => setListingFilter('other')}
-                    className={`pb-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                      listingFilter === 'other'
-                        ? 'border-[#E05D3D] text-[#E05D3D]'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    Other services
-                  </button>
+                  {services.filter(s => s.id !== 'flight').map((service) => (
+                    <button
+                      key={service.id}
+                      onClick={() => setListingFilter(service.id)}
+                      className={`pb-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                        listingFilter === service.id
+                          ? 'border-[#E05D3D] text-[#E05D3D]'
+                          : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      {service.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -774,15 +858,20 @@ export default function HomePage() {
                     <div className="relative h-56 bg-gray-200 overflow-hidden">
                       <img 
                         src={listing.image} 
-                        alt={listing.type} 
+                        alt={listing.title} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
+                       {/* Service Tag Badge */}
+                       <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-medium z-10">
+                          {listing.displayTag}
+                       </div>
+
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           // Handle favorite toggle
                         }}
-                        className="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-colors"
+                        className="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-colors z-10"
                       >
                         <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -911,7 +1000,9 @@ export default function HomePage() {
 
         {/* Common Components (shown for all services) */}
         {/* <VendorBanner /> */}
+        <CustomerReviewsSection />
         <FAQComponent />
+        <VendorCTASection />
       </div>
       
       {/* Smooth scrolling styles */}
